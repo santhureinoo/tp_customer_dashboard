@@ -25,9 +25,9 @@ const CustomizedDropDown = ({ data, selected, setSelected, hidePrefixIcons = fal
             </div>
             <div className={`${openOutletList ? 'absolute' : 'hidden'} top-7 right-0 w-full bg-white text-base z-50 list-none divide-y divide-gray-100 rounded shadow my-4`}>
                 <ul className="py-1" aria-labelledby="dropdown">
-                    {data && data.map(dat => {
+                    {data && data.map((dat, ind) => {
                         return (
-                            <li onClick={(e: any) => {
+                            <li key={dat + '-' + ind} onClick={(e: any) => {
                                 setSelected(dat);
                             }}>
                                 <a href="#" className="text-sm hover:bg-gray-100 text-gray-700 block px-4 py-2">{dat}</a>

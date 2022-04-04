@@ -1,7 +1,13 @@
 import Link from "next/link";
 import React from "react";
 import { useRouter } from 'next/router';
-const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+
+interface Props {
+    sidebarOpen : boolean;
+    setSidebarOpen(sidebarOpen: boolean): void;
+}
+
+const Sidebar = ({ sidebarOpen, setSidebarOpen }: Props) => {
     const router = useRouter();
     return (
         <>

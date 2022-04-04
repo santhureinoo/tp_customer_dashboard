@@ -27,17 +27,18 @@ const Outlets: NextPage = () => {
       </Head>
 
       <main>
-        <Layout title={'Outlet'} children={<>
+        <Layout title={'Outlet'}>
           <Table
             headers={['Outlet ID', 'Customer', 'Outlet Name', 'Tariff Rate', 'Date of Tariff', 'Share of Savings']}
             data={getDummyOutletData()}
             rightSideElements={[
-              <TableOptionField label={'Outlet'} data={['KFC Indonesia']} />
+              <TableOptionField key={"tableOptionField"} label={'Outlet'} data={['KFC Indonesia']} />
             ]}
             handleAddNew={() => {
               setOpenOutletEdit(true);
             }} handleEdit={() => setOpenOutletEdit(true)} handleDelete={() => setOpenOutletEdit(true)} buttonText={"+ Add New Outlet"} leftSideElements={[]} />
-          <OutletEdit openOutletEdit={openOutletEdit} setOpenOutletEdit={setOpenOutletEdit} /></>} />
+          <OutletEdit openOutletEdit={openOutletEdit} setOpenOutletEdit={setOpenOutletEdit} />
+        </Layout>
       </main>
 
       <footer>

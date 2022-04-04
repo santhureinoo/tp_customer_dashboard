@@ -1,4 +1,9 @@
-const TinyEditDeleteMenu = ({ onEdit, onDelete }) => {
+interface Props {
+    onEdit() : void;
+    onDelete(): void;
+}
+
+const TinyEditDeleteMenu = ({ onEdit, onDelete } : Props) => {
     return (
         <div className="block">
             <div className="bg-white border border-gray-300 rounded-lg flex flex-col text-sm py-1 px-1 text-gray-500 shadow-lg">

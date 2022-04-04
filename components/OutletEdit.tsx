@@ -5,7 +5,12 @@ import { dummyContactList, dummySummaryOutletTableData } from "../common/constan
 import Searchfield from "./Searchfield";
 import SummaryTable from "./SummaryTable";
 
-const OutletEdit = ({ openOutletEdit, setOpenOutletEdit }) => {
+interface Props {
+    openOutletEdit: boolean;
+    setOpenOutletEdit(openOutletEdit: boolean): void;
+}
+
+const OutletEdit = ({ openOutletEdit, setOpenOutletEdit }: Props) => {
     const [contactList, setContactList] = React.useState(dummyContactList);
     return (
         <div className={`overflow-auto top-0 space-y-12 px-6 pt-12 bottom-0 right-0 fixed w-full md:w-[46vw] h-full bg-white ease-in-out z-50 duration-300 ${openOutletEdit ? "translate-x-0 " : "translate-x-full"}`}>

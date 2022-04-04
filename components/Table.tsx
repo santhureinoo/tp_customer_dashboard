@@ -33,8 +33,8 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
                 <table className="items-center w-full bg-transparent border-collapse overflow-scroll">
                     <thead>
                         <tr>
-                            {headers.map(header => {
-                                return (<th className="px-6 bg-blueGray-50 text-gray-300 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-t-0 border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                            {headers.map((header,idx) => {
+                                return (<th key={header+"-"+idx} className="px-6 bg-blueGray-50 text-gray-300 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-t-0 border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                     {header}
                                 </th>)
                             })}
@@ -43,10 +43,10 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
                     <tbody>
                         {data.map((obj,i) => {
                             return (
-                                <tr className="odd:bg-white even:bg-slate-100">
-                                    {Object.keys(obj).map(key => {
+                                <tr key={'data-'+i} className="odd:bg-white even:bg-slate-100">
+                                    {Object.keys(obj).map((key,i) => {
                                         return (
-                                            <td className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                            <td key={key+'-'+i} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                                 {obj[key]}
                                             </td>
                                         )

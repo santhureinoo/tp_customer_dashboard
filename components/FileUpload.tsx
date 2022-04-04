@@ -1,4 +1,7 @@
-const FileUpload = ({className}) => {
+interface Props {
+    className : string;
+}
+const FileUpload = ({className} : Props) => {
     return (
         <div className={className}>
             <label
