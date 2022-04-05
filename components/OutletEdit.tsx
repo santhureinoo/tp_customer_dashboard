@@ -4,6 +4,7 @@ import ContactList from "./ContactList";
 import { dummyContactList, dummySummaryOutletTableData } from "../common/constant";
 import Searchfield from "./Searchfield";
 import SummaryTable from "./SummaryTable";
+import FileUpload from "./FileUpload";
 
 interface Props {
     openOutletEdit: boolean;
@@ -12,6 +13,7 @@ interface Props {
 
 const OutletEdit = ({ openOutletEdit, setOpenOutletEdit }: Props) => {
     const [contactList, setContactList] = React.useState(dummyContactList);
+    const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
     return (
         <div className={`overflow-auto top-0 space-y-12 px-6 pt-12 bottom-0 right-0 fixed w-full md:w-[46vw] h-full bg-white ease-in-out z-50 duration-300 ${openOutletEdit ? "translate-x-0 " : "translate-x-full"}`}>
             <div className="divide-y divide-solid">
@@ -54,6 +56,9 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit }: Props) => {
                         <CustomizedInput label={"Baseline"} inputType="textWithPostfix" postFix={'kW'} value={""} />
                         <CustomizedInput label={"Usage - low"} inputType="textWithPostfix" postFix={'kWH'} value={""} />
                         <CustomizedInput label={"Usage - High"} inputType="textWithPostfix" postFix={'kWH'} value={""} />
+                        <div className="col-span-3">
+                            <FileUpload uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}/>
+                        </div>
                     </div>
                 </div>
                 <div className="space-x-3 space-y-3 py-6">
