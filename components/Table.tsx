@@ -1,7 +1,4 @@
-import Searchfield from "./Searchfield";
 import React from 'react';
-import OutletEdit from "./OutletEdit";
-import { DummyTableDataRow } from "../common/constant";
 import TinyEditDeleteMenu from "./TinyEditDeleteMenu";
 import { TableProps } from "../common/types";
 
@@ -11,7 +8,7 @@ interface Props {
     handleAddNew(): any;
     rightSideElements: JSX.Element[];
     leftSideElements: JSX.Element[];
-    buttonText: string;
+    buttonText?: string;
 }
 
 const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
@@ -21,16 +18,16 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
             <div className="shadow-md p-4 bg-white">
                 <div className="grid grid-cols-2 justify-between py-2 grow-0">
                     <div className="flex flex-row gap-x-2">
-                        {rightSideElements}
+                        {leftSideElements}
                     </div>
                     <div className="flex flex-row justify-end gap-x-2">
-                        {leftSideElements}
-                        <button type="button" onClick={(e) => { handleAddNew() }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        {rightSideElements}
+                        {buttonText &&  <button type="button" onClick={(e) => { handleAddNew() }} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             {buttonText}
-                        </button>
+                        </button>}
                     </div>
                 </div>
-                <table className="items-center w-full bg-transparent border-collapse overflow-scroll">
+                <table className="items-center w-full bg-transparent border-collapse">
                     <thead>
                         <tr>
                             {headers.map((header,idx) => {

@@ -1,7 +1,16 @@
 import CustomizedInput from "../components/CustomizedInput";
 import PillButton from "../components/PillButton";
 
-export const DummyTableDataRow = {
+export const DummyCustomerDataRow = {
+    CID: 'Cust-105864',
+    NAM: 'KFC Indonesia',
+    PIC: 'Andrew Shovlin',
+    PIP: '+62878859036',
+    OUT: '3',
+    EQU: '5',
+}
+
+export const DummyEquipmentDataRow = {
     EID: 'EQ-2405',
     CUS: 'KFC Indonesia',
     OUT: 'KFC Gunung Sahari',
@@ -16,7 +25,17 @@ export const DummyOutletDataRow = {
     ONE: 'KFC Jakata Pusat',
     TRE: '$12.05',
     DOT: '20/11/2021',
-    SOS: (<div className="flex flex-row bg-slate-900 items-center justify-between"><span>3%</span><PillButton/></div>)
+    SOS: (<div className="flex flex-row bg-slate-900 gap-x-6 items-center justify-between"><span>3%</span><PillButton className={"bg-green-300 w-12 h-8"} text={"Live"}/></div>)
+}
+
+export const DummyBillingDataRow = {
+    IID: 'Set-2095860',
+    CUS: 'KFC Holding Indonesia',
+    PER: 'Sep, 2022',
+    OUT: '5',
+    TSF: '$485.09',
+    TSS: '$250',
+    TSK: (<div className="flex flex-row bg-slate-900 gap-x-6 items-center justify-between"><span>470</span><PillButton className={"bg-green-300 w-40 h-12"} text={"Invoice Extracted"}/></div>)
 }
 
 export const dummyContactList = [
@@ -61,6 +80,25 @@ export const dummySummaryTableData = [
     }
 ]
 
+
+export const dummySummaryEquipmentTableData = [
+    {
+        "ID": "Outlet-295BO",
+        "Type": "VFD 1",
+        "Name": "Tang City MCD",
+        "Status": "Active",
+        "ChkBox": <input type="checkbox" className="rounded-full bg-sky-600" value="CHK" />
+    },
+    {
+        "ID": "Outlet-295BO",
+        "Type": "VFD 1",
+        "Name": "Tang City MCD",
+        "Status": "Active",
+        "ChkBox": <input type="checkbox" className="rounded-full bg-sky-600" value="CHK" />
+    },
+]
+
+
 export const dummySummaryOutletTableData = [
     {
         "EquipmentID": "Outlet-295BO",
@@ -79,5 +117,32 @@ export const dummySummaryOutletTableData = [
         "Type": "Tang City MCD",
         "Name": "10",
         "CaltrType": <CustomizedInput hideDropDownPrefixIcon={true} inputType="select" value="FastFood" dropDownData={["FastFood", "Test", "Test"]} />
+    },
+]
+
+export const dummySummaryBillingTableData = [
+    {
+        "OutletName": "KFC Jakarta 1",
+        "LAT": "$0.249",
+        "EEB": "9.09kw",
+        "EUsage": '3000kWh/2670kWh',
+        "Savings": "$40/250kWh",
+        "ServiceFee":'$29.59',
+    },
+    {
+        "OutletName": "KFC Jakarta 1",
+        "LAT": "$0.249",
+        "EEB": "9.09kw",
+        "EUsage": '3000kWh/2670kWh',
+        "Savings": "$40/250kWh",
+        "ServiceFee":'$29.59',
+    },
+    {
+        "OutletName": "KFC Jakarta 1",
+        "LAT": "$0.249",
+        "EEB": "9.09kw",
+        "EUsage": '3000kWh/2670kWh',
+        "Savings": "$40/250kWh",
+        "ServiceFee":'$29.59',
     },
 ]

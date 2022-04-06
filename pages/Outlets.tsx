@@ -20,12 +20,12 @@ const Outlets: NextPage = () => {
       <Table
         headers={['Outlet ID', 'Customer', 'Outlet Name', 'Tariff Rate', 'Date of Tariff', 'Share of Savings']}
         data={getDummyOutletData()}
-        rightSideElements={[
+        leftSideElements={[
           <TableOptionField key={"tableOptionField"} label={'Outlet'} data={['KFC Indonesia']} />
         ]}
         handleAddNew={() => {
           setOpenOutletEdit(true);
-        }} handleEdit={() => setOpenOutletEdit(true)} handleDelete={() => setOpenOutletEdit(true)} buttonText={"+ Add New Outlet"} leftSideElements={[]} />
+        }} handleEdit={() => setOpenOutletEdit(true)} handleDelete={() => setOpenOutletEdit(true)} buttonText={"+ Add New Outlet"} rightSideElements={[]} />
       <OutletEdit openOutletEdit={openOutletEdit} setOpenOutletEdit={setOpenOutletEdit} />
     </React.Fragment>
   )

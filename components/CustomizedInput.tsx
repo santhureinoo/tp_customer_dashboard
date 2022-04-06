@@ -2,7 +2,7 @@ import React from 'react';
 import CustomizedDropDown from './CustomizedDropDown';
 
 interface Props {
-    inputType: 'text' | 'mail' | 'number' | 'textWithPostfix' | 'select' | 'selectWithPostfix';
+    inputType: 'text' | 'mail' | 'number' | 'date' | 'textWithPostfix' | 'select' | 'selectWithPostfix';
     label?: string;
     value: string;
     dropDownData? : string[];
@@ -17,6 +17,7 @@ const CustomizedInput = ({inputType, label, value, dropDownData, postFix = "", h
             case 'text':
             case 'mail':
             case 'number':
+            case 'date':
                 elem = <input type={inputType} className="outline-none px-6 py-3 border-2 rounded-lg h-11 w-full" value={value} />
                 break;
             case 'textWithPostfix':

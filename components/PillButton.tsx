@@ -1,7 +1,12 @@
-const PillButton = () => {
+interface Props {
+    className: string;
+    text: string;
+}
+
+const PillButton = ({className, text}: Props) => {
     return (
-        <button className="rounded-full w-24 h-6 bg-teal-400">
-            Live
+        <button className={`rounded-full p-2 ${className}`}>
+            {text}
         </button>
     )
 }

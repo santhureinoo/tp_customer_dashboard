@@ -1,6 +1,7 @@
 export interface TableProps {
     headers: string[];
     data: any[];
+    headerColor?: string;
 }
 
 export interface Contact {
