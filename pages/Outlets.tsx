@@ -4,6 +4,7 @@ import React from 'react';
 import OutletEdit from '../components/OutletEdit';
 import TableOptionField from '../components/TableOptionField';
 import { DummyOutletDataRow } from '../common/constant';
+import { v4 as uuidv4 } from 'uuid';
 
 const Outlets: NextPage = () => {
   const [openOutletEdit, setOpenOutletEdit] = React.useState(false);
@@ -21,7 +22,7 @@ const Outlets: NextPage = () => {
         headers={['Outlet ID', 'Customer', 'Outlet Name', 'Tariff Rate', 'Date of Tariff', 'Share of Savings']}
         data={getDummyOutletData()}
         leftSideElements={[
-          <TableOptionField key={"tableOptionField"} label={'Outlet'} data={['KFC Indonesia']} />
+          <TableOptionField key={uuidv4()} label={'Outlet'} data={['KFC Indonesia']} />
         ]}
         handleAddNew={() => {
           setOpenOutletEdit(true);

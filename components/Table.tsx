@@ -1,5 +1,6 @@
 import React from 'react';
 import TinyEditDeleteMenu from "./TinyEditDeleteMenu";
+import { v4 as uuidv4 } from 'uuid';
 import { TableProps } from "../common/types";
 
 interface Props {
@@ -14,9 +15,9 @@ interface Props {
 const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSideElements = [], leftSideElements = [], buttonText }: Props & TableProps) => {
     const [openTinyMenuIndex, setOpenTinyMenuIndex] = React.useState(-1);
     return (
-        <>
-            <div className="shadow-md p-4 bg-white">
-                <div className="grid grid-cols-2 justify-between py-2 grow-0">
+        <React.Fragment>
+            <div className="drop-shadow-lg rounded-lg p-4 bg-white">
+                <div className="grid grid-cols-2 justify-between items-start py-2 grow-0">
                     <div className="flex flex-row gap-x-2">
                         {leftSideElements}
                     </div>
@@ -31,7 +32,7 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
                     <thead>
                         <tr>
                             {headers.map((header,idx) => {
-                                return (<th key={header+"-"+idx} className="px-6 bg-blueGray-50 text-gray-300 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-t-0 border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                return (<th key={uuidv4()} className="px-6 bg-blueGray-50 text-gray-300 align-middle border border-solid border-blueGray-100 py-3 text-xs border-t-0 border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                     {header}
                                 </th>)
                             })}
@@ -40,10 +41,10 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
                     <tbody>
                         {data.map((obj,i) => {
                             return (
-                                <tr key={'data-'+i} className="odd:bg-white even:bg-slate-100">
+                                <tr key={uuidv4()} className="odd:bg-white even:bg-slate-50">
                                     {Object.keys(obj).map((key,i) => {
                                         return (
-                                            <td key={key+'-'+i} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                            <td key={uuidv4()} className="px-6 bg-blueGray-50 text-blueGray-500 align-middle  py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                                 {obj[key]}
                                             </td>
                                         )
@@ -51,7 +52,7 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
                                     <th onClick={(e: React.MouseEvent<HTMLElement>) => {
                                         if (i === openTinyMenuIndex) setOpenTinyMenuIndex(-1)
                                         else setOpenTinyMenuIndex(i);
-                                    }} className="relative cursor-pointer px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
+                                    }} className="relative cursor-pointer px-6 bg-blueGray-50 text-blueGray-500 align-middle  py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                         <div className={`${openTinyMenuIndex === i ? 'absolute' : 'hidden'} z-20 top-8 -left-8`}>
                                             <TinyEditDeleteMenu onEdit={handleEdit} onDelete={handleDelete} />
@@ -63,7 +64,7 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
                     </tbody>
                 </table>
             </div>
-            <div className="container flex justify-end p-3 px-8">
+            <div className="flex justify-end p-3 px-8">
                 <div>
                     <nav className="relative z-0 inline-flex rounded-md shadow-sm space-x-3" aria-label="Pagination">
                         <a
@@ -109,7 +110,7 @@ const Table = ({ headers, data, handleAddNew, handleEdit, handleDelete, rightSid
                     </nav>
                 </div>
             </div>
-        </>
+        </React.Fragment>
 
     )
 }

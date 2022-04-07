@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    h6 {
+        @apply text-lg font-bold
+    }
+}
+
 @layer utilities {
     .link-active {
         @apply flex items-center py-4 px-6 bg-blue-300 text-blue-600 rounded-lg;

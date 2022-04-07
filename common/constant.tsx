@@ -1,5 +1,7 @@
 import CustomizedInput from "../components/CustomizedInput";
 import PillButton from "../components/PillButton";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleCheck, faCircle } from "@fortawesome/free-solid-svg-icons";
 
 export const DummyCustomerDataRow = {
     CID: 'Cust-105864',
@@ -25,7 +27,7 @@ export const DummyOutletDataRow = {
     ONE: 'KFC Jakata Pusat',
     TRE: '$12.05',
     DOT: '20/11/2021',
-    SOS: (<div className="flex flex-row bg-slate-900 gap-x-6 items-center justify-between"><span>3%</span><PillButton className={"bg-green-300 w-12 h-8"} text={"Live"}/></div>)
+    SOS: (<div className="flex flex-row bg-slate-900 gap-x-6 items-center justify-between"><span>3%</span><PillButton className={"bg-green-300 w-24 h-8"} text={"Live"}/></div>)
 }
 
 export const DummyBillingDataRow = {
@@ -35,7 +37,7 @@ export const DummyBillingDataRow = {
     OUT: '5',
     TSF: '$485.09',
     TSS: '$250',
-    TSK: (<div className="flex flex-row bg-slate-900 gap-x-6 items-center justify-between"><span>470</span><PillButton className={"bg-green-300 w-40 h-12"} text={"Invoice Extracted"}/></div>)
+    TSK: (<div className="flex flex-row bg-slate-900 gap-x-6 items-center justify-between"><span>470</span><PillButton className={"bg-green-300 w-40 h-8"} text={"Invoice Extracted"}/></div>)
 }
 
 export const dummyContactList = [
@@ -64,19 +66,19 @@ export const dummySummaryTableData = [
         "ID": "Outlet-295BO",
         "Name": "Tang City MCD",
         "Equipment": "10",
-        "ChkBox": <input type="checkbox" className="rounded-full bg-sky-600" value="CHK" />
+        "ChkBox":  <FontAwesomeIcon style={{ fontSize: '2em', color:'gray' }} icon={faCircle} />
     },
     {
         "ID": "Outlet-295BO",
         "Name": "Tang City MCD",
         "Equipment": "10",
-        "ChkBox": <input type="checkbox" value="CHK" />
+        "ChkBox": <FontAwesomeIcon style={{ fontSize: '2em', color: 'Dodgerblue' }} icon={faCircleCheck} />
     },
     {
         "ID": "Outlet-295BO",
         "Name": "Tang City MCD",
         "Equipment": "10",
-        "ChkBox": <input type="checkbox" value="CHK" />
+        "ChkBox": <FontAwesomeIcon style={{ fontSize: '2em', color: 'Dodgerblue' }} icon={faCircleCheck} />
     }
 ]
 
@@ -87,14 +89,14 @@ export const dummySummaryEquipmentTableData = [
         "Type": "VFD 1",
         "Name": "Tang City MCD",
         "Status": "Active",
-        "ChkBox": <input type="checkbox" className="rounded-full bg-sky-600" value="CHK" />
+        "ChkBox": <FontAwesomeIcon style={{ fontSize: '2em' }} icon={faCircle} />
     },
     {
         "ID": "Outlet-295BO",
         "Type": "VFD 1",
         "Name": "Tang City MCD",
         "Status": "Active",
-        "ChkBox": <input type="checkbox" className="rounded-full bg-sky-600" value="CHK" />
+        "ChkBox": <FontAwesomeIcon style={{ fontSize: '2em', color: 'Dodgerblue' }} icon={faCircleCheck} />
     },
 ]
 
