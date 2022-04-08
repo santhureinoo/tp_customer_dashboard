@@ -15,20 +15,20 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit }: Props) => {
     const [contactList, setContactList] = React.useState(dummyContactList);
     const [uploadedFiles, setUploadedFiles] = React.useState<File[]>([]);
     return (
-        <div className={`overflow-auto top-0 px-6 pt-6 bottom-0 right-0 fixed w-full md:w-[46vw] h-full bg-white ease-in-out z-50 duration-300 ${openOutletEdit ? "translate-x-0 " : "translate-x-full"}`}>
+        <div className={`edit-container ${openOutletEdit ? "translate-x-0 " : "translate-x-full"}`}>
             <div className="flex justify-end">
                 <button onClick={(e) => { setOpenOutletEdit(!openOutletEdit) }} className={`w-8 h-8`} type='button'>
                     <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer' }} icon={faCircleXmark} />
                 </button>
             </div>
-            <div className="divide-y divide-solid space-y-6 pt-6">
+            <div className="edit-space-divider">
                 <div className="grid grid-cols-2 gap-x-4 pb-6">
                     <CustomizedInput inputType="select" value={"KFC Indonesia"} dropDownData={['KFC Indonesia', 'FKC Indonesia']} />
                     <CustomizedInput hideDropDownPrefixIcon={true} inputType="select" value={"Live"} dropDownData={['Live', 'Pending']} />
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex justify-between">
-                        <h6 ><b>Outlet</b> <br /> Information</h6>
+                        <h2><b>Outlet</b> <br /> Information</h2>
                     </div>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-6">
                         <CustomizedInput label={"Outlet ID"} inputType="text" value={""} />
@@ -48,9 +48,9 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit }: Props) => {
                         <CustomizedInput label={"A.I. Start Date"} inputType="text" value={"22-02-2022"} />
                     </div>
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex justify-between">
-                        <h6 ><b>Equipment</b><br /> Information</h6>
+                        <h2><b>Equipment</b><br /> Information</h2>
                     </div>
                     <div className="grid grid-cols-3 gap-x-2">
                         <CustomizedInput label={"Baseline"} inputType="textWithPostfix" postFix={'kW'} value={""} />
@@ -59,16 +59,16 @@ const OutletEdit = ({ openOutletEdit, setOpenOutletEdit }: Props) => {
 
                     </div>
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex">
-                        <h6 ><b>Person In Charge</b><br /> Information</h6>
+                        <h2><b>Person In Charge</b><br /> Information</h2>
                     </div>
                     <ContactList contactList={contactList} setContactList={setContactList} />
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex justify-between">
-                        <h6><b>Quantity</b></h6>
-                        <h6><b>(2)</b></h6>
+                        <h2><b>Quantity</b></h2>
+                        <h2><b>(2)</b></h2>
                     </div>
                     <div className="grid grid-cols-1 items-center">
                         <div className="w-full overflow-auto">

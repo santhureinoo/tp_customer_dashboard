@@ -28,7 +28,7 @@ const Layout = ({ title, children }: Props) => {
                                         strokeLinejoin="round"></path>
                                 </svg>
                             </button>
-                            <h3 className="text-gray-700 text-3xl font-medium">{title}</h3>
+                            <h3 className="text-gray-700 text-3xl font-bold">{title}</h3>
                             <div className="flex flex-col mt-8">
                                 <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                                     <div

@@ -12,7 +12,7 @@ interface Props {
 
 const BillingEdit = ({ openBillingEdit, setOpenBillingEdit }: Props) => {
     return (
-        <div className={`shadow-lg overflow-auto top-0 px-6 pt-6 bottom-0 right-0 fixed w-full md:w-[46vw] h-full bg-white ease-in-out z-50 duration-300 ${openBillingEdit ? "translate-x-0 " : "translate-x-full"}`}>
+        <div className={` edit-container ${openBillingEdit ? "translate-x-0 " : "translate-x-full"}`}>
             <div className="flex justify-end">
                 <button onClick={(e) => { setOpenBillingEdit(!openBillingEdit) }} className={`w-8 h-8`} type='button'>
                     <FontAwesomeIcon style={{ fontSize: '2em', cursor:'pointer' }} icon={faCircleXmark} />
@@ -31,9 +31,9 @@ const BillingEdit = ({ openBillingEdit, setOpenBillingEdit }: Props) => {
                     </div>
                     <PillButton className={"bg-green-300  w-40 h-10"} text={"Invoice Extracted"} />
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex bg-slate-200 p-4 items-center">
-                        <h6 ><b>Business</b> Information</h6>
+                        <h2><b>Business</b> Information</h2>
                     </div>
                     <div className="grid grid-cols-3 gap-x-2 gap-y-8">
                         <div>
@@ -58,9 +58,9 @@ const BillingEdit = ({ openBillingEdit, setOpenBillingEdit }: Props) => {
                         </div>
                     </div>
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex bg-slate-200 p-4 items-center justify-between">
-                        <h6 ><b>Invoice</b> Information</h6>
+                        <h2><b>Invoice</b> Information</h2>
                         <span> Period <b>Sept. 2022</b></span>
                     </div>
                     <div className="grid grid-cols-4 gap-x-2 gap-y-8">
@@ -96,7 +96,7 @@ const BillingEdit = ({ openBillingEdit, setOpenBillingEdit }: Props) => {
                 </div>
                 <div className="space-x-3 bg-slate-200 space-y-3 py-6">
                     <div className="flex p-4 items-center">
-                        <h6><b>Outlet (5)</b></h6>
+                        <h2><b>Outlet (5)</b></h2>
                     </div>
                     <div className="grid grid-cols-1 items-center">
                         <div className="w-full overflow-auto">

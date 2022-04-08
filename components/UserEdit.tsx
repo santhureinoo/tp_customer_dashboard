@@ -13,15 +13,15 @@ interface Props {
 
 const UserEdit = ({ openUserEdit, setOpenUserEdit }: Props) => {
     return (
-        <div className={`shadow-lg overflow-auto top-0 px-6 pt-6 bottom-0 right-0 fixed w-full md:w-[46vw] h-full bg-white ease-in-out z-50 duration-300 ${openUserEdit ? "translate-x-0 " : "translate-x-full"}`}>
+        <div className={` edit-container ${openUserEdit ? "translate-x-0 " : "translate-x-full"}`}>
             <div className="flex justify-end">
                 <button onClick={(e) => { setOpenUserEdit(!openUserEdit) }} className={`w-8 h-8`} type='button'>
                     <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer' }} icon={faCircleXmark} />
                 </button>
             </div>
-            <div className="divide-y divide-solid space-y-6 pt-6">
+            <div className="edit-space-divider">
                 <div className="text-lg pb-6 space-y-4">
-                    <h6 ><b>User</b> <br /> Information</h6>
+                    <h2><b>User</b> <br /> Information</h2>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-6 pb-6">
                         <div className="col-span-2">
                             <CustomizedInput label={"Category"} inputType="select" value={"Administrator"} dropDownData={['Administrator', 'Customer']} />
@@ -34,10 +34,10 @@ const UserEdit = ({ openUserEdit, setOpenUserEdit }: Props) => {
                         <CustomizedInput label={"Postal Code"} inputType="text" value={""} />
                     </div>
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <CustomizedInput label={"Customer"} inputType="autocomplete" value={"Administrator"} dropDownData={['Administrator', 'Customer']} />
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <CustomizedInput label={"Outlet"} inputType="autocomplete" value={"Administrator"} dropDownData={['Administrator', 'Customer']} />
                 </div>
             </div>

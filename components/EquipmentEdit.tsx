@@ -26,19 +26,19 @@ const OutletEdit = ({ openEquipmentEdit, setOpenEquipmentEdit }: Props) => {
         )
     }
     return (
-        <div className={`overflow-auto top-0 px-6 pt-6 bottom-0 right-0 fixed w-full md:w-[46vw] h-full bg-white ease-in-out z-50 duration-300 ${openEquipmentEdit ? "translate-x-0 " : "translate-x-full"}`}>
+        <div className={`edit-container ${openEquipmentEdit ? "translate-x-0 " : "translate-x-full"}`}>
             <div className="flex justify-end">
                 <button onClick={(e) => { setOpenEquipmentEdit(!openEquipmentEdit) }} className={`w-8 h-8`} type='button'>
                     <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer' }} icon={faCircleXmark} />
                 </button>
             </div>
-            <div className="divide-y divide-solid space-y-6 pt-6">
+            <div className="edit-space-divider">
                 <div className="pb-6">
                     <CustomizedInput inputType="select" value={"KFC Indonesia"} dropDownData={['KFC Indonesia', 'FKC Indonesia']} />
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex justify-between">
-                        <h6 ><b>Equipment</b> <br /> Information</h6>
+                        <h2><b>Equipment</b> <br /> Information</h2>
                     </div>
                     <div className="grid grid-cols-3 gap-x-6 gap-y-6">
                         <CustomizedInput label={"Equipment ID"} inputType="text" value={""} />
@@ -52,9 +52,9 @@ const OutletEdit = ({ openEquipmentEdit, setOpenEquipmentEdit }: Props) => {
                         </div>
                     </div>
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex justify-between">
-                        <h6 ><b>Energy</b><br /> Information</h6>
+                        <h2><b>Energy</b><br /> Information</h2>
                     </div>
                     <div className="grid grid-cols-3 gap-x-2 ">
                         <CustomizedInput label={"Baseline"} inputType="textWithPostfix" postFix={'kW'} value={""} />
@@ -63,10 +63,10 @@ const OutletEdit = ({ openEquipmentEdit, setOpenEquipmentEdit }: Props) => {
 
                     </div>
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex justify-between">
-                        <h6><b>Device</b></h6>
-                        <h6><b>(5)</b></h6>
+                        <h2><b>Device</b></h2>
+                        <h2><b>(5)</b></h2>
                     </div>
                     <div className="grid grid-cols-1 items-center">
                         <Searchfield IconFront={false} WithButton={true} InputElement={getSearchinput()} ButtonText={"Retrieve from Emily"} />

@@ -17,16 +17,16 @@ const CustomerEdit = ({ openCustomerEdit, setOpenCustomerEdit }: Props) => {
 
     const [contactList, setContactList] = React.useState(dummyContactList);
     return (
-        <div className={`shadow-lg overflow-auto top-0 px-6 pt-6 bottom-0 right-0 fixed w-full md:w-[46vw] h-full bg-white ease-in-out z-50 duration-300 ${openCustomerEdit ? "translate-x-0 " : "translate-x-full"}`}>
+        <div className={` edit-container ${openCustomerEdit ? "translate-x-0 " : "translate-x-full"}`}>
             <div className="flex justify-end">
                 <button onClick={(e) => { setOpenCustomerEdit(!openCustomerEdit) }} className={`w-8 h-8`} type='button'>
                     <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer' }} icon={faCircleXmark} />
                 </button>
             </div>
-            <div className="divide-y divide-solid space-y-6 pt-6">
+            <div className="edit-space-divider">
                 <div className="space-x-3 space-y-3">
                     <div>
-                        <h6 ><b>Customer</b> <br /> Information</h6>
+                        <h2><b>Customer</b> <br /> Information</h2>
                     </div>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-6 pb-6">
                         <CustomizedInput label={"Customer ID"} inputType="text" value={""} />
@@ -37,15 +37,15 @@ const CustomerEdit = ({ openCustomerEdit, setOpenCustomerEdit }: Props) => {
                         <CustomizedInput label={"Postal Code"} inputType="text" value={""} />
                     </div>
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex">
-                        <h6 ><b>Person In Charge</b><br /> Information</h6>
+                        <h2><b>Person In Charge</b><br /> Information</h2>
                     </div>
                     <ContactList contactList={contactList} setContactList={setContactList} />
                 </div>
-                <div className="space-x-3 space-y-3 py-6">
+                <div className="edit-sub-container">
                     <div className="flex justify-between">
-                        <h6 ><b>Outlet</b><br />Assignment</h6>
+                        <h2><b>Outlet</b><br />Assignment</h2>
                     </div>
                     <div className="grid grid-cols-1 items-center gap-x-1">
                         <Searchfield IconFront={true} WithButton={true} ButtonText={"Search"} />

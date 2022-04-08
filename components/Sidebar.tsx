@@ -1,8 +1,8 @@
 import Link from "next/link";
 import React from "react";
 import { useRouter } from 'next/router';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {faWrench, faUserGroup, faBriefcase, faUser, faWallet } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faWrench, faUserGroup, faBriefcase, faUser, faWallet, fas, fa2 } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
     sidebarOpen: boolean;
@@ -19,7 +19,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: Props) => {
             <div className={`${sidebarOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'} fixed z-30 inset-y-0 left-0 w-64 transition duration-300 transform bg-white overflow-y-auto lg:translate-x-0 lg:static lg:inset-0`}>
                 <div className="flex items-start pt-8 px-4">
                     <div className="flex">
-                        <span className="text-2xl mx-2 font-semibold">Welcome,<br />Admin</span>
+                        <h2 className="text-3xl mx-2 font-bold">Welcome,<br />Admin</h2>
                     </div>
                 </div>
 

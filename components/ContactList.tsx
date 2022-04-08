@@ -22,7 +22,7 @@ const ContactList = ({ contactList, setContactList }: Props): React.ReactElement
                             <div className="flex flex-row justify-between items-center">
                                 <div className="flex flex-row items-center gap-x-2">
                                     <FontAwesomeIcon style={{ fontSize: '2em', color: 'Dodgerblue' }} icon={faCircleCheck} />
-                                    <h4 className="text-slate-400">Primary Contact</h4>
+                                    <h4 className="text-lg text-slate-400">Primary Contact</h4>
                                 </div>
                                 <div>
                                     <FontAwesomeIcon style={{ fontSize: '2em', cursor: 'pointer', color: 'Tomato' }} onClick={e => {
