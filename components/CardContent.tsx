@@ -58,7 +58,7 @@ const SustainPerformance = (): JSX.Element => {
             <CardHeader Titles={['Sustainability', 'Performance']} SubTitle={'(Accummulative)'} />
             <div className="flex-1">
                 <Jumbotron>
-                    <div className="flex flex-col items-start justify-center gap-y-1 h-full">
+                    <div className="flex flex-col items-start justify-center h-full">
                         <h2 className="font-light text-2xl">CO2 Saved</h2>
                         <div>
                             <span className="font-bold text-3xl">0.64</span>
@@ -194,7 +194,7 @@ const SavingPerformance = (): JSX.Element => {
         <div className="flex flex-col gap-4">
             <div className="flex justify-between items-baseline">
                 <CardHeader Titles={['Savings', 'Performace']} />
-                <div className='flex flex-row gap-x-2'>
+                <div className='flex flex-row gap-x-2 text-xs'>
                     <button className="bg-blue-200 rounded-lg p-2">Last 3 Months</button>
                     <button className="p-2">Last Month</button>
                     <button className="p-2">Last Week</button>
@@ -258,7 +258,7 @@ const Remarks = (): JSX.Element => {
         <div className="flex flex-col gap-4">
             <div className="flex justify-between items-baseline">
                 <CardHeader Titles={['Remarks']} />
-                <span className="text-sm font-bold text-blue-600">
+                <span className="text-sm font-bold cursor-pointer hover:underline text-blue-600">
                     See More
                 </span>
             </div>
@@ -303,7 +303,7 @@ const Equipment = (): JSX.Element => {
         <div className="flex flex-col gap-4 h-full">
             <div className="flex justify-between items-baseline">
                 <CardHeader Titles={['Equipment']} />
-                <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
+                <select className={`outline-none px-2 py-1 border-2 rounded-lg text-sm h-11`}>
                     <option>Kitchen Exhaust</option>
                     <option>Kitchen Exhaust</option>
                 </select>

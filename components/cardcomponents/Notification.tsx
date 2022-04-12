@@ -103,7 +103,7 @@ const Notification = ({ IconColor, Description, IsOpen }: Props): JSX.Element =>
             break;
     }
     return (
-        <div className="gap-x-2 rounded-lg border-2 p-1 flex flex-row items-center text-extraSmall">
+        <div className="gap-x-1 rounded-lg border-2 p-1 flex flex-row items-center text-extraSmall">
             {iconSVG}
             <p>
                 {Description}

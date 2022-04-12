@@ -9,14 +9,14 @@ interface Props {
 const CardHeader = ({ Titles, SubTitle }: Props): JSX.Element => {
     return (
         <div>
-            <h4 className="font-bold text-lg">
+            <h4 className="font-bold text-sm">
                 {Titles.map(title => {
                     return (
                         <span className="block" key={uuidv4()}>{title}</span>
                     )
                 })}
             </h4>
-            {SubTitle && <span>{SubTitle}</span>}
+            {SubTitle && <span className="text-sm font-thin">{SubTitle}</span>}
         </div>
     )
 }
