@@ -1,18 +1,35 @@
 import Sidebar from "./Sidebar"
 import React from 'react';
 import Head from "next/head";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
-    title: string;
+    title: string[];
     children: any;
 }
 
 const Layout = ({ title, children }: Props) => {
     const [sidebarOpen, setSidebarOpen] = React.useState(true);
+
+    const getHeaderBreadCrumb = React.useMemo(() => {
+        return (<h3 className="text-gray-700 text-3xl font-bold">
+            {
+                title.map((titleStr, ind) => {
+                    return (
+                        <>
+                            <span>{titleStr}</span>
+                            {ind !== (title.length - 1) && (<FontAwesomeIcon className="px-2" icon={faAngleRight} />)}
+                        </>
+                    )
+                })
+            }
+        </h3>)
+    }, [title]);
     return (
         <React.Fragment>
             <Head>
-                <title>{title} - Dashboard</title>
+                <title>{title[0]} - Dashboard</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <main className="flex h-screen bg-gray-200">
@@ -28,7 +45,7 @@ const Layout = ({ title, children }: Props) => {
                                         strokeLinejoin="round"></path>
                                 </svg>
                             </button>
-                            <h3 className="text-gray-700 text-3xl font-bold">{title}</h3>
+                            {getHeaderBreadCrumb}
                             <div className="flex flex-col mt-8">
                                 <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                                     <div

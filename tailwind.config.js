@@ -4,7 +4,17 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    fontFamily: {
+      'sans': ['MADE\\ TOMMY', 'sans-serif'],
+    },
+    extend: {
+      fontSize: {
+        'extraSmall': 'xx-small',
+      },
+      colors: {
+        'pillbtn': '#BCFFD7',
+      },
+    },
   },
   plugins: [],
 }
