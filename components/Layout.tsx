@@ -30,7 +30,7 @@ const Layout = ({ title, children }: Props) => {
     return (
         <React.Fragment>
             <Head>
-                <title>{title && title[0]} - Dashboard</title>
+                <title>Dashboard</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <main className="flex h-screen bg-gray-200">
