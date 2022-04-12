@@ -46,7 +46,7 @@ const SavingMeter = (): JSX.Element => {
                 <span className="text-sky-400"> 20-02-2022</span>
             </div>
             <div className="flex flex-col col-span-2">
-                <Image alt="barcode not found" src="/barcode.png" width='500' height="200" />
+                <Image alt="barcode not found" src="/barcode.png" width='500' height="150" />
                 <span className="text-right text-gray-600">Outlet ID: 39505069</span>
             </div>
         </div>
