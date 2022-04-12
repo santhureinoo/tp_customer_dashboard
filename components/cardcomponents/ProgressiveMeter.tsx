@@ -3,7 +3,7 @@ import React from "react";
 const ProgressiveMeter = (): JSX.Element => {
     return (
         <div className="relative flex flex-row h-full">
-            <div className="shadow h-64 w-4 bg-blue-200 rounded-lg"></div>
+            <div className="shadow h-full w-4 bg-blue-200 rounded-lg"></div>
             <div className="flex flex-col justify-between">
                 <div className="pl-2">
                     . 600 kWh
