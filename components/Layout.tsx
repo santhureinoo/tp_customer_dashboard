@@ -3,6 +3,7 @@ import React from 'react';
 import Head from "next/head";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
     title: string[];
@@ -15,12 +16,12 @@ const Layout = ({ title, children }: Props) => {
     const getHeaderBreadCrumb = React.useMemo(() => {
         return (<h3 className="text-gray-700 text-3xl font-bold">
             {
-                title.map((titleStr, ind) => {
+                title && title.map((titleStr, ind) => {
                     return (
-                        <>
+                        <React.Fragment key={uuidv4()} >
                             <span>{titleStr}</span>
                             {ind !== (title.length - 1) && (<FontAwesomeIcon className="px-2" icon={faAngleRight} />)}
-                        </>
+                        </React.Fragment>
                     )
                 })
             }
@@ -29,7 +30,7 @@ const Layout = ({ title, children }: Props) => {
     return (
         <React.Fragment>
             <Head>
-                <title>{title[0]} - Dashboard</title>
+                <title>{title && title[0]} - Dashboard</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <main className="flex h-screen bg-gray-200">
