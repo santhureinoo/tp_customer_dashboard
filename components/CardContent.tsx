@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ForwardedRef } from 'react';
 import Card from "./Card";
 import PillButton from "./cardcomponents/PillButton";
 import SavingMeterDigits from "./cardcomponents/SavingMeterDigits";
@@ -18,8 +18,10 @@ import {
     Legend,
     Tooltip,
     ScriptableContext,
+    Filler,
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
+import { ChartJSOrUndefined } from 'react-chartjs-2/dist/types';
 
 ChartJS.register(
     LinearScale,
@@ -28,7 +30,8 @@ ChartJS.register(
     PointElement,
     LineElement,
     Legend,
-    Tooltip
+    Tooltip,
+    Filler,
 );
 interface EquipmentStatusCardProps {
     Title: String, SubTitle?: String, Value: String, Prefix?: String, Postfix?: String
@@ -138,12 +141,12 @@ const SavingPerformance = (): JSX.Element => {
                         lineTension: 0.4,
                         borderColor: 'rgb(255, 99, 132)',
                         borderWidth: 2,
-                        fill: "start",
+                        fill: true,
                         backgroundColor: (context: ScriptableContext<"line">) => {
                             const ctx = context.chart.ctx;
                             var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                            gradient.addColorStop(0, 'rgba(224, 195, 155, 1)');
-                            gradient.addColorStop(1, 'rgba(100, 100, 0,0)');
+                            gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
+                            gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
                             return gradient;
                         },
                         data: [510, 750, 748, 560, 1000, 560],
