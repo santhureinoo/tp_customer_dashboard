@@ -25,3 +25,7 @@
         @apply space-x-3 space-y-3 py-6;
     }
 }
+
+.dashed{
+    stroke-dasharray: 5,5; 
+ }

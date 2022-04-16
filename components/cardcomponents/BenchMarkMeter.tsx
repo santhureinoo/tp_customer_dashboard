@@ -1,55 +1,92 @@
 import React from "react";
+import * as d3 from 'd3';
+import { BenchMarkProps } from "../../common/types";
 
-const BenchMarkMeter = (): JSX.Element => {
+const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
+    const progressDivRef: React.RefObject<HTMLDivElement> = React.createRef();
+    const orgHeight = 230; // Equivalent to w-48 of tailwind v3.0.24
+
+    const yScale = d3.scaleBand()
+        .domain([props.MinKWH.Percentage, props.MaxKWH.Percentage])
+        .range([0, orgHeight]);
+
+    React.useEffect(() => {
+        var svg = d3.select(progressDivRef.current)
+            .append('svg').attr('viewBox', `0 0 110 ${orgHeight}`);
+        var bgLineGroup = svg.append('g');
+
+        bgLineGroup.append('line')
+            .attr('class', 'dashed')
+            .attr('rx', 10)
+            .attr('ry', 10)
+            .attr('fill', 'rgb(229,231,235)')
+            .attr('width', 15)
+            .attr("x1", 55)
+            .attr("x2", 55)
+            .attr("y1", 0)
+            .attr("y2", orgHeight)
+            .attr("stroke", "black");
+
+        var progressRectGroup = svg.append('g');
+
+        progressRectGroup.append('rect')
+            .attr('class', 'progress-rect')
+            .attr('fill', 'rgb(96,165,250)')
+            .attr('height', 0)
+            .attr('width', 15)
+            .attr('rx', 10)
+            .attr('ry', 10)
+            .attr('y', orgHeight / 2)
+            .attr('x', 47)
+            .transition()
+            .duration(1000)
+            .attr('y', orgHeight / 8)
+            // .attr('y', orgHeight - (yScale(props.MinKWH.Percentage) || 0))
+            .attr('height', (yScale(props.MaxKWH.Percentage) || 0) + 60);
+
+        progressRectGroup.append("foreignObject")
+            .attr("width", '100%')
+            .attr('y', orgHeight / 8)
+            // .attr('y', orgHeight - (yScale(props.MinKWH.Percentage) || 0))
+            .attr('height', (yScale(props.MaxKWH.Percentage) || 0) + 60)
+            .append("xhtml:div")
+            .html(`<div class="absolute z-10 h-full left-0 flex flex-col justify-between">
+                        <div class="mr-4">
+                            <span class="text-gray-400 text-extraSmall block text-right">
+                                25%
+                            </span>
+                            <span class="text-extraSmall align-top text-right">
+                                1689 kWh
+                            </span>
+                        </div>
+                        <div class="mr-4">
+                            <span class="text-gray-400 text-extraSmall block text-right">
+                                10%
+                            </span>
+                            <span class="text-extraSmall align-top text-right">
+                                728 kWh
+                            </span>
+                        </div>
+            </div>`);
+
+        progressRectGroup.append("foreignObject")
+            .attr("width", '100%')
+            .attr("height", '100%')
+            .attr('y', (orgHeight - (yScale(props.MaxKWH.Percentage) || 0)) / 1.5)
+            .append("xhtml:div")
+            .html(`<div class="absolute pl-2 right-0 z-10 flex flex-col  justify-center">
+                        <div class="flex flex-col items-center">
+                            <span class="text-extraSmall font-bold">Last Month</span>
+                            <span class="text-xl text-blue-600 font-bold">
+                                17%
+                            </span>
+                        <span class="text-extraSmall">(1.224 kWh)</span>
+                    </div>
+        </div>`);
+    }, [props, progressDivRef, yScale]);
+
     return (
-        <div className="relative h-full flex flex-row items-center">
-            <div className="absolute h-full w-full top-1/2 left-1/2 transform -translate-y-1/2 ">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-full w-2"
-                    fill="none"
-                    viewBox="0 0 2 385"
-                >
-                    <path
-                        stroke="#989AAC"
-                        strokeDasharray="9 9"
-                        strokeLinecap="round"
-                        strokeWidth="2"
-                        d="M1 1.365v381.803"
-                    ></path>
-                </svg>
-            </div>
-            <div className="absolute h-full w-full top-1/2 left-0 transform -translate-y-1/2 w-full h-2/3 rounded-lg">
-                <div className="absolute z-10 top-0 bottom-0 flex flex-col justify-between w-30">
-                    <div>
-                        <span className="text-gray-400 text-extraSmall block text-right">
-                            25%
-                        </span>
-                        <span className="text-xs">
-                            1689 kWh
-                        </span>
-                    </div>
-                    <div>
-                        <span className="text-gray-400 text-extraSmall block text-right">
-                            10%
-                        </span>
-                        <span className="text-xs">
-                            728 kWh
-                        </span>
-                    </div>
-                </div>
-                <div className="absolute top-0 left-[48%] bg-blue-400 w-4 h-full rounded-lg text-white"></div>
-                <div className="absolute right-0 top-0 bottom-0 z-10 pl-2 flex flex-col top-1/2 justify-center">
-                    <div className="flex flex-col items-center">
-                        <span className="text-extraSmall font-bold">Last Month</span>
-                        <span className="text-lg text-blue-600 font-bold">
-                            17%
-                        </span>
-                        <span className="text-extraSmall">(1.224 kWh)</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div ref={progressDivRef}></div>
     )
 }
 

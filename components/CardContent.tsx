@@ -110,7 +110,9 @@ const BenchMarkComparison = (): JSX.Element => {
         <div className="flex flex-col gap-4 h-full">
             <CardHeader Titles={['Benchmark', 'Comparison']} SubTitle={"(Last Month)"} />
             <div className="h-full">
-                <BenchMarkMeter />
+                <BenchMarkMeter MinKWH={{ Percentage: '10', ActualKHW: 728 }}
+                    MaxKWH={{ Percentage: '25', ActualKHW: 1689 }}
+                    CurrentKHW={{ Percentage: '17', ActualKHW: 1224 }} />
             </div>
         </div>
     )
@@ -121,7 +123,7 @@ const ExpectedSavings = (): JSX.Element => {
         <div className="flex flex-col gap-4 h-full">
             <CardHeader Titles={['Expected Savings']} SubTitle={"(Current Month)"} />
             <div className="h-full">
-                <ProgressiveMeter />
+                <ProgressiveMeter MaxKWH={600} CurrentKHW={300} />
             </div>
         </div>
     )
