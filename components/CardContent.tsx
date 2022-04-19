@@ -46,7 +46,7 @@ const SavingMeter = (): JSX.Element => {
             </div>
             <div className="flex flex-col self-end">
                 <span className="text-gray-600 text-sm"> Live as of</span>
-                <span className="text-sky-400"> 20-02-2022</span>
+                <span className="text-sky-600"> 20-02-2022</span>
             </div>
             <div className="flex flex-col col-span-2">
                 <Image alt="barcode not found" src="/barcode.png" width='500' height="150" />
@@ -62,10 +62,10 @@ const SustainPerformance = (): JSX.Element => {
             <div className="flex-1">
                 <Jumbotron>
                     <div className="flex flex-col items-start justify-center h-full">
-                        <h2 className="font-light text-2xl">CO2 Saved</h2>
+                        <h2 className="font-light text-custom-gray text-2xl">CO2 Saved</h2>
                         <div>
                             <span className="font-bold text-3xl">0.64</span>
-                            <span className="font-light text-sm pl-2">kg</span>
+                            <span className="font-light text-sm text-custom-gray pl-2">kg</span>
                         </div>
                         <PillButton className={"bg-pillbtn text-xs"} text={"+ 0.5 kg Lower"} />
                     </div>
@@ -74,8 +74,8 @@ const SustainPerformance = (): JSX.Element => {
             <div className="flex-1">
                 <Jumbotron>
                     <div className="flex flex-row items-center h-full">
-                        <span className="font-light font-slate-200 text-left">Your Savings is equal to planting</span>
-                        <div className="flex flex-col">
+                        <span className="font-light text-custom-gray text-left">Your Savings is equal to planting</span>
+                        <div className="flex flex-col justify-center">
                             <span className="font-bold text-5xl">5</span>
                             <span>Trees</span>
                         </div>
@@ -94,10 +94,10 @@ const FastFood = (): JSX.Element => {
                 <Image src="/burger.png" alt="burger not found" width="106" height="67" />
             </div>
             <div className="flex flex-col items-start">
-                <span className="text-sm text-red-500">
+                <span className="text-xs text-red-500">
                     Mcdonalds
                 </span>
-                <span className="font-bold text-xs">
+                <span className="font-medium">
                     Quarter Pounder with Cheese Bacon
                 </span>
             </div>
@@ -199,12 +199,12 @@ const SavingPerformance = (): JSX.Element => {
         <div className="flex flex-col gap-4">
             <div className="flex justify-between items-baseline">
                 <CardHeader Titles={['Savings', 'Performace']} />
-                <div className='flex flex-row gap-x-2 text-xs'>
-                    <button className="bg-blue-200 rounded-lg p-2">Last 3 Months</button>
+                <div className='flex flex-row gap-x-2 text-xs text-custom-gray'>
+                    <button className="bg-custom-lightblue text-custom-darkblue rounded-lg p-2">Last 3 Months</button>
                     <button className="p-2">Last Month</button>
                     <button className="p-2">Last Week</button>
                     <div className="grid grid-cols-2">
-                        <button className="text-xs bg-blue-200 rounded-r-none rounded-lg px-2">
+                        <button className="text-xs bg-custom-lightblue text-custom-darkblue rounded-r-none rounded-lg px-2">
                             kWh
                         </button>
                         <button className="text-xs bg-gray-100 rounded-l-none rounded-lg px-2">
@@ -234,9 +234,9 @@ const RankAndOutlet = (): JSX.Element => {
         <div className="flex flex-col gap-y-4 justify-around h-full">
             <Jumbotron>
                 <div className="flex flex-row justify-between items-center h-full">
-                    <span className="font-bold text-lg">Rank</span>
+                    <span className="font-bold">Rank</span>
                     <div>
-                        <span className="font-bold text-2xl">
+                        <span className="font-thin text-5xl">
                             3
                         </span>
                         <span>
@@ -247,9 +247,9 @@ const RankAndOutlet = (): JSX.Element => {
             </Jumbotron>
             <Jumbotron>
                 <div className="flex flex-row justify-between items-center h-full">
-                    <span className="font-bold text-lg ">Outlets</span>
+                    <span className="font-bold">Outlets</span>
                     <div>
-                        <span className="font-bold text-2xl">
+                        <span className="font-thin text-5xl">
                             15
                         </span>
                     </div>
@@ -278,23 +278,22 @@ const Remarks = (): JSX.Element => {
 
 const EquipmentStatusCard = ({ Title, SubTitle, Value, Prefix, Postfix }: EquipmentStatusCardProps): JSX.Element => {
     return (
-        <div className="flex flex-col p-4 rounded-lg border-2 border-gray-200 justify-between h-full">
+        <div className="flex flex-col p-4 rounded-lg border-2 border-gray-200 justify-between min-h-[115px] min-w-[148.75px]">
             <div className="text-left">
-                <h4 className="text-lg text-blue-600">
+                <h4 className="text-sm text-blue-600">
                     {Title}
                 </h4>
-                <span className="text-xs font-light font-gray-200">{SubTitle}</span>
+                <span className="text-xs font-light text-custom-gray">{SubTitle}</span>
             </div>
 
-
-            <div className="flex flex-row gap-1">
-                <span className="text-gray-400">
+            <div className="flex flex-row w-full gap-1">
+                <span className="text-custom-gray">
                     {Prefix}
                 </span>
-                <span className="text-3xl font-bold">
+                <span className="text-custom-5xl font-medium">
                     {Value}
                 </span>
-                <span className="self-end text-gray-400">
+                <span className="self-end text-custom-gray">
                     {Postfix}
                 </span>
 
@@ -313,7 +312,7 @@ const Equipment = (): JSX.Element => {
                     <option>Kitchen Exhaust</option>
                 </select>
             </div>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row flex-wrap gap-2">
                 <EquipmentStatusCard Title={'Quantity'} Value={"1"} />
                 <EquipmentStatusCard Title={'Baseline'} SubTitle={'As of 14/01/2022'} Value={"14,9"} Postfix={'kW'} />
                 <EquipmentStatusCard Title={'Energy Saved'} Value={"305"} Postfix={'kWh'} />
@@ -328,7 +327,7 @@ const LastAvailableTarif = (): JSX.Element => {
         <div className="flex flex-col h-full justify-between gap-y-2">
             <div>
                 <CardHeader Titles={['Last Available', 'Tariff']} />
-                <span>As of <br /><span className="text-blue-600">14/01/2022</span></span>
+                <span className='text-custom-gray'>As of <br /><span className="text-custom-darkblue">14/01/2022</span></span>
             </div>
             <div>
                 <span className="text-4xl font-bold font-lg">

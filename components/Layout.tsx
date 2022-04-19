@@ -15,16 +15,19 @@ const Layout = ({ title, children }: Props) => {
 
     const getHeaderBreadCrumb = React.useMemo(() => {
         return (<h3 className="text-gray-700 text-3xl font-bold">
-            {
-                title && title.map((titleStr, ind) => {
-                    return (
-                        <React.Fragment key={uuidv4()} >
-                            <span>{titleStr}</span>
-                            {ind !== (title.length - 1) && (<FontAwesomeIcon className="px-2" icon={faAngleRight} />)}
-                        </React.Fragment>
-                    )
-                })
-            }
+            <div className="flex items-center">
+                {
+                    title && title.map((titleStr, ind) => {
+                        return (
+                            <React.Fragment key={uuidv4()} >
+                                <span className="text-custom-gray">{titleStr}</span>
+                                {ind !== (title.length - 1) && (<FontAwesomeIcon className="px-2 text-custom-gray text-sm" icon={faAngleRight} />)}
+                            </React.Fragment>
+                        )
+                    })
+                }
+            </div>
+
         </h3>)
     }, [title]);
     return (

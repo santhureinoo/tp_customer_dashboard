@@ -76,7 +76,7 @@ const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
             .append("xhtml:div")
             .html(`<div class="absolute pl-2 right-0 z-10 flex flex-col  justify-center">
                         <div class="flex flex-col items-center">
-                            <span class="text-extraSmall font-bold">Last Month</span>
+                            <span class="text-extraSmall">Last Month</span>
                             <span class="text-xl text-blue-600 font-bold">
                                 17%
                             </span>
