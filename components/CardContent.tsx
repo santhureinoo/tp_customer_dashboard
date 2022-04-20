@@ -278,19 +278,19 @@ const Remarks = (): JSX.Element => {
 
 const EquipmentStatusCard = ({ Title, SubTitle, Value, Prefix, Postfix }: EquipmentStatusCardProps): JSX.Element => {
     return (
-        <div className="flex flex-col p-4 rounded-lg border-2 border-gray-200 justify-between min-h-[115px] min-w-[148.75px]">
+        <div className="flex flex-col p-4 rounded-lg border-2 border-gray-200 justify-between h-[115px] 2xl:h-full min-w-[148.75px]">
             <div className="text-left">
-                <h4 className="text-sm text-blue-600">
+                <h4 className="2xl:text-sm text-xs text-custom-darkblue">
                     {Title}
                 </h4>
-                <span className="text-xs font-light text-custom-gray">{SubTitle}</span>
+                <span className="2xl:text-xs text-extraSmall font-light text-custom-gray">{SubTitle}</span>
             </div>
 
             <div className="flex flex-row w-full gap-1">
                 <span className="text-custom-gray">
                     {Prefix}
                 </span>
-                <span className="text-custom-5xl font-medium">
+                <span className="2xl:text-custom-5xl text-4xl font-medium">
                     {Value}
                 </span>
                 <span className="self-end text-custom-gray">
@@ -312,7 +312,7 @@ const Equipment = (): JSX.Element => {
                     <option>Kitchen Exhaust</option>
                 </select>
             </div>
-            <div className="flex flex-row flex-wrap gap-2">
+            <div className="2xl:grid 2xl:grid-cols-4 grid grid-cols-2 gap-2">
                 <EquipmentStatusCard Title={'Quantity'} Value={"1"} />
                 <EquipmentStatusCard Title={'Baseline'} SubTitle={'As of 14/01/2022'} Value={"14,9"} Postfix={'kW'} />
                 <EquipmentStatusCard Title={'Energy Saved'} Value={"305"} Postfix={'kWh'} />
