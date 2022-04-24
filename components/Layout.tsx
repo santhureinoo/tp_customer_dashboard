@@ -4,6 +4,7 @@ import Head from "next/head";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import { v4 as uuidv4 } from 'uuid';
+import CustomSelect from "./cardcomponents/CustomSelect";
 
 interface Props {
     title: string[];
@@ -36,10 +37,10 @@ const Layout = ({ title, children }: Props) => {
                 <title>Dashboard</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <main className="flex h-screen bg-gray-200">
+            <main className="flex h-screen bg-custom-lightgray">
                 <Sidebar setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
                 <div className="flex-1 flex flex-col overflow-scroll ">
-                    <div className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200">
+                    <div className="flex-1 overflow-x-hidden overflow-y-auto bg-custom-lightgray">
                         <div className="container mx-auto px-6 py-8">
                             <button onClick={e => {
                                 setSidebarOpen(!sidebarOpen)
@@ -49,7 +50,11 @@ const Layout = ({ title, children }: Props) => {
                                         strokeLinejoin="round"></path>
                                 </svg>
                             </button>
-                            {getHeaderBreadCrumb}
+                            <div className="flex justify-between h-full">
+                                {getHeaderBreadCrumb}
+                                <CustomSelect/>
+                            </div>
+
                             <div className="flex flex-col mt-8">
                                 <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                                     <div

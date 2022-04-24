@@ -13,7 +13,7 @@ interface Props {
 const Notification = ({ IconColor, Description, IsOpen }: Props): JSX.Element => {
     return (
         <div className="gap-x-1 rounded-lg border-2 p-1 flex flex-row items-center text-extraSmall">
-            <Image src={`/asserts/${IconColor}warningicon.svg`} width="25" height="25" />
+            <Image alt="WarningIcon" src={`/asserts/${IconColor}warningicon.svg`} width="25" height="25" />
             <p>
                 {Description}
             </p>

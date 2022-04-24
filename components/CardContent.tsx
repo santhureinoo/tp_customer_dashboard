@@ -278,7 +278,7 @@ const Remarks = (): JSX.Element => {
 
 const EquipmentStatusCard = ({ Title, SubTitle, Value, Prefix, Postfix }: EquipmentStatusCardProps): JSX.Element => {
     return (
-        <div className="flex flex-col p-4 rounded-lg border-2 border-gray-200 justify-between h-[115px] 2xl:h-full min-w-[148.75px]">
+        <div className="flex flex-col p-4 rounded-lg border-2 border-custom-lightgray justify-between h-[115px] 2xl:h-full min-w-[148.75px]">
             <div className="text-left">
                 <h4 className="2xl:text-sm text-xs text-custom-darkblue">
                     {Title}
@@ -333,7 +333,7 @@ const LastAvailableTarif = (): JSX.Element => {
                 <span className="text-4xl font-bold font-lg">
                     $12,5
                 </span>
-                <span className="text-sm font-gray-200">cent / kwh</span>
+                <span className="text-sm font-custom-lightgray">cent / kwh</span>
             </div>
         </div>
     )
