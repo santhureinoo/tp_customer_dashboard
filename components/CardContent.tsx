@@ -10,34 +10,67 @@ import BenchMarkMeter from "./cardcomponents/BenchMarkMeter";
 import Notification from "./cardcomponents/Notification";
 import {
     Chart as ChartJS,
-    LinearScale,
-    CategoryScale,
+    ArcElement,
+    LineElement,
     BarElement,
     PointElement,
-    LineElement,
-    Legend,
-    Tooltip,
-    ScriptableContext,
+    BarController,
+    BubbleController,
+    DoughnutController,
+    LineController,
+    PieController,
+    PolarAreaController,
+    RadarController,
+    ScatterController,
+    CategoryScale,
+    LinearScale,
+    LogarithmicScale,
+    RadialLinearScale,
+    TimeScale,
+    TimeSeriesScale,
+    Decimation,
     Filler,
+    Legend,
+    Title,
+    Tooltip,
     SubTitle,
-    registerables 
+    ScriptableContext
 } from 'chart.js';
-import { Chart, Line  } from 'react-chartjs-2';
+import { Chart } from 'react-chartjs-2';
 import { ChartJSOrUndefined } from 'react-chartjs-2/dist/types';
 import CustomizedDropDown from './CustomizedDropDown';
 import { DropdownProps } from '../common/types';
 
+// ChartJS.register(...registerablesJS);
+
+
 ChartJS.register(
-    LinearScale,
-    CategoryScale,
+    ArcElement,
+    LineElement,
     BarElement,
     PointElement,
-    LineElement,
-    Legend,
-    Tooltip,
+    BarController,
+    BubbleController,
+    DoughnutController,
+    LineController,
+    PieController,
+    PolarAreaController,
+    RadarController,
+    ScatterController,
+    CategoryScale,
+    LinearScale,
+    LogarithmicScale,
+    RadialLinearScale,
+    TimeScale,
+    TimeSeriesScale,
+    Decimation,
     Filler,
-    ...registerables 
+    Legend,
+    Title,
+    Tooltip,
+    SubTitle
 );
+
 interface StatusCardProps {
     Title?: String, SubTitle?: String, className: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any,
 }
