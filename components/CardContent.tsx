@@ -20,8 +20,9 @@ import {
     ScriptableContext,
     Filler,
     SubTitle,
+    registerables 
 } from 'chart.js';
-import { Chart } from 'react-chartjs-2';
+import { Chart, Line  } from 'react-chartjs-2';
 import { ChartJSOrUndefined } from 'react-chartjs-2/dist/types';
 import CustomizedDropDown from './CustomizedDropDown';
 import { DropdownProps } from '../common/types';
@@ -35,6 +36,7 @@ ChartJS.register(
     Legend,
     Tooltip,
     Filler,
+    ...registerables 
 );
 interface StatusCardProps {
     Title?: String, SubTitle?: String, className: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any,
