@@ -1,5 +1,5 @@
 import React from "react";
-import { BenchMarkComparisonCard, EquipmentCard, ExpectedSavingsCard, FastFoodCard, LastAvailableTarifCard, RankAndOutletCard, RemarksCard, SavingMeterCard, SavingPerformanceCard, SustainPerformanceCard } from "./CardContent";
+import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, ExpectedSavingsCard, FastFoodCard, LastAvailableTarifCard, RankAndOutletCard, RemarksCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard } from "./CardContent";
 
 const Dashboard = (): JSX.Element => {
     return (
@@ -8,12 +8,12 @@ const Dashboard = (): JSX.Element => {
                 <div className="col-span-2">
                     <SavingMeterCard />
                 </div>
-                <div className="col-span-3">
+                <div className="col-span-4">
                     <SustainPerformanceCard />
                 </div>
-                <div>
+                {/* <div>
                     <FastFoodCard />
-                </div>
+                </div> */}
                 <div>
                     <BenchMarkComparisonCard />
                 </div>
@@ -21,7 +21,7 @@ const Dashboard = (): JSX.Element => {
                     <ExpectedSavingsCard />
                 </div>
                 <div className="col-span-4">
-                    <SavingPerformanceCard />
+                    <ChartCard elements={([<SavingPerformance key={'spCard'}/>, <EqptEnergyBaseline key={'eebCard'} />])} />
                 </div>
                 <div>
                     <RankAndOutletCard />

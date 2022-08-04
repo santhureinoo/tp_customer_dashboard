@@ -12,12 +12,12 @@ interface Props {
 
 const Notification = ({ IconColor, Description, IsOpen }: Props): JSX.Element => {
     return (
-        <div className="gap-x-1 rounded-lg border-2 p-1 flex flex-row items-center text-extraSmall">
-            <Image alt="WarningIcon" src={`/asserts/${IconColor}warningicon.svg`} width="25" height="25" />
-            <p>
+        <div className="gap-y-2 rounded-lg border-2 p-2 flex flex-col items-start text-sm">
+            <Image alt="WarningIcon" src={`/asserts/${IconColor}warningicon.svg`} width="50" height="50" />
+            <p className='font-bold'>
                 {Description}
             </p>
-            <span>{IsOpen ? 'Open' : 'Closed'}</span>
+            <span className='text-custom-darkblue  cursor-pointer'>{IsOpen ? 'Open' : 'Closed'}</span>
         </div>
 
     )

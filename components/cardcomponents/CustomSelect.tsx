@@ -17,7 +17,7 @@ const CustomSelect = (): JSX.Element => {
       ease-in-out
       m-0
       outline-none">
-                    <option selected>Tanglin Mall</option>
+                    <option defaultValue={'Tanglin Mall'}>Tanglin Mall</option>
                     <option value="1">One</option>
                     <option value="2">Two</option>
                     <option value="3">Three</option>

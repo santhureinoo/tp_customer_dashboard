@@ -8,17 +8,18 @@ interface Props {
 
 const SavingMeterDigits = ({ numberString, description }: Props): JSX.Element => {
     const numberStringElem = numberString.split('').map((char, index) => {
-        const bgColor = index !== numberString.length - 1 ? 'bg-custom-lightgray' : 'bg-sky-600 text-white';
-        return (<div key={uuidv4()} className={`p-2 rounded-lg text-4xl ${bgColor}`}>
+        const bgColor = index !== numberString.length - 1 ? 'bg-custom-dark' : 'bg-custom-darkblue text-white';
+        return (<div key={uuidv4()} className={`p-2 rounded-lg text-2xl ${bgColor}`}>
             {char}
         </div>);
     })
     return (
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col">
+            <span className="text-sm  text-custom-gray">{description}</span>
             <div className="flex gap-x-1 flex-row">
                 {numberStringElem}
             </div>
-            <span className="text-sm justify-self-end text-slate-200">{description}</span>
+
         </div>
     )
 }

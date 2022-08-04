@@ -23,3 +23,8 @@ export interface BenchMarkProps {
     MaxKWH: BenchMarkKWHProps;
     CurrentKHW: BenchMarkKWHProps;
 }
+
+export interface DropdownProps {
+    display: any;
+    value: string;
+}
