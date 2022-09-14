@@ -13,24 +13,6 @@ interface Props {
 
 const Layout = ({ title, children }: Props) => {
     const [sidebarOpen, setSidebarOpen] = React.useState(true);
-
-    const getHeaderBreadCrumb = React.useMemo(() => {
-        return (<h3 className="text-gray-700 text-3xl font-bold">
-            <div className="flex items-center">
-                {
-                    title && title.map((titleStr, ind) => {
-                        return (
-                            <React.Fragment key={uuidv4()} >
-                                <span className="text-custom-gray">{titleStr}</span>
-                                {ind !== (title.length - 1) && (<FontAwesomeIcon className="px-2 text-custom-gray text-sm" icon={faAngleRight} />)}
-                            </React.Fragment>
-                        )
-                    })
-                }
-            </div>
-
-        </h3>)
-    }, [title]);
     return (
         <React.Fragment>
             <Head>
@@ -50,19 +32,7 @@ const Layout = ({ title, children }: Props) => {
                                         strokeLinejoin="round"></path>
                                 </svg>
                             </button>
-                            <div className="flex justify-between h-full">
-                                {getHeaderBreadCrumb}
-                                <CustomSelect/>
-                            </div>
-
-                            <div className="flex flex-col mt-8">
-                                <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                                    <div
-                                        className="align-middle inline-block min-w-full sm:rounded-lg">
-                                        {children}
-                                    </div>
-                                </div>
-                            </div>
+                            {children}
                         </div>
                     </div>
                 </div>

@@ -39,7 +39,9 @@ import {
 import { Chart } from 'react-chartjs-2';
 import { ChartJSOrUndefined } from 'react-chartjs-2/dist/types';
 import CustomizedDropDown from './CustomizedDropDown';
-import { DropdownProps } from '../common/types';
+import { DropdownProps, first_intermediary_table, outlet, results, secondary_intermediary_table } from '../common/types';
+import { gql, useLazyQuery, useQuery } from '@apollo/client';
+import moment from 'moment';
 
 // ChartJS.register(...registerablesJS);
 
@@ -177,14 +179,68 @@ const FastFood = (): JSX.Element => {
     )
 }
 
-const BenchMarkComparison = (): JSX.Element => {
+const BenchMarkComparison = ({ outlet_id }: any): JSX.Element => {
+    const [selectedResult, setSelectedResult] = React.useState<results[]>([]);
+    const [totalKWHs, setTotalKWHs] = React.useState({
+        MinKWH : 0,
+        MaxKWH : 0,
+        CurrentKHW : 0,
+    });
+    const currentMoment = moment();
+    const getResultsQuery = gql`
+    query FindManyResults($where: ResultsWhereInput) {
+        findManyResults(where: $where) {
+          outlet_id
+          outlet_date
+          acmv_25percent_benchmark_comparison_kWh
+          acmv_10percent_benchmark_comparison_kWh
+        }
+      }
+    `;
+    const getResultsVariable = {
+        "variables": {
+            "where": {
+                "outlet_id": {
+                    "equals": outlet_id
+                }
+            }
+        }
+    };
+    const getResultsResult = useQuery(getResultsQuery,getResultsVariable);
+
+    React.useEffect(()=>{
+        if(getResultsResult.data && getResultsResult.data.findManyResults) {
+            const currData = getResultsResult.data.findManyResults as results[];
+            setSelectedResult(currData);
+            const currentTotalKWHs = currData.map(dat=>{
+                return {
+                    MinKWH : parseInt(dat.acmv_10percent_benchmark_comparison_kWh || "") ,
+                    MaxKWH : parseInt(dat.acmv_25percent_benchmark_comparison_kWh || ""),
+                    CurrentKHW : parseInt(dat.acmv_measured_savings_kWh || ""),
+                }
+            }).reduce((prev, curr) => {
+               return {
+                MinKWH : prev.MinKWH +curr.MaxKWH,
+                MaxKWH : prev.MaxKWH + curr.MaxKWH,
+                CurrentKHW : prev.CurrentKHW + curr.CurrentKHW,
+               }
+            }, {
+                MinKWH : 0,
+                MaxKWH : 0,
+                CurrentKHW : 0,  
+            });
+
+            setTotalKWHs(currentTotalKWHs);
+        }
+    },[getResultsResult.data]);
+
     return (
         <div className="flex flex-col gap-4 h-full">
             <CardHeader Titles={['Benchmark', 'Comparison']} SubTitle={"(Last Month)"} />
             <div className="h-full">
-                <BenchMarkMeter MinKWH={{ Percentage: '10', ActualKHW: 728 }}
-                    MaxKWH={{ Percentage: '25', ActualKHW: 1689 }}
-                    CurrentKHW={{ Percentage: '17', ActualKHW: 1224 }} />
+                <BenchMarkMeter MinKWH={{ Percentage: '10', ActualKHW: totalKWHs.MinKWH }}
+                    MaxKWH={{ Percentage: '25', ActualKHW: totalKWHs.MaxKWH }}
+                    CurrentKHW={{ Percentage: '17', ActualKHW: totalKWHs.CurrentKHW }} />
             </div>
         </div>
     )
@@ -201,54 +257,273 @@ const ExpectedSavings = (): JSX.Element => {
     )
 }
 
+interface Props {
+    currentOutletID: string;
+}
 
-export const SavingPerformance = (): JSX.Element => {
-    const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
+    const [firstIntermediaryData, setFirstIntermediaryData] = React.useState<first_intermediary_table[]>([]);
+    const [selectedSavingPerformanceIndex, setSelectedSavingPerformanceIndex] = React.useState(0);
+    const [selectedTab, setSelectedTab] = React.useState<'kwh' | 'saving'>('kwh');
+    const getFirstIntermediaryQuery = gql`
+    query First_intermediary_tables($where: First_intermediary_tableWhereInput) {
+        first_intermediary_tables(where: $where) {
+          outlet_id
+          outlet_month_year
+          day_of_month
+          ke_baseline_kW
+          ke_without_TP_kWh
+          ke_with_TP_kWh
+          ke_savings_kWh
+          ke_savings_expenses
+          ac_baseline_kWh
+          ac_without_TP_kWh
+          ac_with_TP_kWh
+          ac_savings_kWh
+          ac_savings_expenses
+          all_eqpt_without_TP_kWh
+          all_eqpt_with_TP_kWh
+          total_savings_kWh
+          total_savings_expenses
+          ke_ops_hours
+          ac_op_hours
+        }
+      }
+    `;
+
+    const getFirstIntermediaryResult = useLazyQuery(getFirstIntermediaryQuery);
+
+    const getLastSevenDays = (currentMoment: moment.Moment): moment.Moment[] => {
+        const momentDaysArray: moment.Moment[] = [];
+        momentDaysArray.push(currentMoment);
+        for (var i = 1; i < 7; i++) {
+            momentDaysArray.push(currentMoment.clone().subtract(i, 'day'));
+        }
+        return momentDaysArray;
+    }
+
+    const getFirstIntermediaryVariable = React.useMemo(() => {
+        let variable = {};
+        const currentMoment = moment();
+        if (currentOutletID) {
+            switch (selectedSavingPerformanceIndex) {
+                case 0: variable = {
+                    "variables": {
+                        "where": {
+                            "AND": [
+                                {
+                                    "outlet_month_year": {
+                                        "in": [currentMoment.clone().subtract(1, 'months').format("MMMM YYYY"), currentMoment.clone().subtract(2, 'months').format("MMMM YYYY"), currentMoment.format("MMMM YYYY")]
+                                    },
+                                    "outlet_id": {
+                                        "equals": parseInt(currentOutletID)
+                                    }
+                                }
+                            ],
+
+                        }
+                    }
+                }; break;
+                case 1: variable = {
+                    "variables": {
+                        "where": {
+                            "AND": [
+                                {
+                                    "outlet_month_year": {
+                                        "equals": currentMoment.format("MMMM YYYY")
+                                    },
+                                    "outlet_id": {
+                                        "equals": parseInt(currentOutletID)
+                                    }
+                                }
+                            ],
+
+                        }
+                    }
+                }; break;
+                default: variable = {
+                    "variables": {
+                        "where": {
+                            "AND": [
+                                {
+                                    "OR": getLastSevenDays(currentMoment).map(mom => {
+                                        return {
+                                            "outlet_month_year": {
+                                                "equals": mom.format("MMMM YYYY")
+                                            },
+                                            "day_of_month": {
+                                                "equals": mom.format("DD")
+                                            }
+                                        }
+                                    }),
+                                    "outlet_id": {
+                                        "equals": parseInt(currentOutletID)
+                                    }
+                                }
+                            ]
+
+                        }
+                    }
+                }; break;
+            }
+        }
+
+        return variable;
+    }, [currentOutletID, selectedSavingPerformanceIndex]);
+
+    React.useEffect(() => {
+        if (currentOutletID) {
+            // const getFirstIntermediaryVariable = {
+            //     "variables": {
+            //         "where": {
+            //             "AND": [
+            //                 {
+            //                     "outlet_id": {
+            //                         "equals": parseInt(currentOutletID)
+            //                     }
+            //                 }
+            //             ],
+
+            //         }
+            //     }
+            // }
+            getFirstIntermediaryResult[0](getFirstIntermediaryVariable).then(result => {
+                if (result.data && result.data.first_intermediary_tables) {
+                    setFirstIntermediaryData(result.data.first_intermediary_tables);
+                }
+            });
+        } else {
+            setFirstIntermediaryData([]);
+        }
+
+    }, [currentOutletID, selectedSavingPerformanceIndex]);
+
+    const getChartData = React.useMemo(() => {
+        if (selectedTab === 'kwh') {
+            return [
+                {
+                    type: 'line' as const,
+                    label: 'Measured Savings',
+                    lineTension: 0,
+                    borderColor: 'rgb(255, 99, 132)',
+                    borderWidth: 2,
+                    fill: true,
+                    // backgroundColor: (context: ScriptableContext<"line">) => {
+                    //     const ctx = context.chart.ctx;
+                    //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                    //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
+                    //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
+                    //     return gradient;
+                    // },
+                    backgroundColor: 'transparent',
+                    data: firstIntermediaryData.map(data => parseInt(data.all_eqpt_without_TP_kWh || "0")),
+                },
+                {
+                    type: 'bar' as const,
+                    label: 'Without Tablepointer',
+                    backgroundColor: 'rgb(191 219 254)',
+                    data: firstIntermediaryData.map(data => parseInt(data.all_eqpt_without_TP_kWh || "0") - parseInt(data.all_eqpt_with_TP_kWh || "0")),
+                    barThickness: 25,
+                    order: 3,
+                },
+                {
+                    type: 'bar' as const,
+                    label: 'With Tablepointer',
+                    backgroundColor: 'rgb(96 165 250)',
+                    data: firstIntermediaryData.map(data => parseInt(data.all_eqpt_with_TP_kWh || "0")),
+                    barThickness: 25,
+                    order: 2,
+                }
+
+            ]
+        } else {
+            return [
+                {
+                    type: 'line' as const,
+                    label: 'KE Saving Expenses',
+                    lineTension: 0,
+                    borderColor: 'rgb(255, 99, 132)',
+                    borderWidth: 2,
+                    fill: true,
+                    // backgroundColor: (context: ScriptableContext<"line">) => {
+                    //     const ctx = context.chart.ctx;
+                    //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                    //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
+                    //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
+                    //     return gradient;
+                    // },
+                    backgroundColor: 'transparent',
+                    data: firstIntermediaryData.map(data => parseInt(data.ke_savings_expenses || "0")),
+                },
+                {
+                    type: 'line' as const,
+                    label: 'AC Saving Expenses',
+                    lineTension: 0,
+                    borderColor: 'rgb(255, 99, 132)',
+                    borderWidth: 2,
+                    fill: true,
+                    // backgroundColor: (context: ScriptableContext<"line">) => {
+                    //     const ctx = context.chart.ctx;
+                    //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                    //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
+                    //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
+                    //     return gradient;
+                    // },
+                    backgroundColor: 'transparent',
+                    data: firstIntermediaryData.map(data => parseInt(data.ac_savings_expenses || "0")),
+                },
+                {
+                    type: 'line' as const,
+                    label: 'Total Saving Expenses',
+                    lineTension: 0,
+                    borderColor: 'rgb(255, 99, 132)',
+                    borderWidth: 2,
+                    fill: true,
+                    // backgroundColor: (context: ScriptableContext<"line">) => {
+                    //     const ctx = context.chart.ctx;
+                    //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                    //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
+                    //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
+                    //     return gradient;
+                    // },
+                    backgroundColor: 'transparent',
+                    data: firstIntermediaryData.map(data => parseInt(data.total_savings_expenses || "0")),
+                }
+            ]
+        }
+    }, [selectedTab]);
+
+
     const data = () => {
         return (
             {
-                labels,
-                datasets: [
-                    {
-                        type: 'line' as const,
-                        label: 'Without Tablepointer',
-                        lineTension: 0,
-                        borderColor: 'rgb(255, 99, 132)',
-                        borderWidth: 2,
-                        fill: true,
-                        backgroundColor: (context: ScriptableContext<"line">) => {
-                            const ctx = context.chart.ctx;
-                            var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                            gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
-                            gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
-                            return gradient;
-                        },
-                        data: [510, 750, 748, 560, 1000, 560],
-                    },
-                    {
-                        type: 'bar' as const,
-                        label: 'With Tablepointer',
-                        backgroundColor: 'rgb(96 165 250)',
-                        data: [250, 250, 250, 250, 250, 250],
-                        barThickness: 25,
-                    },
-                    {
-                        type: 'bar' as const,
-                        label: 'Measured Savings',
-                        backgroundColor: 'rgb(191 219 254)',
-                        data: [260, 500, 498, 310, 750, 310],
-                        barThickness: 25,
-                    },
-                ],
+                labels: [...firstIntermediaryData.map(dat => dat.day_of_month + " " + dat.outlet_month_year),],
+                datasets: getChartData
             }
         )
     }
 
     const option = {
+
         plugins: {
             legend: {
                 position: 'bottom' as const,
-            }
+                onClick: function (event: any, elem: any) {
+                    console.log(elem.text);
+                },
+            }, tooltip: {
+                callbacks: {
+                    label: function (context: any) {
+                        console.log(context);
+                        console.log(context.dataset.label);
+                        if (context.dataset.label === "Without Tablepointer") {
+                            return firstIntermediaryData[context.dataIndex].all_eqpt_without_TP_kWh
+                        } else {
+                            return context.formattedValue;
+                        }
+                    }
+                }
+            },
         },
         elements: {
             bar: {
@@ -261,7 +536,7 @@ export const SavingPerformance = (): JSX.Element => {
                 stacked: true,
             },
             y: {
-                stacked: true
+                stacked: true,
             },
 
         }
@@ -271,14 +546,14 @@ export const SavingPerformance = (): JSX.Element => {
         <div className="flex flex-col gap-4">
             <div className="flex justify-between items-baseline">
                 <div className='flex flex-row gap-x-2 text-xs font-extrabold text-custom-gray'>
-                    <button className="bg-custom-lightblue text-custom-darkblue rounded-lg p-2">Last 3 Months</button>
-                    <button className="p-2">Last Month</button>
-                    <button className="p-2">Last Week</button>
+                    <button onClick={e => { setSelectedSavingPerformanceIndex(0) }} className={`${selectedSavingPerformanceIndex === 0 ? 'active-sp ' : ''}p-2`}>Last 3 Months</button>
+                    <button onClick={e => { setSelectedSavingPerformanceIndex(1) }} className={`${selectedSavingPerformanceIndex === 1 ? 'active-sp ' : ''}p-2`}>Last Month</button>
+                    <button onClick={e => { setSelectedSavingPerformanceIndex(2) }} className={`${selectedSavingPerformanceIndex === 2 ? 'active-sp ' : ''}p-2`}>Last Week</button>
                     <div className="grid grid-cols-2">
-                        <button className="bg-custom-lightblue text-custom-darkblue rounded-r-none rounded-lg px-2">
+                        <button onClick={(e) => { setSelectedTab('kwh'); }} className={selectedTab === 'kwh' ? "bg-custom-lightblue text-custom-darkblue rounded-r-none rounded-lg px-2" : "bg-gray-100 rounded-l-none rounded-lg px-2"}>
                             kWh
                         </button>
-                        <button className="bg-gray-100 rounded-l-none rounded-lg px-2">
+                        <button onClick={(e) => { setSelectedTab('saving'); }} className={selectedTab === 'saving' ? "bg-custom-lightblue text-custom-darkblue rounded-r-none rounded-lg px-2" : "bg-gray-100 rounded-l-none rounded-lg px-2"}>
                             $
                         </button>
                     </div>
@@ -302,8 +577,47 @@ export const SavingPerformance = (): JSX.Element => {
     )
 }
 
-export const EqptEnergyBaseline = (): JSX.Element => {
+export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
     const labels = ['0', '4.50', '9.00', '13.50', '18.00'];
+    const [secondaryIntermediary, setSecondIntermediary] = React.useState<secondary_intermediary_table[]>([]);
+    const getSecondIntermediaryQuery = gql`
+    query Secondary_intermediary_tables($where: Secondary_intermediary_tableWhereInput) {
+        secondary_intermediary_tables(where: $where) {
+          outlet_id
+          outlet_month_year
+          day_of_month
+          time
+          ke_without_TP_kWh
+          ke_baseline_kW
+          ac_without_TP_kWh
+          ac_baseline_kW
+          acmv_without_TP_kWh
+          acmv_baseline_kW
+        }
+      }`;
+
+
+    const getSecondIntermediaryResult = useLazyQuery(getSecondIntermediaryQuery);
+
+    React.useEffect(() => {
+        if (currentOutletID) {
+            const getSecondIntermediaryVariable = {
+                "variables": {
+                    "where": {
+                        "outlet_id": {
+                            "equals": parseInt(currentOutletID)
+                        }
+                    }
+                }
+            }
+            getSecondIntermediaryResult[0](getSecondIntermediaryVariable).then(result => {
+                setSecondIntermediary(result.data.secondary_intermediary_tables);
+            })
+        } else {
+            setSecondIntermediary([]);
+        }
+    }, [currentOutletID])
+
     const data = () => {
         return (
             {
@@ -312,7 +626,7 @@ export const EqptEnergyBaseline = (): JSX.Element => {
                     {
                         type: 'line' as const,
                         label: 'Line Dataset',
-                        data: [900, 900, 900, 900, 900, 900],
+                        data: secondaryIntermediary.map(data => data.acmv_baseline_kW),
                         backgroundColor: 'rgb(0, 0, 255)',
                         borderColor: 'rgb(0, 0, 255)',
                         pointRadius: 0,
@@ -324,7 +638,7 @@ export const EqptEnergyBaseline = (): JSX.Element => {
                         borderColor: 'rgb(255, 0, 0)',
                         pointStyle: 'cross',
                         rotation: 45,
-                        data: [850, 1000, 748, 920, 980, 560]
+                        data: secondaryIntermediary.map(data => data.acmv_without_TP_kWh)
                     }
                 ],
             }
@@ -400,7 +714,7 @@ export const EqptEnergyBaseline = (): JSX.Element => {
     )
 }
 
-const CardSwitcher = (elements: Array<JSX.Element>): JSX.Element => {
+const CardSwitcher = ({ currentOutletID }: Props): JSX.Element => {
     const [selectedCard, setSelectedCard] = React.useState<DropdownProps>({
         display: <CardHeader Titles={['Savings Performace']} />,
         value: 'savingPerformance',
@@ -418,13 +732,12 @@ const CardSwitcher = (elements: Array<JSX.Element>): JSX.Element => {
     ]
 
     const selectedContent = React.useMemo(() => {
-        if (selectedCard.value === "savingPerformance") return <SavingPerformance />;
-        else return <EqptEnergyBaseline />
-    }, [selectedCard])
+        if (selectedCard.value === "savingPerformance") return <SavingPerformance currentOutletID={currentOutletID} />;
+        else return <EqptEnergyBaseline currentOutletID={currentOutletID} />
+    }, [selectedCard, currentOutletID])
 
     return (
         <div className="flex flex-col gap-4">
-
             <CustomizedDropDown
                 data={titleDropdowns}
                 selected={selectedCard}
@@ -441,7 +754,11 @@ const CardSwitcher = (elements: Array<JSX.Element>): JSX.Element => {
     )
 }
 
-const RankAndOutlet = (): JSX.Element => {
+interface rankAndOutletPros {
+    outlets: outlet[];
+}
+
+const RankAndOutlet = ({ outlets }: rankAndOutletPros): JSX.Element => {
     return (
         <div className="flex flex-col gap-y-4 justify-around h-full">
             <Jumbotron>
@@ -462,7 +779,7 @@ const RankAndOutlet = (): JSX.Element => {
                     <span className="font-bold">Outlets</span>
                     <div>
                         <span className="font-thin text-5xl">
-                            15
+                            {outlets.length}
                         </span>
                     </div>
                 </div>

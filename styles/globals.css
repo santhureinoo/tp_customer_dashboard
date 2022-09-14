@@ -24,6 +24,9 @@
     .edit-sub-container {
         @apply space-x-3 space-y-3 py-6;
     }
+    .active-sp {
+        @apply bg-custom-lightblue text-custom-darkblue rounded-lg
+    }
 }
 
 .dashed{

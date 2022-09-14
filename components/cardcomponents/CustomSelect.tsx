@@ -1,8 +1,14 @@
-const CustomSelect = (): JSX.Element => {
+import { DropdownProps } from "../../common/types";
+
+interface Props {
+    dropdownValue: DropdownProps[];
+    selectedValue: string;
+}
+const CustomSelect = ({ dropdownValue, selectedValue }: Props): JSX.Element => {
     return (
         <div className="flex justify-center items-baseline gap-x-2">
-                <label className="text-black text-custom-xs font-medium">Outlet</label>
-                <select className="form-select appearance-none
+            <label className="text-black text-custom-xs font-medium">Outlet</label>
+            <select className="form-select appearance-none
       block
       mb-3 min-w-[104.68px] h-full
       px-3
@@ -17,11 +23,14 @@ const CustomSelect = (): JSX.Element => {
       ease-in-out
       m-0
       outline-none">
-                    <option defaultValue={'Tanglin Mall'}>Tanglin Mall</option>
-                    <option value="1">One</option>
-                    <option value="2">Two</option>
-                    <option value="3">Three</option>
-                </select>
+                {
+                    dropdownValue.map(val => {
+                        return <option value={val.value} selected={selectedValue === val.value}>{val.display}</option>
+                    })
+                }
+
+
+            </select>
         </div>
     )
 }
