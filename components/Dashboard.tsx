@@ -57,8 +57,8 @@ const Dashboard = (): JSX.Element => {
             acmv_25percent_benchmark_comparison_expenses
             acmv_10percent_benchmark_comparison_kWh
             acmv_10percent_benchmark_comparison_expenses
-            ke_and_ac__25percent_benchmark_comparison_kWh
-            ke_and_ac__25percent_benchmark_comparison_expenses
+            ke_and_ac_25percent_benchmark_comparison_kWh
+            ke_and_ac_25percent_benchmark_comparison_expenses
             monday
             tuesday
             wednesday

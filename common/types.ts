@@ -457,8 +457,8 @@ export namespace resultsFields {
     export type acmv_25percent_benchmark_comparison_expenses = string | null;
     export type acmv_10percent_benchmark_comparison_kWh = string | null;
     export type acmv_10percent_benchmark_comparison_expenses = string | null;
-    export type ke_and_ac__25percent_benchmark_comparison_kWh = string | null;
-    export type ke_and_ac__25percent_benchmark_comparison_expenses = string | null;
+    export type ke_and_ac_25percent_benchmark_comparison_kWh = string | null;
+    export type ke_and_ac_25percent_benchmark_comparison_expenses = string | null;
     export type monday = string | null;
     export type tuesday = string | null;
     export type wednesday = string | null;
@@ -500,8 +500,8 @@ export interface results {
     acmv_25percent_benchmark_comparison_expenses: resultsFields.acmv_25percent_benchmark_comparison_expenses;
     acmv_10percent_benchmark_comparison_kWh: resultsFields.acmv_10percent_benchmark_comparison_kWh;
     acmv_10percent_benchmark_comparison_expenses: resultsFields.acmv_10percent_benchmark_comparison_expenses;
-    ke_and_ac__25percent_benchmark_comparison_kWh: resultsFields.ke_and_ac__25percent_benchmark_comparison_kWh;
-    ke_and_ac__25percent_benchmark_comparison_expenses: resultsFields.ke_and_ac__25percent_benchmark_comparison_expenses;
+    ke_and_ac_25percent_benchmark_comparison_kWh: resultsFields.ke_and_ac_25percent_benchmark_comparison_kWh;
+    ke_and_ac_25percent_benchmark_comparison_expenses: resultsFields.ke_and_ac_25percent_benchmark_comparison_expenses;
     monday: resultsFields.monday;
     tuesday: resultsFields.tuesday;
     wednesday: resultsFields.wednesday;
