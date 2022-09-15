@@ -11,7 +11,7 @@ config.autoAddCss = false
 function MyApp({ Component, pageProps, router }: AppProps) {
   return <ApolloProvider client={client}><Layout title={pageProps.title}>
     <Component {...pageProps} />
-    <Script src="./TW-ELEMENTS-PATH/dist/js/index.min.js"></Script>
+    {/* <Script src="./TW-ELEMENTS-PATH/dist/js/index.min.js"></Script> */}
   </Layout></ApolloProvider>
 
 }

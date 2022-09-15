@@ -8,7 +8,7 @@ const CustomSelect = ({ dropdownValue, selectedValue }: Props): JSX.Element => {
     return (
         <div className="flex justify-center items-baseline gap-x-2">
             <label className="text-black text-custom-xs font-medium">Outlet</label>
-            <select className="form-select appearance-none
+            <select value={selectedValue} onChange={() => { }} className="form-select appearance-none
       block
       mb-3 min-w-[104.68px] h-full
       px-3
@@ -24,8 +24,8 @@ const CustomSelect = ({ dropdownValue, selectedValue }: Props): JSX.Element => {
       m-0
       outline-none">
                 {
-                    dropdownValue.map(val => {
-                        return <option value={val.value} selected={selectedValue === val.value}>{val.display}</option>
+                    dropdownValue.map((val, index) => {
+                        return <option key={index} value={val.value}>{val.display}</option>
                     })
                 }
 
