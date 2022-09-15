@@ -408,13 +408,6 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                     borderColor: 'rgb(255, 99, 132)',
                     borderWidth: 2,
                     fill: true,
-                    // backgroundColor: (context: ScriptableContext<"line">) => {
-                    //     const ctx = context.chart.ctx;
-                    //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                    //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
-                    //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
-                    //     return gradient;
-                    // },
                     backgroundColor: 'transparent',
                     data: firstIntermediaryData.map(data => parseInt(data.all_eqpt_without_TP_kWh || "0")),
                 },
@@ -491,7 +484,7 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                 }
             ]
         }
-    }, [selectedTab]);
+    }, [selectedTab, firstIntermediaryData]);
 
 
     const data = () => {
