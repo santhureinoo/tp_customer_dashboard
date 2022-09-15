@@ -313,7 +313,7 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                             "AND": [
                                 {
                                     "outlet_month_year": {
-                                        "in": [currentMoment.clone().subtract(1, 'months').format("MMMM YYYY"), currentMoment.clone().subtract(2, 'months').format("MMMM YYYY"), currentMoment.format("MMMM YYYY")]
+                                        "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
                                     },
                                     "outlet_id": {
                                         "equals": parseInt(currentOutletID)
@@ -330,7 +330,7 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                             "AND": [
                                 {
                                     "outlet_month_year": {
-                                        "equals": currentMoment.format("MMMM YYYY")
+                                        "equals": currentMoment.format("MM/YYYY")
                                     },
                                     "outlet_id": {
                                         "equals": parseInt(currentOutletID)
@@ -349,7 +349,7 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                                     "OR": getLastSevenDays(currentMoment).map(mom => {
                                         return {
                                             "outlet_month_year": {
-                                                "equals": mom.format("MMMM YYYY")
+                                                "equals": mom.format("MM/YYYY")
                                             },
                                             "day_of_month": {
                                                 "equals": mom.format("DD")
