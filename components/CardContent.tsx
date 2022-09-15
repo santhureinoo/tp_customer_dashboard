@@ -42,6 +42,7 @@ import CustomizedDropDown from './CustomizedDropDown';
 import { DropdownProps, first_intermediary_table, outlet, results, secondary_intermediary_table } from '../common/types';
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
+import { cloneDeep } from '@apollo/client/utilities';
 
 // ChartJS.register(...registerablesJS);
 
@@ -182,9 +183,9 @@ const FastFood = (): JSX.Element => {
 const BenchMarkComparison = ({ outlet_id }: any): JSX.Element => {
     const [selectedResult, setSelectedResult] = React.useState<results[]>([]);
     const [totalKWHs, setTotalKWHs] = React.useState({
-        MinKWH : 0,
-        MaxKWH : 0,
-        CurrentKHW : 0,
+        MinKWH: 0,
+        MaxKWH: 0,
+        CurrentKHW: 0,
     });
     const currentMoment = moment();
     const getResultsQuery = gql`
@@ -206,33 +207,33 @@ const BenchMarkComparison = ({ outlet_id }: any): JSX.Element => {
             }
         }
     };
-    const getResultsResult = useQuery(getResultsQuery,getResultsVariable);
+    const getResultsResult = useQuery(getResultsQuery, getResultsVariable);
 
-    React.useEffect(()=>{
-        if(getResultsResult.data && getResultsResult.data.findManyResults) {
+    React.useEffect(() => {
+        if (getResultsResult.data && getResultsResult.data.findManyResults) {
             const currData = getResultsResult.data.findManyResults as results[];
             setSelectedResult(currData);
-            const currentTotalKWHs = currData.map(dat=>{
+            const currentTotalKWHs = currData.map(dat => {
                 return {
-                    MinKWH : parseInt(dat.acmv_10percent_benchmark_comparison_kWh || "") ,
-                    MaxKWH : parseInt(dat.acmv_25percent_benchmark_comparison_kWh || ""),
-                    CurrentKHW : parseInt(dat.acmv_measured_savings_kWh || ""),
+                    MinKWH: parseInt(dat.acmv_10percent_benchmark_comparison_kWh || ""),
+                    MaxKWH: parseInt(dat.acmv_25percent_benchmark_comparison_kWh || ""),
+                    CurrentKHW: parseInt(dat.acmv_measured_savings_kWh || ""),
                 }
             }).reduce((prev, curr) => {
-               return {
-                MinKWH : prev.MinKWH +curr.MaxKWH,
-                MaxKWH : prev.MaxKWH + curr.MaxKWH,
-                CurrentKHW : prev.CurrentKHW + curr.CurrentKHW,
-               }
+                return {
+                    MinKWH: prev.MinKWH + curr.MaxKWH,
+                    MaxKWH: prev.MaxKWH + curr.MaxKWH,
+                    CurrentKHW: prev.CurrentKHW + curr.CurrentKHW,
+                }
             }, {
-                MinKWH : 0,
-                MaxKWH : 0,
-                CurrentKHW : 0,  
+                MinKWH: 0,
+                MaxKWH: 0,
+                CurrentKHW: 0,
             });
 
             setTotalKWHs(currentTotalKWHs);
         }
-    },[getResultsResult.data]);
+    }, [getResultsResult.data]);
 
     return (
         <div className="flex flex-col gap-4 h-full">
@@ -373,23 +374,13 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
 
     React.useEffect(() => {
         if (currentOutletID) {
-            // const getFirstIntermediaryVariable = {
-            //     "variables": {
-            //         "where": {
-            //             "AND": [
-            //                 {
-            //                     "outlet_id": {
-            //                         "equals": parseInt(currentOutletID)
-            //                     }
-            //                 }
-            //             ],
-
-            //         }
-            //     }
-            // }
             getFirstIntermediaryResult[0](getFirstIntermediaryVariable).then(result => {
                 if (result.data && result.data.first_intermediary_tables) {
-                    setFirstIntermediaryData(result.data.first_intermediary_tables);
+                    const cloned_first_intermediary_tables = cloneDeep(result.data.first_intermediary_tables);
+                    const sortDat = cloned_first_intermediary_tables.sort(function (left: any, right: any) {
+                        return moment(left.day_of_month + "/" + left.outlet_month_year, "DD/MM/YYYY").diff(moment(right.day_of_month + "/" + right.outlet_month_year, "DD/MM/YYYY"));
+                    });
+                    setFirstIntermediaryData(sortDat);
                 }
             });
         } else {
@@ -455,13 +446,6 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                     borderColor: 'rgb(255, 99, 132)',
                     borderWidth: 2,
                     fill: true,
-                    // backgroundColor: (context: ScriptableContext<"line">) => {
-                    //     const ctx = context.chart.ctx;
-                    //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                    //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
-                    //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
-                    //     return gradient;
-                    // },
                     backgroundColor: 'transparent',
                     data: firstIntermediaryData.map(data => parseInt(data.ac_savings_expenses || "0")),
                 },
@@ -472,13 +456,6 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                     borderColor: 'rgb(255, 99, 132)',
                     borderWidth: 2,
                     fill: true,
-                    // backgroundColor: (context: ScriptableContext<"line">) => {
-                    //     const ctx = context.chart.ctx;
-                    //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                    //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
-                    //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
-                    //     return gradient;
-                    // },
                     backgroundColor: 'transparent',
                     data: firstIntermediaryData.map(data => parseInt(data.total_savings_expenses || "0")),
                 }
@@ -490,7 +467,7 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
     const data = () => {
         return (
             {
-                labels: [...firstIntermediaryData.map(dat => dat.day_of_month + " " + dat.outlet_month_year),],
+                labels: [...firstIntermediaryData.map(dat => dat.day_of_month + "/" + dat.outlet_month_year),],
                 datasets: getChartData
             }
         )
@@ -507,8 +484,6 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
             }, tooltip: {
                 callbacks: {
                     label: function (context: any) {
-                        console.log(context);
-                        console.log(context.dataset.label);
                         if (context.dataset.label === "Without Tablepointer") {
                             return firstIntermediaryData[context.dataIndex].all_eqpt_without_TP_kWh
                         } else {
@@ -571,8 +546,9 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
 }
 
 export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
-    const labels = ['0', '4.50', '9.00', '13.50', '18.00'];
+    const labels = ['0', '10.00', '20.00', '30.00', '40.00'];
     const [secondaryIntermediary, setSecondIntermediary] = React.useState<secondary_intermediary_table[]>([]);
+    const [selectedEqptEnergyIndex, setSelectedEqptEnergyIndex] = React.useState(1);
     const getSecondIntermediaryQuery = gql`
     query Secondary_intermediary_tables($where: Secondary_intermediary_tableWhereInput) {
         secondary_intermediary_tables(where: $where) {
@@ -604,6 +580,10 @@ export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
                 }
             }
             getSecondIntermediaryResult[0](getSecondIntermediaryVariable).then(result => {
+                const cloned_second_intermediary_tables = cloneDeep(result.data.secondary_intermediary_tables);
+                const sortDat = cloned_second_intermediary_tables.sort(function (left: any, right: any) {
+                    return moment(left.day_of_month + "/" + left.outlet_month_year, "DD/MM/YYYY").diff(moment(right.day_of_month + "/" + right.outlet_month_year, "DD/MM/YYYY"));
+                });
                 setSecondIntermediary(result.data.secondary_intermediary_tables);
             })
         } else {
@@ -683,8 +663,8 @@ export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
         <div className="flex flex-col gap-4">
             <div className="flex justify-between items-baseline">
                 <div className='flex flex-row gap-x-2 text-xs font-extrabold text-custom-gray'>
-                    <button className="bg-custom-lightblue text-custom-darkblue rounded-lg p-2">Last 3 Months</button>
-                    <button className="p-2">Last Month</button>
+                    <button onClick={e => { setSelectedEqptEnergyIndex(1) }} className={selectedEqptEnergyIndex === 1 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last 3 Months</button>
+                    <button onClick={e => { setSelectedEqptEnergyIndex(2) }} className={selectedEqptEnergyIndex === 2 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last Month</button>
                 </div>
                 <div className='flex flex-row gap-x-2 text-xs'>
                     <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
@@ -831,21 +811,61 @@ const StatusCard = ({ Title, SubTitle, Value, Prefix, Postfix, className, RightS
     )
 }
 
-const Equipment = (): JSX.Element => {
+interface EqptProps {
+    outlet?: outlet;
+}
+
+const Equipment = ({ outlet }: EqptProps): JSX.Element => {
+    const [selectedType, setSelectedType] = React.useState("ke");
+    const renderedData = React.useMemo(() => {
+        const renderedData = {
+            quantity: 0,
+            baseline: 0,
+            energySaved: 0,
+            costSaved: 0,
+        }
+        if (selectedType === 'ke') {
+
+            if (outlet) {
+                if (outlet.outlet_device_ex_fa_input) {
+                    renderedData.quantity = outlet.outlet_device_ex_fa_input.length;
+                }
+                if (outlet.results && outlet.results.length > 0) {
+                    renderedData.baseline = parseInt(outlet.results[0].ke_measured_savings_kWh || "");
+                    renderedData.energySaved = parseInt(outlet.results[0].ke_eqpt_energy_baseline_avg_hourly_kW || "");
+                    renderedData.costSaved = parseInt(outlet.results[0].outlet_measured_savings_expenses || "")
+                }
+            }
+
+        } else {
+            if (outlet) {
+                if (outlet.outlet_device_ac_input) {
+                    renderedData.quantity = outlet.outlet_device_ac_input.length;
+                }
+                if (outlet.results && outlet.results.length > 0) {
+                    renderedData.baseline = parseInt(outlet.results[0].ac_measured_savings_kWh || "");
+                    renderedData.energySaved = parseInt(outlet.results[0].ac_eqpt_energy_baseline_avg_hourly_kW || "");
+                    renderedData.costSaved = parseInt(outlet.results[0].outlet_measured_savings_expenses || "")
+                }
+            }
+        }
+        return renderedData;
+    }, [selectedType, outlet]);
+
     return (
         <div className="flex flex-col gap-4 h-full">
             <div className="flex justify-between items-baseline">
                 <CardHeader Titles={['Equipment']} />
-                <select className={`outline-none px-2 py-1 border-2 rounded-lg text-sm h-11`}>
-                    <option>Kitchen Exhaust</option>
-                    <option>Kitchen Exhaust</option>
+                <select value={selectedType} onChange={((event) => { setSelectedType(event.currentTarget.value) })} className={`outline-none px-2 py-1 border-2 rounded-lg text-sm h-11`}>
+                    <option value="ke">Kitchen Exhaust</option>
+                    <option value="ac">Air Con</option>
                 </select>
             </div>
             <div className="2xl:grid 2xl:grid-cols-4 grid grid-cols-2 gap-x-2">
-                <StatusCard Title={'Quantity'} className='bg-custom-blue-card text-custom-blue-card-font' Value={"1"} />
-                <StatusCard Title={'Baseline'} className='bg-custom-red-card text-custom-red-card-font' SubTitle={'As of 14/01/2022'} Value={"14,9"} Postfix={'kW'} />
-                <StatusCard Title={'Energy Saved'} className='bg-custom-green-card text-custom-green-card-font' Value={"305"} Postfix={'kWh'} />
-                <StatusCard Title={'Cost Saved'} className='bg-custom-orange-card text-custom-orange-card-font' Value={"159"} Prefix={'$'} />
+                <StatusCard Title={'Quantity'} className='bg-custom-blue-card text-custom-blue-card-font' Value={renderedData.quantity} />
+                <StatusCard Title={'Baseline'} className='bg-custom-red-card text-custom-red-card-font' SubTitle={'As of 14/01/2022'} Value={renderedData.baseline} Postfix={'kW'} />
+                <StatusCard Title={'Energy Saved'} className='bg-custom-green-card text-custom-green-card-font' Value={renderedData.energySaved} Postfix={'kWh'} />
+                <StatusCard Title={'Cost Saved'} className='bg-custom-orange-card text-custom-orange-card-font' Value={renderedData.costSaved} Prefix={'$'} />
             </div>
         </div>
     )

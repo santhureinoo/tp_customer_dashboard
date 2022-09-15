@@ -1,7 +1,7 @@
 import { gql, useQuery } from "@apollo/client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
-import { customer, outlet } from "../common/types";
+import { customer, outlet, results } from "../common/types";
 import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, ExpectedSavingsCard, FastFoodCard, LastAvailableTarifCard, RankAndOutletCard, RemarksCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard } from "./CardContent";
 import ClientOnly from "./ClientOnly";
 import { v4 as uuidv4 } from 'uuid';
@@ -11,6 +11,7 @@ import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 const Dashboard = (): JSX.Element => {
     const [currentCustomerID, setCurrentCustomerID] = React.useState(1);
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
+    const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
     const [currentOutletID, setCurrentOutletID] = React.useState("");
     const [title, setTitle] = React.useState(["Outlet", "Tanglin Mall"]);
 
@@ -20,6 +21,53 @@ const Dashboard = (): JSX.Element => {
           outlet_id
           name
           customer_id
+          outlet_device_ac_input {
+            od_device_input_id
+          }
+          outlet_device_ex_fa_input {
+            od_device_input_id
+          }
+          results {
+            outlet_id
+            outlet_date
+            ke_measured_savings_kWh
+            ac_measured_savings_kWh
+            acmv_measured_savings_kWh
+            outlet_measured_savings_kWh
+            outlet_measured_savings_expenses
+            outlet_measured_savings_percent
+            co2_savings_kg
+            savings_tariff_expenses
+            tp_sales_expenses
+            ke_eqpt_energy_baseline_avg_hourly_kW
+            ac_eqpt_energy_baseline_avg_hourly_kW
+            acmv_eqpt_energy_baseline_avg_hourly_kW
+            ke_eqpt_energy_baseline_avg_hourly_as_date
+            ac_eqpt_energy_baseline_avg_hourly_as_date
+            acmv_eqpt_energy_baseline_avg_hourly_as_date
+            ke_eqpt_energy_usage_without_TP_month_kW
+            ac_eqpt_energy_usage_without_TP_month_kW
+            outlet_eqpt_energy_usage_without_TP_month_kW
+            outlet_eqpt_energy_usage_without_TP_month_expenses
+            ke_eqpt_energy_usage_with_TP_month_kW
+            ac_eqpt_energy_usage_with_TP_month_kW
+            outlet_eqpt_energy_usage_with_TP_month_kW
+            outlet_eqpt_energy_usage_with_TP_month_expenses
+            acmv_25percent_benchmark_comparison_kWh
+            acmv_25percent_benchmark_comparison_expenses
+            acmv_10percent_benchmark_comparison_kWh
+            acmv_10percent_benchmark_comparison_expenses
+            ke_and_ac__25percent_benchmark_comparison_kWh
+            ke_and_ac__25percent_benchmark_comparison_expenses
+            monday
+            tuesday
+            wednesday
+            thursday
+            friday
+            saturday
+            sunday
+            holiday
+          }
         }
       }`;
 
@@ -59,9 +107,9 @@ const Dashboard = (): JSX.Element => {
         if (outlets.length > 0) {
             setTitle(["Outlet", outlets[0].name]);
             if (currentOutletID === "") {
-                console.log(outlets[0].outlet_id.toString());
                 setCurrentOutletID(outlets[0].outlet_id.toString());
             }
+            setCurrentOutlet(outlets[0]);
         }
     }, [outlets])
 
@@ -118,7 +166,7 @@ const Dashboard = (): JSX.Element => {
                                     <RemarksCard />
                                 </div>
                                 <div className="col-span-3">
-                                    <EquipmentCard />
+                                    <EquipmentCard outlet={currentOutlet} />
                                 </div>
                                 <div>
                                     <LastAvailableTarifCard />

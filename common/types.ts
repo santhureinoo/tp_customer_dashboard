@@ -251,7 +251,9 @@ export interface outlet {
     outlet_type: outletFields.outlet_type;
     customer?: customer;
     outlet_month?: outlet_month[];
-
+    results? : results[];
+    outlet_device_ex_fa_input?: outlet_device_ex_fa_input[];
+    outlet_device_ac_input?: outlet_device_ac_input[];
 }
 
 export namespace outlet_device_ac_inputFields {
