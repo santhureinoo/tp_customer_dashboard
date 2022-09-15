@@ -181,12 +181,11 @@ const FastFood = (): JSX.Element => {
 }
 
 const BenchMarkComparison = ({ outlet_id }: any): JSX.Element => {
-    const [selectedResult, setSelectedResult] = React.useState<results[]>([]);
-    const [totalKWHs, setTotalKWHs] = React.useState({
-        MinKWH: 0,
-        MaxKWH: 0,
-        CurrentKHW: 0,
-    });
+    const [totalKWHs, setTotalKWHs] = React.useState<{
+        MinKWH: number,
+        MaxKWH: number,
+        CurrentKHW: number,
+    }>();
     const currentMoment = moment();
     const getResultsQuery = gql`
     query FindManyResults($where: ResultsWhereInput) {
@@ -195,6 +194,7 @@ const BenchMarkComparison = ({ outlet_id }: any): JSX.Element => {
           outlet_date
           acmv_25percent_benchmark_comparison_kWh
           acmv_10percent_benchmark_comparison_kWh
+          acmv_measured_savings_kWh
         }
       }
     `;
@@ -212,7 +212,7 @@ const BenchMarkComparison = ({ outlet_id }: any): JSX.Element => {
     React.useEffect(() => {
         if (getResultsResult.data && getResultsResult.data.findManyResults) {
             const currData = getResultsResult.data.findManyResults as results[];
-            setSelectedResult(currData);
+
             const currentTotalKWHs = currData.map(dat => {
                 return {
                     MinKWH: parseInt(dat.acmv_10percent_benchmark_comparison_kWh || ""),
@@ -230,18 +230,26 @@ const BenchMarkComparison = ({ outlet_id }: any): JSX.Element => {
                 MaxKWH: 0,
                 CurrentKHW: 0,
             });
-
             setTotalKWHs(currentTotalKWHs);
         }
     }, [getResultsResult.data]);
+
+    const getBMM = React.useMemo(() => {
+        if (totalKWHs) {
+            return <BenchMarkMeter MinKWH={{ Percentage: '10', ActualKHW: totalKWHs.MinKWH }}
+                MaxKWH={{ Percentage: '25', ActualKHW: totalKWHs.MaxKWH }}
+                CurrentKHW={{ Percentage: '17', ActualKHW: totalKWHs.CurrentKHW }} />
+        } else {
+            return <></>
+        }
+
+    }, [totalKWHs])
 
     return (
         <div className="flex flex-col gap-4 h-full">
             <CardHeader Titles={['Benchmark', 'Comparison']} SubTitle={"(Last Month)"} />
             <div className="h-full">
-                <BenchMarkMeter MinKWH={{ Percentage: '10', ActualKHW: totalKWHs.MinKWH }}
-                    MaxKWH={{ Percentage: '25', ActualKHW: totalKWHs.MaxKWH }}
-                    CurrentKHW={{ Percentage: '17', ActualKHW: totalKWHs.CurrentKHW }} />
+                {getBMM}
             </div>
         </div>
     )
@@ -546,7 +554,7 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
 }
 
 export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
-    const labels = ['0', '10.00', '20.00', '30.00', '40.00'];
+    // const labels = ['10', '10.5', '11', '11.5', '12', '12.5', '13', '13.5', '14','14.5','15','15.5','16','16.5','17','17.5','18','18.5','19','19.5','20','20.5','21','21.5','22'];
     const [secondaryIntermediary, setSecondIntermediary] = React.useState<secondary_intermediary_table[]>([]);
     const [selectedEqptEnergyIndex, setSelectedEqptEnergyIndex] = React.useState(1);
     const getSecondIntermediaryQuery = gql`
@@ -584,12 +592,27 @@ export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
                 const sortDat = cloned_second_intermediary_tables.sort(function (left: any, right: any) {
                     return moment(left.day_of_month + "/" + left.outlet_month_year, "DD/MM/YYYY").diff(moment(right.day_of_month + "/" + right.outlet_month_year, "DD/MM/YYYY"));
                 });
-                setSecondIntermediary(result.data.secondary_intermediary_tables);
+                setSecondIntermediary(sortDat);
             })
         } else {
             setSecondIntermediary([]);
         }
     }, [currentOutletID])
+
+    const labels = React.useMemo(() => {
+        return secondaryIntermediary.map(data => {
+            if (data.time) {
+                const splitParts = data.time.split(':');
+                if (splitParts[1] === '30') {
+                    return splitParts[0] + ".5";
+                } else {
+                    return splitParts[0];
+                }
+            }
+            return 0;
+
+        });
+    }, [secondaryIntermediary])
 
     const data = () => {
         return (
