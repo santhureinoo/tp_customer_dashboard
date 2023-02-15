@@ -78,24 +78,24 @@ interface StatusCardProps {
     Title?: String, SubTitle?: String, className: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any,
 }
 
-const SavingMeter = (): JSX.Element => {
+const SavingMeter = ({ date, outletId }: any): JSX.Element => {
 
-    const date = () => {
+    const dateComp = () => {
         return (<div className="flex flex-row self-end">
-            <span className="text-custom-gray text-sm"> Live as of  <span className="text-sky-600"> 20-02-2022</span></span>
+            <span className="text-custom-gray text-sm"> Live as of  <span className="text-sky-600"> {date}</span></span>
 
         </div>)
     }
 
     return (
         <div className="grid grid-cols-3 gap-4 place-content-between h-full">
-            <CardHeader Titles={['Saving Meter']} SubTitle={date()} />
+            <CardHeader Titles={['Saving Meter']} SubTitle={dateComp()} />
             <div className="col-span-2 flex flex-row-reverse">
                 <SavingMeterDigits numberString="003225" description={"Kilo Watt Hour"} />
             </div>
 
             <div className="flex flex-col col-span-2">
-                <span className="text-left text-custom-gray">Outlet ID: 39505069</span>
+                <span className="text-left text-custom-gray">Outlet ID: {outletId}</span>
                 <Image alt="barcode not found" src="/barcode.png" width='500' height="100" />
             </div>
         </div>
@@ -180,59 +180,7 @@ const FastFood = (): JSX.Element => {
     )
 }
 
-const BenchMarkComparison = ({ outlet_id }: any): JSX.Element => {
-    const [totalKWHs, setTotalKWHs] = React.useState<{
-        MinKWH: number,
-        MaxKWH: number,
-        CurrentKHW: number,
-    }>();
-    const currentMoment = moment();
-    const getResultsQuery = gql`
-    query FindManyResults($where: ResultsWhereInput) {
-        findManyResults(where: $where) {
-          outlet_id
-          outlet_date
-          acmv_25percent_benchmark_comparison_kWh
-          acmv_10percent_benchmark_comparison_kWh
-          acmv_measured_savings_kWh
-        }
-      }
-    `;
-    const getResultsVariable = {
-        "variables": {
-            "where": {
-                "outlet_id": {
-                    "equals": outlet_id
-                }
-            }
-        }
-    };
-    const getResultsResult = useQuery(getResultsQuery, getResultsVariable);
-
-    React.useEffect(() => {
-        if (getResultsResult.data && getResultsResult.data.findManyResults) {
-            const currData = getResultsResult.data.findManyResults as results[];
-
-            const currentTotalKWHs = currData.map(dat => {
-                return {
-                    MinKWH: parseInt(dat.acmv_10percent_benchmark_comparison_kWh || ""),
-                    MaxKWH: parseInt(dat.acmv_25percent_benchmark_comparison_kWh || ""),
-                    CurrentKHW: parseInt(dat.acmv_measured_savings_kWh || ""),
-                }
-            }).reduce((prev, curr) => {
-                return {
-                    MinKWH: prev.MinKWH + curr.MaxKWH,
-                    MaxKWH: prev.MaxKWH + curr.MaxKWH,
-                    CurrentKHW: prev.CurrentKHW + curr.CurrentKHW,
-                }
-            }, {
-                MinKWH: 0,
-                MaxKWH: 0,
-                CurrentKHW: 0,
-            });
-            setTotalKWHs(currentTotalKWHs);
-        }
-    }, [getResultsResult.data]);
+const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
 
     const getBMM = React.useMemo(() => {
         if (totalKWHs) {
@@ -255,12 +203,12 @@ const BenchMarkComparison = ({ outlet_id }: any): JSX.Element => {
     )
 }
 
-const ExpectedSavings = (): JSX.Element => {
+const ExpectedSavings = ({ totalKWHs }: any): JSX.Element => {
     return (
         <div className="flex flex-col gap-4 h-full">
             <CardHeader Titles={['Expected Savings']} SubTitle={"(Current Month)"} />
             <div className="h-full">
-                <ProgressiveMeter MaxKWH={600} CurrentKHW={300} />
+                <ProgressiveMeter MaxKWH={totalKWHs.MaxKWH} CurrentKHW={totalKWHs.CurrentKHW} />
             </div>
         </div>
     )
@@ -487,7 +435,7 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
             legend: {
                 position: 'bottom' as const,
                 onClick: function (event: any, elem: any) {
-                    console.log(elem.text);
+                    // console.log(elem.text);
                 },
             }, tooltip: {
                 callbacks: {
@@ -894,12 +842,12 @@ const Equipment = ({ outlet }: EqptProps): JSX.Element => {
     )
 }
 
-const LastAvailableTarif = (): JSX.Element => {
+const LastAvailableTarif = ({ date }: any): JSX.Element => {
     return (
         <div className="flex flex-col gap-y-2">
             <div>
                 <CardHeader Titles={['Last Available Tariff']} />
-                <span className='text-custom-gray'>As of <span className="text-custom-darkblue">14/01/2022</span></span>
+                <span className='text-custom-gray'>As of <span className="text-custom-darkblue">{date}</span></span>
             </div>
             <StatusCard className='bg-custom-green-card text-custom-green-card-font' Value={"$12.5"} Postfix={"cent/kWh"} />
         </div>
