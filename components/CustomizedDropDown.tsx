@@ -64,7 +64,6 @@ const CustomizedDropDown = ({ data, name, selected,hideBorder = false, extraIcon
                     {data && data.map((dat, ind) => {
                         return (
                             <li key={'cd-'+ind} onClick={(e: any) => {
-                                console.log(dat);
                                 setSelected(dat);
                                 setOpenOutletList(!openOutletList);
                             }}>

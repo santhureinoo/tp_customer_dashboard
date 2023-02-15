@@ -3,12 +3,13 @@ import { DropdownProps } from "../../common/types";
 interface Props {
     dropdownValue: DropdownProps[];
     selectedValue: string;
+    setSelectedValue: (val: string) => void;
 }
-const CustomSelect = ({ dropdownValue, selectedValue }: Props): JSX.Element => {
+const CustomSelect = ({ dropdownValue, selectedValue, setSelectedValue }: Props): JSX.Element => {
     return (
         <div className="flex justify-center items-baseline gap-x-2">
             <label className="text-black text-custom-xs font-medium">Outlet</label>
-            <select value={selectedValue} onChange={() => { }} className="form-select appearance-none
+            <select value={selectedValue} onChange={(event) => { setSelectedValue(event.target.value) }} className="form-select appearance-none
       block
       mb-3 min-w-[104.68px] h-full
       px-3

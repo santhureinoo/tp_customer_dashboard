@@ -1,6 +1,7 @@
 import { gql, useQuery } from "@apollo/client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
+import moment from 'moment';
 import { customer, outlet, results } from "../common/types";
 import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, ExpectedSavingsCard, FastFoodCard, LastAvailableTarifCard, RankAndOutletCard, RemarksCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard } from "./CardContent";
 import ClientOnly from "./ClientOnly";
@@ -13,11 +14,21 @@ const Dashboard = (): JSX.Element => {
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
     const [currentOutletID, setCurrentOutletID] = React.useState("");
-    const [title, setTitle] = React.useState(["Outlet", "Tanglin Mall"]);
+    const [title, setTitle] = React.useState(["Outlet", ""]);
+    const [totalKWHs, setTotalKWHs] = React.useState<{
+        MinKWH: number,
+        MaxKWH: number,
+        CurrentKHW: number,
+    }>({
+        MinKWH: 0,
+        MaxKWH: 0,
+        CurrentKHW: 0,
+    });
+    const currentMoment = moment();
 
     const getOutletsByIdQuery = gql`
-    query _count($where: OutletWhereInput) {
-        outlets(where: $where) {
+    query _count {
+        outlets {
           outlet_id
           name
           customer_id
@@ -80,8 +91,53 @@ const Dashboard = (): JSX.Element => {
             }
         }
     }
+    const getResultsQuery = gql`
+    query FindManyResults($where: ResultsWhereInput) {
+        findManyResults(where: $where) {
+          outlet_id
+          outlet_date
+          acmv_25percent_benchmark_comparison_kWh
+          acmv_10percent_benchmark_comparison_kWh
+          acmv_measured_savings_kWh
+        }
+      }
+    `;
+    const getResultsVariable = {
+        "variables": {
+            "where": {
+                "outlet_id": {
+                    "equals": Number(currentOutletID)
+                }
+            }
+        }
+    };
+    const getResultsResult = useQuery(getResultsQuery, getResultsVariable);
 
-    const getOutletsByIdResult = useQuery(getOutletsByIdQuery, getOutletsByIdVariable);
+    React.useEffect(() => {
+        if (getResultsResult.data && getResultsResult.data.findManyResults) {
+            const currData = getResultsResult.data.findManyResults as results[];
+            const currentTotalKWHs = currData.map(dat => {
+                return {
+                    MinKWH: parseInt(dat.acmv_10percent_benchmark_comparison_kWh || "0"),
+                    MaxKWH: parseInt(dat.acmv_25percent_benchmark_comparison_kWh || "0"),
+                    CurrentKHW: parseInt(dat.acmv_measured_savings_kWh || "0"),
+                }
+            }).reduce((prev, curr) => {
+                return {
+                    MinKWH: prev.MinKWH + curr.MinKWH,
+                    MaxKWH: prev.MaxKWH + curr.MaxKWH,
+                    CurrentKHW: prev.CurrentKHW + curr.CurrentKHW,
+                }
+            }, {
+                MinKWH: 0,
+                MaxKWH: 0,
+                CurrentKHW: 0,
+            });
+            setTotalKWHs(currentTotalKWHs);
+        }
+    }, [getResultsResult.data]);
+
+    const getOutletsByIdResult = useQuery(getOutletsByIdQuery);
 
     React.useEffect(() => {
         if (getOutletsByIdResult.data && getOutletsByIdResult.data.outlets) {
@@ -113,6 +169,14 @@ const Dashboard = (): JSX.Element => {
         }
     }, [outlets])
 
+    const getLastResultDate = React.useMemo(() => {
+        if (currentOutlet && currentOutlet.results && currentOutlet.results.length > 0) {
+            return currentOutlet.results[currentOutlet.results.length - 1].outlet_date;
+        } else {
+            return "";
+        }
+    }, [currentOutlet])
+
     const getHeaderBreadCrumb = React.useMemo(() => {
         return (<h3 className="text-gray-700 text-3xl font-bold">
             <div className="flex items-center">
@@ -135,7 +199,12 @@ const Dashboard = (): JSX.Element => {
         <React.Fragment>
             <div className="flex justify-between h-full">
                 {getHeaderBreadCrumb}
-                <CustomSelect selectedValue={currentOutletID} dropdownValue={outlets.map(out => { return { value: out.outlet_id.toString(), display: out.name } })} />
+                <CustomSelect setSelectedValue={(val) => {
+                    setCurrentOutletID(val);
+                    const curOut = outlets.find(out => out.outlet_id === Number(val));
+                    setCurrentOutlet(curOut);
+                    setTitle(["Outlet", curOut?.name || '']);
+                }} selectedValue={currentOutletID} dropdownValue={outlets.map(out => { return { value: out.outlet_id.toString(), display: out.name } })} />
             </div>
 
             <div className="flex flex-col mt-8">
@@ -145,16 +214,16 @@ const Dashboard = (): JSX.Element => {
                         <ClientOnly>
                             <div className="grid grid-cols-6 gap-2">
                                 <div className="col-span-2">
-                                    <SavingMeterCard />
+                                    <SavingMeterCard date={getLastResultDate} outletId={currentOutlet?.outlet_id} />
                                 </div>
                                 <div className="col-span-4">
                                     <SustainPerformanceCard />
                                 </div>
                                 <div>
-                                    <BenchMarkComparisonCard />
+                                    <BenchMarkComparisonCard totalKWHs={totalKWHs} />
                                 </div>
                                 <div>
-                                    <ExpectedSavingsCard />
+                                    <ExpectedSavingsCard totalKWHs={totalKWHs} />
                                 </div>
                                 <div className="col-span-4">
                                     <ChartCard currentOutletID={currentOutletID} />
@@ -169,7 +238,7 @@ const Dashboard = (): JSX.Element => {
                                     <EquipmentCard outlet={currentOutlet} />
                                 </div>
                                 <div>
-                                    <LastAvailableTarifCard />
+                                    <LastAvailableTarifCard date={getLastResultDate} />
                                 </div>
                             </div>
                         </ClientOnly>
