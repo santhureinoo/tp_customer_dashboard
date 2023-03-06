@@ -75,7 +75,7 @@ ChartJS.register(
 );
 
 interface StatusCardProps {
-    Title?: String, SubTitle?: String, className: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any,
+    Title?: String, SubTitle?: String, className: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any, PostfixDirection?: 'horizontal' | 'vertical'
 }
 
 const SavingMeter = ({ date, outletId }: any): JSX.Element => {
@@ -125,10 +125,12 @@ const SustainPerformance = (): JSX.Element => {
             <div className="flex justify-between items-baseline">
                 <CardHeader Titles={['Sustainability Performance']} SubTitle={'Accummulative'} />
             </div>
-            <div className="2xl:grid 2xl:grid-cols-3 grid grid-cols-2 gap-2">
-                <StatusCard Title={'CO2 Saved'} className='bg-custom-blue-card text-custom-blue-card-font' Value={"0.64"} Postfix={'kg'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
-                <StatusCard Title={'Your Savings is equal to planting'} className='bg-custom-green-card text-custom-green-card-font' Value={"5"} Postfix={'trees'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
-                <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} />
+            <div className="2xl:grid 2xl:grid-cols-4 grid grid-cols-2 gap-2">
+                <StatusCard Title={'Energy Savings/Year'} className='bg-custom-gray-card text-custom-gray-card-font' Value={"100.590"} Postfix={'SGD'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
+                <StatusCard Title={'CO2 Saved/Year'} className='bg-custom-blue-card text-custom-blue-card-font' Value={"225,7"} Postfix={'kg/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
+                <StatusCard Title={'Planted Tree/Year'} className='bg-custom-green-card text-custom-green-card-font' Value={"3.370"} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
+                <StatusCard Title={'Meals to be sold/Year'} className='bg-custom-orange-card text-custom-orange-card-font' Value={"201.800"} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
+                {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
             </div>
         </div>
@@ -750,7 +752,7 @@ const Remarks = (): JSX.Element => {
     )
 }
 
-const StatusCard = ({ Title, SubTitle, Value, Prefix, Postfix, className, RightSideValue }: StatusCardProps): JSX.Element => {
+const StatusCard = ({ Title, SubTitle, Value, Prefix, Postfix, className, RightSideValue, PostfixDirection = 'horizontal' }: StatusCardProps): JSX.Element => {
 
     return (
         <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray justify-between h-[115px] 2xl:h-full min-w-[148.75px] ${className}`}>
@@ -762,20 +764,44 @@ const StatusCard = ({ Title, SubTitle, Value, Prefix, Postfix, className, RightS
             </div>}
 
             <div className={`flex flex-row w-full gap-1 ${Title ? 'mt-4 justify-between' : 'p-6 justify-center'}`}>
-                <div>
-                    <span>
-                        {Prefix}
-                    </span>
-                    <span className="text-4xl font-medium">
-                        {Value}
-                    </span>
-                    <span className="self-end">
-                        {Postfix}
-                    </span>
-                </div>
-                <div>
-                    {RightSideValue}
-                </div>
+                {PostfixDirection === 'vertical' ?
+                    <React.Fragment>
+                        <div className='flex flex-col'>
+                            <div>
+                                <span className='text-sm'>
+                                    {Prefix}
+                                </span>
+                                <span className="text-4xl font-medium">
+                                    {Value}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="text-xs self-end">
+                                    {Postfix}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            {RightSideValue}
+                        </div>
+
+                    </React.Fragment>
+                    : <React.Fragment>
+                        <div>
+                            <span>
+                                {Prefix}
+                            </span>
+                            <span className="text-4xl font-medium">
+                                {Value}
+                            </span>
+                            <span className="self-end">
+                                {Postfix}
+                            </span>
+                        </div>
+                        <div>
+                            {RightSideValue}
+                        </div>
+                    </React.Fragment>}
 
             </div>
         </div>

@@ -29,6 +29,8 @@ module.exports = {
         'custom-green-card-font': '#1FBF5F',
         'custom-orange-card' : '#FFF1E5',
         'custom-orange-card-font': '#FF6F00',
+        'custom-gray-card' : '#F0F0F0',
+        'custom-gray-card-font': '#989AAC',
       },
     },
   },

@@ -32,19 +32,29 @@ const ProgressiveMeter = (props: Props): JSX.Element => {
             .attr('ry', 10)
             .attr('fill', 'rgb(229,231,235)')
             .attr('height', '100%')
-            .attr('width', 15)
+            .attr('width', 12)
             .attr('x', 0);
 
         bgRectGroup.append("foreignObject")
             .attr("width", '100%')
             .attr("height", '100%')
             .append("xhtml:div")
-            .html(`<div class="absolute h-full w-full justify-between text-gray-400">
+            .html(`<div class="absolute h-full w-full justify-between text-gray-400 text-sm">
             <div class="absolute top-0 right-0 w-full">
-                <span class="pl-6">. ${props.MaxKWH} kWh</span>
+                <div class="pl-4 flex flex-row items-center gap-x-2">
+                    <div class='w-8'>
+                        <img alt="->" src="/asserts/progressmeter_indicator.svg" />
+                    </div>
+                    <span>${props.MaxKWH} kWh</span>
+                </div>
             </div>
             <div class="absolute bottom-0 right-0 w-full">
-                <span class="pl-6"> . 0 kWh</span>
+                <div class="pl-4 flex flex-row items-center gap-x-2">
+                    <div class='w-8'>
+                        <img alt="->" src="/asserts/progressmeter_indicator.svg" />
+                    </div>
+                    <span> . 0 kWh</span>
+                </div>
             </div>
         </div>`);
 
@@ -54,7 +64,7 @@ const ProgressiveMeter = (props: Props): JSX.Element => {
             .attr('class', 'progress-rect')
             .attr('fill', 'rgb(96,165,250)')
             .attr('height', 0)
-            .attr('width', 15)
+            .attr('width', 12)
             .attr('rx', 10)
             .attr('ry', 10)
             .attr('y', orgHeight)
@@ -68,9 +78,14 @@ const ProgressiveMeter = (props: Props): JSX.Element => {
             .attr("height", yScale(props.CurrentKHW))
             .attr('y', orgHeight - yScale(props.CurrentKHW))
             .append("xhtml:div")
-            .html(`<div class="relative h-full w-full justify-between">
+            .html(`<div class="relative h-full w-full justify-between text-sm">
             <div class="absolute top-0 right-0 text-blue-400 w-full">
-                <span class="pl-6">. ${props.CurrentKHW} kWh</span>
+                <div class="pl-4 flex flex-row items-center gap-x-2">
+                    <div class='w-8'>
+                        <img alt="->" src="/asserts/progressmeter_indicator.svg"  width="500" height="600" />
+                    </div>
+                    <span>${props.CurrentKHW} kWh</span>
+                </div>
             </div>
         </div>`);
 

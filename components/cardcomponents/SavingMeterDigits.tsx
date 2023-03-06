@@ -8,8 +8,8 @@ interface Props {
 
 const SavingMeterDigits = ({ numberString, description }: Props): JSX.Element => {
     const numberStringElem = numberString.split('').map((char, index) => {
-        const bgColor = index !== numberString.length - 1 ? 'bg-custom-dark' : 'bg-custom-darkblue text-white';
-        return (<div key={uuidv4()} className={`p-2 rounded-lg text-2xl ${bgColor}`}>
+        const bgColor = index !== numberString.length - 1 ? 'bg-custom-lightgray' : 'bg-custom-darkblue text-white';
+        return (<div key={uuidv4()} className={`py-2 px-3 rounded-lg text-2xl ${bgColor}`}>
             {char}
         </div>);
     })

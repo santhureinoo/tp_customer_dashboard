@@ -9,10 +9,11 @@ import { ApolloProvider } from '@apollo/client';
 
 config.autoAddCss = false
 function MyApp({ Component, pageProps, router }: AppProps) {
-  return <ApolloProvider client={client}><Layout title={pageProps.title}>
+  return <ApolloProvider client={client}>
     <Component {...pageProps} />
-    {/* <Script src="./TW-ELEMENTS-PATH/dist/js/index.min.js"></Script> */}
-  </Layout></ApolloProvider>
+  </ApolloProvider >
+
+
 
 }
 

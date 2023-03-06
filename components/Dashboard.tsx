@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import CustomSelect from "./cardcomponents/CustomSelect";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 
-const Dashboard = (): JSX.Element => {
+const Dashboard = ({ groupId }: any): JSX.Element => {
     const [currentCustomerID, setCurrentCustomerID] = React.useState(1);
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
@@ -24,7 +24,6 @@ const Dashboard = (): JSX.Element => {
         MaxKWH: 0,
         CurrentKHW: 0,
     });
-    const currentMoment = moment();
 
     const getOutletsByIdQuery = gql`
     query _count {
@@ -178,13 +177,13 @@ const Dashboard = (): JSX.Element => {
     }, [currentOutlet])
 
     const getHeaderBreadCrumb = React.useMemo(() => {
-        return (<h3 className="text-gray-700 text-3xl font-bold">
+        return (<h3 className="text-gray-700 text-sm font-bold">
             <div className="flex items-center">
                 {
                     title && title.map((titleStr, ind) => {
                         return (
                             <React.Fragment key={uuidv4()} >
-                                <span className="text-custom-gray">{titleStr}</span>
+                                <span className={`${ind === 0 ? 'text-custom-darkblue' : 'text-custom-gray'}`}>{titleStr}</span>
                                 {ind !== (title.length - 1) && (<FontAwesomeIcon className="px-2 text-custom-gray text-sm" icon={faAngleRight} />)}
                             </React.Fragment>
                         )
