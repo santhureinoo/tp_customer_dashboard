@@ -1,10 +1,6 @@
 import Sidebar from "./Sidebar"
 import React from 'react';
 import Head from "next/head";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
-import { v4 as uuidv4 } from 'uuid';
-import CustomSelect from "./cardcomponents/CustomSelect";
 
 interface Props {
     title: string[];
