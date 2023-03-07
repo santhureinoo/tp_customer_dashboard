@@ -228,17 +228,17 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     <ChartCard currentOutletID={currentOutletID} />
                                 </div>
                                 <div>
-                                    <RankAndOutletCard outlets={outlets} />
+                                    {/* <RankAndOutletCard outlets={outlets} /> */}
                                 </div>
                                 <div>
-                                    <RemarksCard />
+                                    {/* <RemarksCard /> */}
                                 </div>
-                                <div className="col-span-3">
+                                <div className="col-span-6">
                                     <EquipmentCard outlet={currentOutlet} />
                                 </div>
-                                <div>
+                                {/* <div>
                                     <LastAvailableTarifCard date={getLastResultDate} />
-                                </div>
+                                </div> */}
                             </div>
                         </ClientOnly>
                     </div>

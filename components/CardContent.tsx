@@ -197,7 +197,7 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
 
     return (
         <div className="flex flex-col gap-4 h-full">
-            <CardHeader Titles={['Benchmark', 'Comparison']} SubTitle={"(Last Month)"} />
+            <CardHeader Titles={['Benchmark', 'Comparison']} SubTitle={"vs. Industry Peer"} />
             <div className="h-full">
                 {getBMM}
             </div>

@@ -35,19 +35,16 @@ const ProgressiveMeter = (props: Props): JSX.Element => {
             .attr('width', 12)
             .attr('x', 0);
 
+        let maxComp = `<div class="absolute top-0 right-0 w-full"><div class="pl-4 flex flex-row items-center gap-x-2"><div class="w-8"><img alt="->" src="/asserts/progressmeter_indicator.svg" /></div><span>${props.MaxKWH} kWh</span></div></div>`
+        if (props.MaxKWH < props.CurrentKHW) {
+            maxComp = '';
+        }
         bgRectGroup.append("foreignObject")
             .attr("width", '100%')
             .attr("height", '100%')
             .append("xhtml:div")
             .html(`<div class="absolute h-full w-full justify-between text-gray-400 text-sm">
-            <div class="absolute top-0 right-0 w-full">
-                <div class="pl-4 flex flex-row items-center gap-x-2">
-                    <div class='w-8'>
-                        <img alt="->" src="/asserts/progressmeter_indicator.svg" />
-                    </div>
-                    <span>${props.MaxKWH} kWh</span>
-                </div>
-            </div>
+            ${maxComp}
             <div class="absolute bottom-0 right-0 w-full">
                 <div class="pl-4 flex flex-row items-center gap-x-2">
                     <div class='w-8'>
@@ -60,6 +57,8 @@ const ProgressiveMeter = (props: Props): JSX.Element => {
 
         var progressRectGroup = svg.append('g');
 
+        // alert( yScale(props.CurrentKHW));
+
         progressRectGroup.append('rect')
             .attr('class', 'progress-rect')
             .attr('fill', 'rgb(96,165,250)')
@@ -70,13 +69,13 @@ const ProgressiveMeter = (props: Props): JSX.Element => {
             .attr('y', orgHeight)
             .transition()
             .duration(1000)
-            .attr('y', orgHeight - yScale(props.CurrentKHW))
-            .attr('height', yScale(props.CurrentKHW));
+            .attr('y', orgHeight - yScale(props.CurrentKHW > props.MaxKWH ? props.MaxKWH : props.CurrentKHW))
+            .attr('height', yScale(props.CurrentKHW > props.MaxKWH ? props.MaxKWH : props.CurrentKHW));
 
         progressRectGroup.append("foreignObject")
             .attr("width", '100%')
-            .attr("height", yScale(props.CurrentKHW))
-            .attr('y', orgHeight - yScale(props.CurrentKHW))
+            .attr("height", yScale(props.CurrentKHW > props.MaxKWH ? props.MaxKWH : props.CurrentKHW))
+            .attr('y', orgHeight - yScale(props.CurrentKHW > props.MaxKWH ? props.MaxKWH : props.CurrentKHW))
             .append("xhtml:div")
             .html(`<div class="relative h-full w-full justify-between text-sm">
             <div class="absolute top-0 right-0 text-blue-400 w-full">
