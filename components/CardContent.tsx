@@ -269,16 +269,20 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                 case 0: variable = {
                     "variables": {
                         "where": {
-                            "AND": [
-                                {
-                                    "outlet_month_year": {
-                                        "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
-                                    },
-                                    "outlet_id": {
-                                        "equals": parseInt(currentOutletID)
-                                    }
-                                }
-                            ],
+                            // "AND": [
+                            //     {
+                            //         // "outlet_month_year": {
+                            //         //     "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
+                            //         // },
+                            //         "outlet_id": {
+                            //             "equals": parseInt(currentOutletID)
+                            //         }
+                            //     }
+                            // ],
+
+                            "outlet_id": {
+                                "equals": parseInt(currentOutletID)
+                            }
 
                         }
                     }
@@ -286,16 +290,20 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                 case 1: variable = {
                     "variables": {
                         "where": {
-                            "AND": [
-                                {
-                                    "outlet_month_year": {
-                                        "equals": currentMoment.format("MM/YYYY")
-                                    },
-                                    "outlet_id": {
-                                        "equals": parseInt(currentOutletID)
-                                    }
-                                }
-                            ],
+                            // "AND": [
+                            //     {
+                            //         // "outlet_month_year": {
+                            //         //     "equals": currentMoment.format("MM/YYYY")
+                            //         // },
+                            //         "outlet_id": {
+                            //             "equals": parseInt(currentOutletID)
+                            //         }
+                            //     }
+                            // ],
+
+                            "outlet_id": {
+                                "equals": parseInt(currentOutletID)
+                            }
 
                         }
                     }
@@ -303,24 +311,27 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                 default: variable = {
                     "variables": {
                         "where": {
-                            "AND": [
-                                {
-                                    "OR": getLastSevenDays(currentMoment).map(mom => {
-                                        return {
-                                            "outlet_month_year": {
-                                                "equals": mom.format("MM/YYYY")
-                                            },
-                                            "day_of_month": {
-                                                "equals": mom.format("DD")
-                                            }
-                                        }
-                                    }),
-                                    "outlet_id": {
-                                        "equals": parseInt(currentOutletID)
-                                    }
-                                }
-                            ]
+                            // "AND": [
+                            //     {
+                            //         "OR": getLastSevenDays(currentMoment).map(mom => {
+                            //             return {
+                            //                 "outlet_month_year": {
+                            //                     "equals": mom.format("MM/YYYY")
+                            //                 },
+                            //                 "day_of_month": {
+                            //                     "equals": mom.format("DD")
+                            //                 }
+                            //             }
+                            //         }),
+                            //         "outlet_id": {
+                            //             "equals": parseInt(currentOutletID)
+                            //         }
+                            //     }
+                            // ]
 
+                            "outlet_id": {
+                                "equals": parseInt(currentOutletID)
+                            }
                         }
                     }
                 }; break;
