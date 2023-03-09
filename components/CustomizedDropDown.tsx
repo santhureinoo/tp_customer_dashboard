@@ -16,20 +16,20 @@ interface Props {
     setSelected(selected: DropdownProps): void;
 }
 
-const CustomizedDropDown = ({ data, name, selected,hideBorder = false, extraIcon, textColor = 'text-black', inputType, setSelected, hidePrefixIcons = false }: Props): React.ReactElement => {
+const CustomizedDropDown = ({ data, name, selected, hideBorder = false, extraIcon, textColor = 'text-black', inputType, setSelected, hidePrefixIcons = false }: Props): React.ReactElement => {
     const [openOutletList, setOpenOutletList] = React.useState(false);
-    const id = uuidv5(name ,uuidv5.URL);
+    const id = uuidv5(name, uuidv5.URL);
 
     React.useEffect(() => {
         // Bind the event listener
-        document.addEventListener("mousedown", (ev : MouseEvent) => {
+        document.addEventListener("mousedown", (ev: MouseEvent) => {
             let isFound = false;
-            ev.composedPath().forEach((et)=>{
+            ev.composedPath().forEach((et) => {
                 const elem = et as HTMLElement;
                 if (elem.id === id) {
-                   isFound = true;
+                    isFound = true;
                 }
-             
+
             })
             !isFound && setOpenOutletList(false);
         });
@@ -63,11 +63,11 @@ const CustomizedDropDown = ({ data, name, selected,hideBorder = false, extraIcon
                 <ul className="py-1" aria-labelledby="dropdown">
                     {data && data.map((dat, ind) => {
                         return (
-                            <li key={'cd-'+ind} onClick={(e: any) => {
+                            <li key={'cd-' + ind} onClick={(e: any) => {
                                 setSelected(dat);
                                 setOpenOutletList(!openOutletList);
                             }}>
-                                <a href="#" className={`text-sm overflow-hidden hover:bg-gray-100 ${textColor} block px-4 py-2`}>{dat.display}</a>
+                                <a href="#" className={`text-sm overflow-hidden hover:bg-gray-100 ${selected.value === dat.value ? 'bg-gray-200' : ''} ${textColor} block px-4 py-2`}>{dat.display}</a>
                             </li>
                         )
                     })}

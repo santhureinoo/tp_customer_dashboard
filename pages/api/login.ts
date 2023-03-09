@@ -16,7 +16,6 @@ const validateCaptcha = (response_key: any) => {
         })
             .then((response) => response.json())
             .then((google_response) => {
-                console.log(google_response);
                 if (google_response.success == true) {
                     resolve(true)
                 } else {
@@ -24,7 +23,6 @@ const validateCaptcha = (response_key: any) => {
                 }
             })
             .catch((err) => {
-                console.log(err)
                 resolve(false)
             })
     })

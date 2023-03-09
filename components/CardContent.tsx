@@ -43,6 +43,7 @@ import { DropdownProps, first_intermediary_table, outlet, results, secondary_int
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
 import { cloneDeep } from '@apollo/client/utilities';
+import { numberWithCommas } from '../common/helper';
 
 // ChartJS.register(...registerablesJS);
 
@@ -78,7 +79,7 @@ interface StatusCardProps {
     Title?: String, SubTitle?: String, className: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any, PostfixDirection?: 'horizontal' | 'vertical'
 }
 
-const SavingMeter = ({ date, outletId }: any): JSX.Element => {
+const SavingMeter = ({ date, outletId, kiloWatHour }: any): JSX.Element => {
 
     const dateComp = () => {
         return (<div className="flex flex-row self-end">
@@ -91,7 +92,7 @@ const SavingMeter = ({ date, outletId }: any): JSX.Element => {
         <div className="grid grid-cols-3 gap-4 place-content-between h-full">
             <CardHeader Titles={['Saving Meter']} SubTitle={dateComp()} />
             <div className="col-span-2 flex flex-row-reverse">
-                <SavingMeterDigits numberString="003225" description={"Kilo Watt Hour"} />
+                <SavingMeterDigits numberString={kiloWatHour} description={"Kilo Watt Hour"} />
             </div>
 
             <div className="flex flex-col col-span-2">
@@ -101,7 +102,7 @@ const SavingMeter = ({ date, outletId }: any): JSX.Element => {
         </div>
     )
 }
-const SustainPerformance = (): JSX.Element => {
+const SustainPerformance = ({ total }: any): JSX.Element => {
 
     const outlet_category_iconisation = () => {
         return (
@@ -126,10 +127,10 @@ const SustainPerformance = (): JSX.Element => {
                 <CardHeader Titles={['Sustainability Performance']} SubTitle={'Accummulative'} />
             </div>
             <div className="2xl:grid 2xl:grid-cols-4 grid grid-cols-2 gap-2">
-                <StatusCard Title={'Energy Savings/Year'} className='bg-custom-gray-card text-custom-gray-card-font' Value={"100.590"} Postfix={'SGD'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
-                <StatusCard Title={'CO2 Saved/Year'} className='bg-custom-blue-card text-custom-blue-card-font' Value={"225,7"} Postfix={'kg/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
-                <StatusCard Title={'Planted Tree/Year'} className='bg-custom-green-card text-custom-green-card-font' Value={"3.370"} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
-                <StatusCard Title={'Meals to be sold/Year'} className='bg-custom-orange-card text-custom-orange-card-font' Value={"201.800"} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
+                <StatusCard Title={'Energy Savings/Year'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
+                <StatusCard Title={'CO2 Saved/Year'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
+                <StatusCard Title={'Planted Tree/Year'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(total.energy * 0.00084)} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
+                <StatusCard Title={'Meals to be sold/Year'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(total.energy * 2)} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
                 {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
             </div>
@@ -218,11 +219,12 @@ const ExpectedSavings = ({ totalKWHs }: any): JSX.Element => {
 
 interface Props {
     currentOutletID: string;
+    latestLiveDate?: string;
 }
 
-export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
+export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     const [firstIntermediaryData, setFirstIntermediaryData] = React.useState<first_intermediary_table[]>([]);
-    const [selectedSavingPerformanceIndex, setSelectedSavingPerformanceIndex] = React.useState(0);
+    const [selectedSavingPerformanceIndex, setSelectedSavingPerformanceIndex] = React.useState(1);
     const [selectedTab, setSelectedTab] = React.useState<'kwh' | 'saving'>('kwh');
     const getFirstIntermediaryQuery = gql`
     query First_intermediary_tables($where: First_intermediary_tableWhereInput) {
@@ -263,26 +265,26 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
 
     const getFirstIntermediaryVariable = React.useMemo(() => {
         let variable = {};
-        const currentMoment = moment();
+        const currentMoment = moment(latestLiveDate, 'DD/MM/YYYY');
         if (currentOutletID) {
             switch (selectedSavingPerformanceIndex) {
                 case 0: variable = {
                     "variables": {
                         "where": {
-                            // "AND": [
-                            //     {
-                            //         // "outlet_month_year": {
-                            //         //     "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
-                            //         // },
-                            //         "outlet_id": {
-                            //             "equals": parseInt(currentOutletID)
-                            //         }
-                            //     }
-                            // ],
+                            "AND": [
+                                {
+                                    "outlet_month_year": {
+                                        "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
+                                    },
+                                    "outlet_id": {
+                                        "equals": parseInt(currentOutletID)
+                                    }
+                                }
+                            ],
 
-                            "outlet_id": {
-                                "equals": parseInt(currentOutletID)
-                            }
+                            // "outlet_id": {
+                            //     "equals": parseInt(currentOutletID)
+                            // }
 
                         }
                     }
@@ -290,20 +292,20 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                 case 1: variable = {
                     "variables": {
                         "where": {
-                            // "AND": [
-                            //     {
-                            //         // "outlet_month_year": {
-                            //         //     "equals": currentMoment.format("MM/YYYY")
-                            //         // },
-                            //         "outlet_id": {
-                            //             "equals": parseInt(currentOutletID)
-                            //         }
-                            //     }
-                            // ],
+                            "AND": [
+                                {
+                                    "outlet_month_year": {
+                                        "equals": currentMoment.format("MM/YYYY")
+                                    },
+                                    "outlet_id": {
+                                        "equals": parseInt(currentOutletID)
+                                    }
+                                }
+                            ],
 
-                            "outlet_id": {
-                                "equals": parseInt(currentOutletID)
-                            }
+                            // "outlet_id": {
+                            //     "equals": parseInt(currentOutletID)
+                            // }
 
                         }
                     }
@@ -311,35 +313,30 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                 default: variable = {
                     "variables": {
                         "where": {
-                            // "AND": [
-                            //     {
-                            //         "OR": getLastSevenDays(currentMoment).map(mom => {
-                            //             return {
-                            //                 "outlet_month_year": {
-                            //                     "equals": mom.format("MM/YYYY")
-                            //                 },
-                            //                 "day_of_month": {
-                            //                     "equals": mom.format("DD")
-                            //                 }
-                            //             }
-                            //         }),
-                            //         "outlet_id": {
-                            //             "equals": parseInt(currentOutletID)
-                            //         }
-                            //     }
-                            // ]
-
-                            "outlet_id": {
-                                "equals": parseInt(currentOutletID)
-                            }
+                            "AND": [
+                                {
+                                    "OR": getLastSevenDays(currentMoment).map(mom => {
+                                        return {
+                                            "outlet_month_year": {
+                                                "equals": mom.format("MM/YYYY")
+                                            },
+                                            "day_of_month": {
+                                                "equals": mom.format("D")
+                                            }
+                                        }
+                                    }),
+                                    "outlet_id": {
+                                        "equals": parseInt(currentOutletID)
+                                    }
+                                }
+                            ]
                         }
                     }
                 }; break;
             }
         }
-
         return variable;
-    }, [currentOutletID, selectedSavingPerformanceIndex]);
+    }, [currentOutletID, latestLiveDate, selectedSavingPerformanceIndex]);
 
     React.useEffect(() => {
         if (currentOutletID) {
@@ -483,19 +480,19 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
         <div className="flex flex-col gap-4">
             <div className="flex justify-between items-baseline">
                 <div className='flex flex-row gap-x-2 text-xs font-extrabold text-custom-gray'>
-                    <button onClick={e => { setSelectedSavingPerformanceIndex(0) }} className={`${selectedSavingPerformanceIndex === 0 ? 'active-sp ' : ''}p-2`}>Last 3 Months</button>
+                    {/* <button onClick={e => { setSelectedSavingPerformanceIndex(0) }} className={`${selectedSavingPerformanceIndex === 0 ? 'active-sp ' : ''}p-2`}>Last 3 Months</button>
                     <button onClick={e => { setSelectedSavingPerformanceIndex(1) }} className={`${selectedSavingPerformanceIndex === 1 ? 'active-sp ' : ''}p-2`}>Last Month</button>
-                    <button onClick={e => { setSelectedSavingPerformanceIndex(2) }} className={`${selectedSavingPerformanceIndex === 2 ? 'active-sp ' : ''}p-2`}>Last Week</button>
+                    <button onClick={e => { setSelectedSavingPerformanceIndex(2) }} className={`${selectedSavingPerformanceIndex === 2 ? 'active-sp ' : ''}p-2`}>Last Week</button> */}
                     <div className="grid grid-cols-2">
-                        <button onClick={(e) => { setSelectedTab('kwh'); }} className={selectedTab === 'kwh' ? "bg-custom-lightblue text-custom-darkblue rounded-r-none rounded-lg px-2" : "bg-gray-100 rounded-l-none rounded-lg px-2"}>
+                        <button onClick={(e) => { setSelectedTab('kwh'); }} className={selectedTab === 'kwh' ? "bg-custom-lightblue text-custom-darkblue rounded-r-none rounded-l-lg px-4 py-4" : "bg-gray-100 rounded-r-none rounded-lg px-4 py-4"}>
                             kWh
                         </button>
-                        <button onClick={(e) => { setSelectedTab('saving'); }} className={selectedTab === 'saving' ? "bg-custom-lightblue text-custom-darkblue rounded-r-none rounded-lg px-2" : "bg-gray-100 rounded-l-none rounded-lg px-2"}>
+                        <button onClick={(e) => { setSelectedTab('saving'); }} className={selectedTab === 'saving' ? "bg-custom-lightblue text-custom-darkblue rounded-l-none rounded-r-lg px-4 py-4" : "bg-gray-100 rounded-l-none rounded-lg px-4 py-4"}>
                             $
                         </button>
                     </div>
                 </div>
-                <div className='flex flex-row gap-x-2 text-xs'>
+                {/* <div className='flex flex-row gap-x-2 text-xs'>
                     <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
                         <option>Start Date</option>
                         <option>Start Date</option>
@@ -504,7 +501,7 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
                         <option>End Date</option>
                         <option>End Date</option>
                     </select>
-                </div>
+                </div> */}
 
             </div>
             <div>
@@ -514,10 +511,11 @@ export const SavingPerformance = ({ currentOutletID }: Props): JSX.Element => {
     )
 }
 
-export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
+export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     // const labels = ['10', '10.5', '11', '11.5', '12', '12.5', '13', '13.5', '14','14.5','15','15.5','16','16.5','17','17.5','18','18.5','19','19.5','20','20.5','21','21.5','22'];
     const [secondaryIntermediary, setSecondIntermediary] = React.useState<secondary_intermediary_table[]>([]);
     const [selectedEqptEnergyIndex, setSelectedEqptEnergyIndex] = React.useState(1);
+    const currentMoment = moment(latestLiveDate, 'DD/MM/YYYY');
     const getSecondIntermediaryQuery = gql`
     query Secondary_intermediary_tables($where: Secondary_intermediary_tableWhereInput) {
         secondary_intermediary_tables(where: $where) {
@@ -539,14 +537,48 @@ export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
 
     React.useEffect(() => {
         if (currentOutletID) {
-            const getSecondIntermediaryVariable = {
-                "variables": {
-                    "where": {
-                        "outlet_id": {
-                            "equals": parseInt(currentOutletID)
+
+            let getSecondIntermediaryVariable = {};
+
+            switch (selectedEqptEnergyIndex) {
+                case 1: getSecondIntermediaryVariable = {
+                    "variables": {
+                        "where": {
+                            "AND": [
+                                {
+                                    "outlet_month_year": {
+                                        "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
+                                    },
+                                    "outlet_id": {
+                                        "equals": parseInt(currentOutletID)
+                                    }
+                                }
+                            ],
+                            // "outlet_id": {
+                            //     "equals": parseInt(currentOutletID)
+                            // }
                         }
                     }
-                }
+                }; break;
+                default: getSecondIntermediaryVariable = {
+                    "variables": {
+                        "where": {
+                            "AND": [
+                                {
+                                    "outlet_month_year": {
+                                        "equals": currentMoment.format("MM/YYYY")
+                                    },
+                                    "outlet_id": {
+                                        "equals": parseInt(currentOutletID)
+                                    }
+                                }
+                            ],
+                            // "outlet_id": {
+                            //     "equals": parseInt(currentOutletID)
+                            // }
+                        }
+                    }
+                }; break;
             }
             getSecondIntermediaryResult[0](getSecondIntermediaryVariable).then(result => {
                 const cloned_second_intermediary_tables = cloneDeep(result.data.secondary_intermediary_tables);
@@ -558,7 +590,7 @@ export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
         } else {
             setSecondIntermediary([]);
         }
-    }, [currentOutletID])
+    }, [currentOutletID, selectedEqptEnergyIndex])
 
     const labels = React.useMemo(() => {
         return secondaryIntermediary.map(data => {
@@ -646,7 +678,7 @@ export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
     return (
         <div className="flex flex-col gap-4">
             <div className="flex justify-between items-baseline">
-                <div className='flex flex-row gap-x-2 text-xs font-extrabold text-custom-gray'>
+                {/* <div className='flex flex-row gap-x-2 text-xs font-extrabold text-custom-gray'>
                     <button onClick={e => { setSelectedEqptEnergyIndex(1) }} className={selectedEqptEnergyIndex === 1 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last 3 Months</button>
                     <button onClick={e => { setSelectedEqptEnergyIndex(2) }} className={selectedEqptEnergyIndex === 2 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last Month</button>
                 </div>
@@ -659,19 +691,19 @@ export const EqptEnergyBaseline = ({ currentOutletID }: Props): JSX.Element => {
                         <option>End Date</option>
                         <option>End Date</option>
                     </select>
-                </div>
+                </div> */}
 
             </div>
             <div className='flex flex-col'>
                 <Chart type='scatter' data={data()} options={option} />
-                <span className='text-custom-gray self-end'>Valid as of 30th 2022</span>
+                <span className='text-custom-gray self-end'>Valid as of {currentMoment.format('Mo YYYY')}</span>
                 <span className='text-custom-gray text-custom-subtitle w-1/3  px-4'>Eqpt. Energy Baseline represents the equipment energy usage over a typical hour without TablePointer, and is continuously and dynamically sampled for statistical best-averaging to ensure validity of time</span>
             </div>
         </div>
     )
 }
 
-const CardSwitcher = ({ currentOutletID }: Props): JSX.Element => {
+const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     const [selectedCard, setSelectedCard] = React.useState<DropdownProps>({
         display: <CardHeader Titles={['Savings Performace']} />,
         value: 'savingPerformance',
@@ -689,9 +721,9 @@ const CardSwitcher = ({ currentOutletID }: Props): JSX.Element => {
     ]
 
     const selectedContent = React.useMemo(() => {
-        if (selectedCard.value === "savingPerformance") return <SavingPerformance currentOutletID={currentOutletID} />;
-        else return <EqptEnergyBaseline currentOutletID={currentOutletID} />
-    }, [selectedCard, currentOutletID])
+        if (selectedCard.value === "savingPerformance") return <SavingPerformance latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />;
+        else return <EqptEnergyBaseline latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />
+    }, [selectedCard, latestLiveDate, currentOutletID])
 
     return (
         <div className="flex flex-col gap-4">
@@ -821,9 +853,10 @@ const StatusCard = ({ Title, SubTitle, Value, Prefix, Postfix, className, RightS
 
 interface EqptProps {
     outlet?: outlet;
+    latestLiveDate: string;
 }
 
-const Equipment = ({ outlet }: EqptProps): JSX.Element => {
+const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
     const [selectedType, setSelectedType] = React.useState("ke");
     const renderedData = React.useMemo(() => {
         const renderedData = {
@@ -839,9 +872,9 @@ const Equipment = ({ outlet }: EqptProps): JSX.Element => {
                     renderedData.quantity = outlet.outlet_device_ex_fa_input.length;
                 }
                 if (outlet.results && outlet.results.length > 0) {
-                    renderedData.baseline = parseInt(outlet.results[0].ke_measured_savings_kWh || "");
-                    renderedData.energySaved = parseInt(outlet.results[0].ke_eqpt_energy_baseline_avg_hourly_kW || "");
-                    renderedData.costSaved = parseInt(outlet.results[0].outlet_measured_savings_expenses || "")
+                    renderedData.baseline = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_measured_savings_kWh || "") }, 0);
+                    renderedData.energySaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_eqpt_energy_baseline_avg_hourly_kW || "") }, 0);
+                    renderedData.costSaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "") }, 0);
                 }
             }
 
@@ -851,9 +884,9 @@ const Equipment = ({ outlet }: EqptProps): JSX.Element => {
                     renderedData.quantity = outlet.outlet_device_ac_input.length;
                 }
                 if (outlet.results && outlet.results.length > 0) {
-                    renderedData.baseline = parseInt(outlet.results[0].ac_measured_savings_kWh || "");
-                    renderedData.energySaved = parseInt(outlet.results[0].ac_eqpt_energy_baseline_avg_hourly_kW || "");
-                    renderedData.costSaved = parseInt(outlet.results[0].outlet_measured_savings_expenses || "")
+                    renderedData.baseline = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_measured_savings_kWh || "") }, 0);
+                    renderedData.energySaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_eqpt_energy_baseline_avg_hourly_kW || "") }, 0);
+                    renderedData.costSaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "") }, 0);
                 }
             }
         }
@@ -870,10 +903,10 @@ const Equipment = ({ outlet }: EqptProps): JSX.Element => {
                 </select>
             </div>
             <div className="2xl:grid 2xl:grid-cols-4 grid grid-cols-2 gap-x-2">
-                <StatusCard Title={'Quantity'} className='bg-custom-blue-card text-custom-blue-card-font' Value={renderedData.quantity} />
-                <StatusCard Title={'Baseline'} className='bg-custom-red-card text-custom-red-card-font' SubTitle={'As of 14/01/2022'} Value={renderedData.baseline} Postfix={'kW'} />
-                <StatusCard Title={'Energy Saved'} className='bg-custom-green-card text-custom-green-card-font' Value={renderedData.energySaved} Postfix={'kWh'} />
-                <StatusCard Title={'Cost Saved'} className='bg-custom-orange-card text-custom-orange-card-font' Value={renderedData.costSaved} Prefix={'$'} />
+                <StatusCard Title={'Quantity'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(renderedData.quantity)} />
+                <StatusCard Title={'Baseline'} className='bg-custom-red-card text-custom-red-card-font' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} />
+                <StatusCard Title={'Energy Saved'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(renderedData.energySaved)} Postfix={'kWh'} />
+                <StatusCard Title={'Cost Saved'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(renderedData.costSaved)} Prefix={'$'} />
             </div>
         </div>
     )
