@@ -11,11 +11,11 @@ export function bytesToSize(bytes: number) {
 }
 
 export function numberWithCommas(x?: number) {
-  if (x) {
+  if (x && x > 0) {
     return Number(x).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   else {
-    0;
+    return 0;
   }
 
 }
