@@ -366,13 +366,13 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     borderWidth: 2,
                     fill: true,
                     backgroundColor: 'transparent',
-                    data: firstIntermediaryData.map(data => parseInt(data.all_eqpt_without_TP_kWh || "0")),
+                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.all_eqpt_without_TP_kWh || "0"))),
                 },
                 {
                     type: 'bar' as const,
                     label: 'Without Tablepointer',
                     backgroundColor: 'rgb(191 219 254)',
-                    data: firstIntermediaryData.map(data => parseInt(data.all_eqpt_without_TP_kWh || "0") - parseInt(data.all_eqpt_with_TP_kWh || "0")),
+                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.all_eqpt_without_TP_kWh || "0")) - Math.round(parseInt(data.all_eqpt_with_TP_kWh || "0"))),
                     barThickness: 25,
                     order: 3,
                 },
@@ -380,7 +380,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     type: 'bar' as const,
                     label: 'With Tablepointer',
                     backgroundColor: 'rgb(96 165 250)',
-                    data: firstIntermediaryData.map(data => parseInt(data.all_eqpt_with_TP_kWh || "0")),
+                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.all_eqpt_with_TP_kWh || "0"))),
                     barThickness: 25,
                     order: 2,
                 }
@@ -403,7 +403,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     //     return gradient;
                     // },
                     backgroundColor: 'transparent',
-                    data: firstIntermediaryData.map(data => parseInt(data.ke_savings_expenses || "0")),
+                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.ke_savings_expenses || "0"))),
                 },
                 {
                     type: 'line' as const,
@@ -413,7 +413,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     borderWidth: 2,
                     fill: true,
                     backgroundColor: 'transparent',
-                    data: firstIntermediaryData.map(data => parseInt(data.ac_savings_expenses || "0")),
+                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.ac_savings_expenses || "0"))),
                 },
                 {
                     type: 'line' as const,
@@ -423,7 +423,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     borderWidth: 2,
                     fill: true,
                     backgroundColor: 'transparent',
-                    data: firstIntermediaryData.map(data => parseInt(data.total_savings_expenses || "0")),
+                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.total_savings_expenses || "0"))),
                 }
             ]
         }
@@ -451,7 +451,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                 callbacks: {
                     label: function (context: any) {
                         if (context.dataset.label === "Without Tablepointer") {
-                            return firstIntermediaryData[context.dataIndex].all_eqpt_without_TP_kWh
+                            return Math.round(parseInt(firstIntermediaryData[context.dataIndex].all_eqpt_without_TP_kWh || '0'))
                         } else {
                             return context.formattedValue;
                         }
