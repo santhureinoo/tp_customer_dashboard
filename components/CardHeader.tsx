@@ -5,12 +5,13 @@ interface Props {
     Titles: string[];
     SubTitle?: string | JSX.Element;
     SubTitleAlign?: 'start' | 'end' ;
+    className?: String;
 }
 
-const CardHeader = ({ Titles, SubTitle, SubTitleAlign = 'start'}: Props): JSX.Element => {
+const CardHeader = ({ Titles, SubTitle, SubTitleAlign = 'start', className}: Props): JSX.Element => {
     return (
         <div className={`flex flex-col w-fit`}>
-            <h4 className="font-bold text-base">
+            <h4 className={`font-bold ${className}`}>
                 {Titles.map(title => {
                     return (
                         <span className="block" key={uuidv4()}>{title}</span>

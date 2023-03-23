@@ -76,7 +76,7 @@ ChartJS.register(
 );
 
 interface StatusCardProps {
-    Title?: String, SubTitle?: String, className: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any, PostfixDirection?: 'horizontal' | 'vertical'
+    Title?: String, SubTitle?: String, className: string, textClassName?: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any, PostfixDirection?: 'horizontal' | 'vertical'
 }
 
 const SavingMeter = ({ date, outletId, kiloWatHour }: any): JSX.Element => {
@@ -197,7 +197,7 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
     }, [totalKWHs])
 
     return (
-        <div className="flex flex-col gap-4 h-full">
+        <div className="flex flex-col gap-4 h-3/6">
             <CardHeader Titles={['Benchmark', 'Comparison']} SubTitle={"vs. Industry Peer"} />
             <div className="h-full">
                 {getBMM}
@@ -206,16 +206,16 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
     )
 }
 
-const ExpectedSavings = ({ totalKWHs }: any): JSX.Element => {
-    return (
-        <div className="flex flex-col gap-4 h-full">
-            <CardHeader Titles={['Expected Savings']} SubTitle={"(Current Month)"} />
-            <div className="h-full">
-                <ProgressiveMeter MaxKWH={totalKWHs.MaxKWH} CurrentKHW={totalKWHs.CurrentKHW} />
-            </div>
-        </div>
-    )
-}
+// const ExpectedSavings = ({ totalKWHs }: any): JSX.Element => {
+//     return (
+//         <div className="flex flex-col gap-4 h-full">
+//             <CardHeader Titles={['Expected Savings']} SubTitle={"(Current Month)"} />
+//             <div className="h-full">
+//                 <ProgressiveMeter MaxKWH={totalKWHs.MaxKWH} CurrentKHW={totalKWHs.CurrentKHW} />
+//             </div>
+//         </div>
+//     )
+// }
 
 interface Props {
     currentOutletID: string;
@@ -795,10 +795,10 @@ const Remarks = (): JSX.Element => {
     )
 }
 
-const StatusCard = ({ Title, SubTitle, Value, Prefix, Postfix, className, RightSideValue, PostfixDirection = 'horizontal' }: StatusCardProps): JSX.Element => {
+const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, className, RightSideValue, PostfixDirection = 'horizontal' }: StatusCardProps): JSX.Element => {
 
     return (
-        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray justify-between h-[115px] 2xl:h-full min-w-[148.75px] ${className}`}>
+        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray justify-between h-auto 2xl:h-full min-w-[148.75px] ${className}`}>
             {Title && <div className="text-left">
                 <h4 className="2xl:text-sm text-xs">
                     {Title}
@@ -811,15 +811,15 @@ const StatusCard = ({ Title, SubTitle, Value, Prefix, Postfix, className, RightS
                     <React.Fragment>
                         <div className='flex flex-col'>
                             <div>
-                                <span className='text-sm'>
+                                <span className={`text-sm ${textClassName}`}>
                                     {Prefix}
                                 </span>
-                                <span className="text-4xl font-medium">
+                                <span className={`text-4xl font-medium ${textClassName}`}>
                                     {Value}
                                 </span>
                             </div>
                             <div>
-                                <span className="text-xs self-end">
+                                <span className={`text-xs self-end ${textClassName}`}>
                                     {Postfix}
                                 </span>
                             </div>
@@ -831,13 +831,13 @@ const StatusCard = ({ Title, SubTitle, Value, Prefix, Postfix, className, RightS
                     </React.Fragment>
                     : <React.Fragment>
                         <div>
-                            <span>
+                            <span className={`${textClassName}`}>
                                 {Prefix}
                             </span>
-                            <span className="text-4xl font-medium">
+                            <span className={`${textClassName} font-medium `}>
                                 {Value}
                             </span>
-                            <span className="self-end">
+                            <span className={`self-end ${textClassName}`}>
                                 {Postfix}
                             </span>
                         </div>
@@ -894,19 +894,19 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
     }, [selectedType, outlet]);
 
     return (
-        <div className="flex flex-col gap-4 h-full">
+        <div className="flex flex-col gap-4 h-3/6">
             <div className="flex justify-between items-baseline">
-                <CardHeader Titles={['Equipment']} />
-                <select value={selectedType} onChange={((event) => { setSelectedType(event.currentTarget.value) })} className={`outline-none px-2 py-1 border-2 rounded-lg text-sm h-11`}>
+                <CardHeader Titles={['Equipment']} className='text-sm'/>
+                <select value={selectedType} onChange={((event) => { setSelectedType(event.currentTarget.value) })} className={`outline-none px-2 py-1 border-2 rounded-lg text-xs w-1/2`}>
                     <option value="ke">Kitchen Exhaust</option>
                     <option value="ac">Air Con</option>
                 </select>
             </div>
-            <div className="2xl:grid 2xl:grid-cols-4 grid grid-cols-2 gap-x-2">
-                <StatusCard Title={'Quantity'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(renderedData.quantity)} />
-                <StatusCard Title={'Baseline'} className='bg-custom-red-card text-custom-red-card-font' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} />
-                <StatusCard Title={'Energy Saved'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(renderedData.energySaved)} Postfix={'kWh'} />
-                <StatusCard Title={'Cost Saved'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(renderedData.costSaved)} Prefix={'$'} />
+            <div className="2xl:grid grid gap-x-2">
+                <StatusCard Title={'Quantity'} textClassName='text-l' className='bg-custom-blue-card text-custom-blue-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.quantity)} />
+                <StatusCard Title={'Baseline'} textClassName='text-l' className='bg-custom-red-card text-custom-red-card-font h-3/4 my-1' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} />
+                <StatusCard Title={'Energy Saved'} textClassName='text-l' className='bg-custom-green-card text-custom-green-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.energySaved)} Postfix={'kWh'} />
+                <StatusCard Title={'Cost Saved'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.costSaved)} Prefix={'$'} />
             </div>
         </div>
     )
@@ -929,7 +929,7 @@ export const SustainPerformanceCard = Card(SustainPerformance);
 export const FastFoodCard = Card(FastFood);
 export const RankAndOutletCard = Card(RankAndOutlet);
 export const RemarksCard = Card(Remarks);
-export const ExpectedSavingsCard = Card(ExpectedSavings);
+// export const ExpectedSavingsCard = Card(ExpectedSavings);
 export const BenchMarkComparisonCard = Card(BenchMarkComparison);
 export const EquipmentCard = Card(Equipment);
 export const LastAvailableTarifCard = Card(LastAvailableTarif);

@@ -280,6 +280,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
     return (
         <React.Fragment>
+            <div className="flex justify-between mb-4 w-1/4 gap-2">
+                <span className='py-3 px-auto rounded-lg text-sm bg-custom-darkblue text-center text-white w-1/2 cursor-pointer '>Summary</span>
+                <span className='py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer'>Outlet</span>
+            </div>
             <div className="flex justify-between h-full">
                 {getHeaderBreadCrumb}
                 <CustomSelect setSelectedValue={(val) => {
@@ -303,12 +307,17 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     <SustainPerformanceCard total={totalPerYear} />
                                 </div>
                                 <div>
-                                    <BenchMarkComparisonCard totalKWHs={totalKWHs} />
+                                    <div className="mb-2">
+                                        <BenchMarkComparisonCard totalKWHs={totalKWHs} />
+                                    </div>
+                                    <div>
+                                        <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
+                                    </div>
                                 </div>
-                                <div>
+                                {/* <div>
                                     <ExpectedSavingsCard totalKWHs={totalKWHs} />
-                                </div>
-                                <div className="col-span-4">
+                                </div> */}
+                                <div className="col-span-5">
                                     <ChartCard latestLiveDate={lastestLiveDate} currentOutletID={currentOutletID} />
                                 </div>
                                 <div>
@@ -316,9 +325,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 </div>
                                 <div>
                                     {/* <RemarksCard /> */}
-                                </div>
-                                <div className="col-span-6">
-                                    <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
                                 </div>
                                 {/* <div>
                                     <LastAvailableTarifCard date={getLastResultDate} />

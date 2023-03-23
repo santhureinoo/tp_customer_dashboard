@@ -52,7 +52,7 @@ export default withIronSessionApiRoute(
         `;
 
         const client = new ApolloClient({
-            link: new HttpLink({ uri: 'http://127.0.0.1:4000', fetch }),
+            link: new HttpLink({ uri: 'http://18.141.128.98:4000/', fetch }),
             cache: new InMemoryCache(),
         });
 
