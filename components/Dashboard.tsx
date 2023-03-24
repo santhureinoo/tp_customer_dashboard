@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
 import { customer, group, outlet, results } from "../common/types";
-import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, ExpectedSavingsCard, FastFoodCard, LastAvailableTarifCard, RankAndOutletCard, RemarksCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard } from "./CardContent";
+import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, ExpectedSavingsCard, FastFoodCard, LastAvailableTarifCard, RankAndOutletCard, RemarksCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard, LiveOutletCard, EquipmentEnergyCard, SavingEnergyCard, YearlyEnergyCard } from "./CardContent";
 import ClientOnly from "./ClientOnly";
 import { v4 as uuidv4 } from 'uuid';
 import CustomSelect from "./cardcomponents/CustomSelect";
@@ -11,6 +11,7 @@ import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 
 const Dashboard = ({ groupId }: any): JSX.Element => {
     const [currentCustomerID, setCurrentCustomerID] = React.useState(1);
+    const [currentPage, setCurrentPage] = React.useState('outlet');
     const [lastestLiveDate, setLastestLiveDate] = React.useState('');
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
@@ -280,60 +281,166 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
     return (
         <React.Fragment>
-            <div className="flex justify-between mb-4 w-1/4 gap-2">
-                <span className='py-3 px-auto rounded-lg text-sm bg-custom-darkblue text-center text-white w-1/2 cursor-pointer '>Summary</span>
-                <span className='py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer'>Outlet</span>
-            </div>
-            <div className="flex justify-between h-full">
-                {getHeaderBreadCrumb}
-                <CustomSelect setSelectedValue={(val) => {
-                    setCurrentOutletID(val);
-                    const curOut = outlets.find(out => out.outlet_id === Number(val));
-                    setCurrentOutlet(curOut);
-                    setTitle(["Outlet", curOut?.name || '']);
-                }} selectedValue={currentOutletID} dropdownValue={outlets.map(out => { return { value: out.outlet_id.toString(), display: out.name } })} />
-            </div>
+            {
+                /**
+                 * Checking the dashboard page is outlet or summary
+                 */
+                currentPage=='outlet' ? 
+                /**
+                 * outlet page
+                 */
+                <div>
+                    <div className="flex justify-between mb-4 w-1/4 gap-2">
+                        <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${currentPage == 'summary' ? 'bg-custom-darkblue text-white': 'text-custom-darkblue border-solid border-2'}`} onClick={()=> setCurrentPage('summary')}>Summary</span>
+                        <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${currentPage == 'summary' ? 'text-custom-darkblue border-solid border-2' : 'bg-custom-darkblue text-white'}`} onClick={()=> setCurrentPage('outlet')}>Outlet</span>
+                    </div>
+                    <div className="flex justify-between h-full">
+                        {getHeaderBreadCrumb}
+                        <CustomSelect setSelectedValue={(val) => {
+                            setCurrentOutletID(val);
+                            const curOut = outlets.find(out => out.outlet_id === Number(val));
+                            setCurrentOutlet(curOut);
+                            setTitle(["Outlet", curOut?.name || '']);
+                        }} selectedValue={currentOutletID} dropdownValue={outlets.map(out => { return { value: out.outlet_id.toString(), display: out.name } })} />
+                    </div>
 
-            <div className="flex flex-col mt-8">
-                <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                    <div
-                        className="align-middle inline-block min-w-full sm:rounded-lg">
-                        <ClientOnly>
-                            <div className="grid grid-cols-6 gap-2">
-                                <div className="col-span-2">
-                                    <SavingMeterCard date={lastestLiveDate} kiloWatHour={totalKWHs.OutletSavingKHW.toString()} outletId={currentOutlet?.outlet_id} />
-                                </div>
-                                <div className="col-span-4">
-                                    <SustainPerformanceCard total={totalPerYear} />
-                                </div>
-                                <div>
-                                    <div className="mb-2">
-                                        <BenchMarkComparisonCard totalKWHs={totalKWHs} />
+                    <div className="flex flex-col mt-8">
+                        <div className="my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+                            <div
+                                className="align-middle inline-block min-w-full sm:rounded-lg">
+                                <ClientOnly>
+                                    <div className="grid grid-cols-6 gap-2">
+                                        <div className="col-span-2">
+                                            <SavingMeterCard date={lastestLiveDate} kiloWatHour={totalKWHs.OutletSavingKHW.toString()} outletId={currentOutlet?.outlet_id} />
+                                        </div>
+                                        <div className="col-span-4">
+                                            <SustainPerformanceCard total={totalPerYear} />
+                                        </div>
+                                        <div>
+                                            <div className="mb-2">
+                                                <BenchMarkComparisonCard totalKWHs={totalKWHs} />
+                                            </div>
+                                            <div>
+                                                <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
+                                            </div>
+                                        </div>
+                                        {/* <div>
+                                            <ExpectedSavingsCard totalKWHs={totalKWHs} />
+                                        </div> */}
+                                        <div className="col-span-5">
+                                            <ChartCard latestLiveDate={lastestLiveDate} currentOutletID={currentOutletID} />
+                                        </div>
+                                        <div>
+                                            {/* <RankAndOutletCard outlets={outlets} /> */}
+                                        </div>
+                                        <div>
+                                            {/* <RemarksCard /> */}
+                                        </div>
+                                        {/* <div>
+                                            <LastAvailableTarifCard date={getLastResultDate} />
+                                        </div> */}
                                     </div>
-                                    <div>
-                                        <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
-                                    </div>
-                                </div>
-                                {/* <div>
-                                    <ExpectedSavingsCard totalKWHs={totalKWHs} />
-                                </div> */}
-                                <div className="col-span-5">
-                                    <ChartCard latestLiveDate={lastestLiveDate} currentOutletID={currentOutletID} />
-                                </div>
-                                <div>
-                                    {/* <RankAndOutletCard outlets={outlets} /> */}
-                                </div>
-                                <div>
-                                    {/* <RemarksCard /> */}
-                                </div>
-                                {/* <div>
-                                    <LastAvailableTarifCard date={getLastResultDate} />
-                                </div> */}
+                                </ClientOnly>
                             </div>
-                        </ClientOnly>
+                        </div>
+                    </div>
+                </div> : 
+                /**
+                 * summary page
+                 */
+                <div>
+                    <div className="flex justify-between mb-4 w-1/4 gap-2">
+                        <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${currentPage == 'summary' ? 'bg-custom-darkblue text-white': 'text-custom-darkblue border-solid border-2'}`} onClick={()=> setCurrentPage('summary')}>Summary</span>
+                        <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${currentPage == 'summary' ? 'text-custom-darkblue border-solid border-2' : 'bg-custom-darkblue text-white'}`} onClick={()=> setCurrentPage('outlet')}>Outlet</span>
+                    </div>
+                    {/**
+                     * Group Div
+                     */}
+                    <div className="flex justify-between h-full">
+                        <div>
+                            <span className='text-custom-darkblue font-bold text-sm'>Group</span>
+                            <FontAwesomeIcon className="px-2 text-custom-gray text-sm" icon={faAngleRight} />
+                            <span className='text-custom-grey text-sm'>KFC</span>
+                        </div>
+                        <div className="flex justify-between h-full gap-4">
+                            <select id="countries" className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                <option selected>Month</option>
+                                <option value="US">January</option>
+                                <option value="CA">February</option>
+                                <option value="FR">March</option>
+                                <option value="DE">April</option>
+                                <option value="DE">May</option>
+                                <option value="DE">June</option>
+                                <option value="DE">July</option>
+                                <option value="DE">August</option>
+                                <option value="DE">September</option>
+                                <option value="DE">October</option>
+                                <option value="DE">November</option>
+                                <option value="DE">December</option>
+                            </select>
+                            <select id="countries" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                <option selected>Year</option>
+                                <option value="US">1997</option>
+                                <option value="CA">1998</option>
+                                <option value="FR">1999</option>
+                                <option value="DE">2000</option>
+                                <option value="DE">2001</option>
+                                <option value="DE">2002</option>
+                                <option value="DE">2003</option>
+                                <option value="DE">2004</option>
+                                <option value="DE">2005</option>
+                                <option value="DE">2006</option>
+                                <option value="DE">2007</option>
+                                <option value="DE">2008</option>
+                                <option value="DE">2009</option>
+                                <option value="DE">2010</option>
+                                <option value="DE">2011</option>
+                                <option value="DE">2012</option>
+                                <option value="DE">2013</option>
+                                <option value="DE">2014</option>
+                                <option value="DE">2015</option>
+                                <option value="DE">2016</option>
+                                <option value="DE">2017</option>
+                                <option value="DE">2018</option>
+                                <option value="DE">2019</option>
+                                <option value="DE">2020</option>
+                                <option value="DE">2021</option>
+                                <option value="DE">2022</option>
+                                <option value="DE">2023</option>
+                            </select>
+                        </div>
+                    </div>
+                    {/**
+                     * Energy card Div
+                     */}
+                    <div className="flex gap-4 my-4">
+                        {/**
+                         * Live outlet card
+                         */}
+                        <div className="w-1/5">
+                            <LiveOutletCard />
+                        </div>
+                        <div className="flex justify-between gap-2 h-full w-2/3">
+                            <EquipmentEnergyCard />
+                        </div>
+                        <div className="flex justify-between gap-2 h-full w-2/3">
+                            <SavingEnergyCard />
+                        </div>
+                    </div>
+                    {
+                        /**
+                         * 4 cards
+                         */
+                    }
+                    <div className="flex gap-4 justify-between">
+                        <YearlyEnergyCard Svg="/asserts/energy.png" Value="$22,793 Energy" Year="Saved / Year" BgColor="bg-blue-200" TextColor="text-blue-500"/>
+                        <YearlyEnergyCard Svg="/asserts/greycarbondioxide.svg" Value="89,000 kg CO2" Year="Saved / Year" BgColor="bg-grey-600" TextColor="text-gray-400/50"/>
+                        <YearlyEnergyCard Svg="/asserts/bigtree.svg" Value="1,400 Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-green-600"/>
+                        <YearlyEnergyCard Svg="/asserts/meals.png" Value="24.000 Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-orange-400"/>
                     </div>
                 </div>
-            </div>
+            }
+            
 
 
         </React.Fragment>

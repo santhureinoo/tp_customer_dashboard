@@ -806,7 +806,7 @@ const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, cl
                 <span className="2xl:text-xs text-extraSmall font-light">{SubTitle}</span>
             </div>}
 
-            <div className={`flex flex-row w-full gap-1 ${Title ? 'mt-4 justify-between' : 'p-6 justify-center'}`}>
+            <div className={`flex flex-row w-full ${Title ? 'mt-4 justify-between' : 'p-6 justify-center'}`}>
                 {PostfixDirection === 'vertical' ?
                     <React.Fragment>
                         <div className='flex flex-col'>
@@ -924,6 +924,134 @@ const LastAvailableTarif = ({ date }: any): JSX.Element => {
     )
 }
 
+/**
+ * Live outlet card
+ */
+const LiveOutlet = ({data}: any): JSX.Element => {
+    return (
+        <div className="flex flex-col gap-y-2 py-4">
+            <CardHeader Titles={['Live Outlets']}/>
+            <span className="font-bold text-5xl mt-4 text-center">
+                2
+            </span>
+        </div>
+    )
+}
+interface UsageCardProps {
+    Title?: String,
+    PreSubTitle?: String,
+    PostSubTitle?: any,
+    FirstPrefix?: any,
+    FirstValue?: any,
+    FirstPostfix?: any,
+    SecondPrefix?: any,
+    SecondValue?: any,
+    SecondPostfix?: any,
+    BgColor?: any,
+    Position?: String
+}
+
+/***
+ * Equipment Energy Card
+ */
+const EquipmentEnergy = (): JSX.Element => {
+    return (
+        <div className='flex flex-row gap-2 justify-between w-full h-full' >
+             <UsageCard BgColor={`bg-custom-blue-card`} PreSubTitle='W/O' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue="44,857" FirstPostfix="kWh" SecondPrefix="$" SecondValue="8,215"/>
+             <UsageCard BgColor={`bg-custom-green-card`} PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue="34,356" FirstPostfix="kWh" SecondPrefix="$" SecondValue="6,136"/>
+        </div>
+    )
+}
+
+/**
+ * Saving Energy Card
+ */
+const SavingEnergy = (): JSX.Element => {
+    return (
+        <div>
+            <div className='flex flex-row gap-2 justify-between w-full h-full' >
+             <UsageCard BgColor={`bg-custom-blue-card`}Title='Measured Savings' FirstValue="44,857" FirstPostfix="kWh" SecondPrefix="$" SecondValue="8,215" Position="vertical"/>
+             <UsageCard BgColor={`bg-custom-blue-card`} Title='Saving @ Tariff' FirstValue="34,356" FirstPostfix="kWh" SecondPrefix="$" SecondValue="6,136" Position="vertical"/>
+        </div>
+        </div>
+    )
+}
+
+/**
+ * Usage Card
+ */
+
+const UsageCard = ({Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, Position='horizontal'}: UsageCardProps): JSX.Element => {
+    return (
+        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray ${Position !== 'vertical' ? 'justify-between gap-8' : ''} h-auto 2xl:h-full w-2/3 ${BgColor}`}>
+            <div className={'flex flex-col'}>
+                <h2 className="font-bold text-sm">
+                    {Title}
+                </h2>
+                <div>
+                    <span className="font-bold text-sm mr-2">{PreSubTitle}</span>
+                    <span className="text-sm font-thin">{PostSubTitle}</span>
+                </div>
+            </div>
+            {
+                (Position == 'vertical') ? 
+                <div className='flex flex-col gap-6 relative'>
+                    <div className="text-left">
+                        <span className="font-bold text-xl">{FirstPrefix}</span>
+                        <span className="font-bold text-xl">{FirstValue}</span>
+                        <span className="text-lg">{FirstPostfix}</span>
+                    </div>
+                    <svg className="absolute inset-x-28" width="44" height="80" viewBox="0 0 44 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <line y1="-0.25" x2="118.955" y2="-0.25" transform="matrix(0.359554 -0.933124 0.860639 0.509216 0.714844 112)" stroke="#999999" stroke-width="0.5"/>
+                    </svg>
+                    <div className="text-right">
+                        <span className="font-bold text-xl">{SecondPrefix}</span>
+                        <span className="font-bold text-xl">{SecondValue}</span>
+                        <span className="text-lg">{SecondPostfix}</span>
+                    </div>
+                </div> :
+                <div className='flex flex-row justify-between mt-6'>
+                    <div>
+                        <span className="font-bold text-xl">{FirstPrefix}</span>
+                        <span className="font-bold text-xl">{FirstValue}</span>
+                        <span className="text-lg">{FirstPostfix}</span>
+                    </div>
+                    <div>
+                    <span className="font-bold text-xl">{SecondPrefix}</span>
+                        <span className="font-bold text-xl">{SecondValue}</span>
+                        <span className="text-lg">{SecondPostfix}</span>
+                    </div>
+                </div> 
+            }
+            
+        </div>
+    )
+}
+interface YearlyEnergyProps {
+    Svg?: any,
+    Value: any,
+    Year: any,
+    TextColor: any,
+    BgColor: any,
+}
+const YearlyEnergy = ({Svg, Value, Year, TextColor, BgColor}: YearlyEnergyProps): JSX.Element => {
+    return (
+        <div className="flex flex-col py-7 justify-between items-center h-auto">
+            <div className={`${BgColor} rounded-full w-3/4 h-3/4 text-center`}>
+                <img src={Svg} alt="" className="text-center"/>
+            </div>
+            <div className="flex flex-col mt-28">
+                <div className={`${TextColor} text-3xl`}>
+                    {Value}
+                </div>
+                <div className={`${TextColor} text-xl`}>
+                    {Year}
+                </div>
+            </div>
+        </div>
+    )
+}
+
 export const SavingMeterCard = Card(SavingMeter);
 export const SustainPerformanceCard = Card(SustainPerformance);
 export const FastFoodCard = Card(FastFood);
@@ -934,3 +1062,7 @@ export const BenchMarkComparisonCard = Card(BenchMarkComparison);
 export const EquipmentCard = Card(Equipment);
 export const LastAvailableTarifCard = Card(LastAvailableTarif);
 export const ChartCard = Card(CardSwitcher);
+export const LiveOutletCard = Card(LiveOutlet);
+export const EquipmentEnergyCard = Card(EquipmentEnergy);
+export const SavingEnergyCard = Card(SavingEnergy);
+export const YearlyEnergyCard = Card(YearlyEnergy);
