@@ -798,15 +798,15 @@ const Remarks = (): JSX.Element => {
 const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, className, RightSideValue, PostfixDirection = 'horizontal' }: StatusCardProps): JSX.Element => {
 
     return (
-        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray justify-between h-auto 2xl:h-full min-w-[148.75px] ${className}`}>
+        <div className={`flex flex-row p-2 rounded-lg border-2 border-custom-lightgray justify-between h-auto 2xl:h-full min-w-[148.75px] ${className}`}>
             {Title && <div className="text-left">
                 <h4 className="2xl:text-sm text-xs">
                     {Title}
                 </h4>
-                <span className="2xl:text-xs text-extraSmall font-light">{SubTitle}</span>
+                <span className=" text-extraSmall font-light">{SubTitle}</span>
             </div>}
 
-            <div className={`flex flex-row w-full gap-1 ${Title ? 'mt-4 justify-between' : 'p-6 justify-center'}`}>
+            <div className={`flex ${Title ? 'items-center justify-between' : 'p-6 justify-center'}`}>
                 {PostfixDirection === 'vertical' ?
                     <React.Fragment>
                         <div className='flex flex-col'>
@@ -814,9 +814,7 @@ const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, cl
                                 <span className={`text-sm ${textClassName}`}>
                                     {Prefix}
                                 </span>
-                                <span className={`text-4xl font-medium ${textClassName}`}>
-                                    {Value}
-                                </span>
+                                {Value}
                             </div>
                             <div>
                                 <span className={`text-xs self-end ${textClassName}`}>
@@ -896,30 +894,37 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
     return (
         <div className="flex flex-col gap-4 h-3/6">
             <div className="flex justify-between items-baseline">
-                <CardHeader Titles={['Equipment']} className='text-sm'/>
+                <CardHeader Titles={['Equipment']} className='text-sm' />
                 <select value={selectedType} onChange={((event) => { setSelectedType(event.currentTarget.value) })} className={`outline-none px-2 py-1 border-2 rounded-lg text-xs w-1/2`}>
                     <option value="ke">Kitchen Exhaust</option>
                     <option value="ac">Air Con</option>
                 </select>
             </div>
-            <div className="2xl:grid grid gap-x-2">
-                <StatusCard Title={'Quantity'} textClassName='text-l' className='bg-custom-blue-card text-custom-blue-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.quantity)} />
-                <StatusCard Title={'Baseline'} textClassName='text-l' className='bg-custom-red-card text-custom-red-card-font h-3/4 my-1' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} />
-                <StatusCard Title={'Energy Saved'} textClassName='text-l' className='bg-custom-green-card text-custom-green-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.energySaved)} Postfix={'kWh'} />
-                <StatusCard Title={'Cost Saved'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.costSaved)} Prefix={'$'} />
+            <div className="2xl:grid grid gap-y-2">
+                <StatusCard Title={'Baseline'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} />
+                {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
+                <StatusCard Title={'Savings @ Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} /> */}
+
+                {/* <StatusCard Title={'Quantity'} textClassName='text-l' className='bg-custom-blue-card text-custom-blue-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.quantity)} /> */}
+
+                {/* <StatusCard Title={'Energy Saved'} textClassName='text-l' className='bg-custom-green-card text-custom-green-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.energySaved)} Postfix={'kWh'} />
+                <StatusCard Title={'Cost Saved'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.costSaved)} Prefix={'$'} /> */}
             </div>
         </div>
     )
 }
 
-const LastAvailableTarif = ({ date }: any): JSX.Element => {
+const ValueFirst = ({ title, subTitle, value, valueColor }: any): JSX.Element => {
     return (
         <div className="flex flex-col gap-y-2">
             <div>
-                <CardHeader Titles={['Last Available Tariff']} />
-                <span className='text-custom-gray'>As of <span className="text-custom-darkblue">{date}</span></span>
+                <CardHeader Titles={[title]} />
+                <span className='text-custom-gray text-custom-xs'>{subTitle}</span>
             </div>
-            <StatusCard className='bg-custom-green-card text-custom-green-card-font' Value={"$12.5"} Postfix={"cent/kWh"} />
+            <span className={`text-end text-custom-4xl text-${valueColor}`}>
+                {value}
+            </span>
+            {/* <StatusCard className='bg-custom-green-card text-custom-green-card-font' Value={"$12.5"} Postfix={"cent/kWh"} /> */}
         </div>
     )
 }
@@ -932,5 +937,5 @@ export const RemarksCard = Card(Remarks);
 // export const ExpectedSavingsCard = Card(ExpectedSavings);
 export const BenchMarkComparisonCard = Card(BenchMarkComparison);
 export const EquipmentCard = Card(Equipment);
-export const LastAvailableTarifCard = Card(LastAvailableTarif);
+export const ValueFirstCard = Card(ValueFirst);
 export const ChartCard = Card(CardSwitcher);

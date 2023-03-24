@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
 import { customer, group, outlet, results } from "../common/types";
-import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, FastFoodCard, LastAvailableTarifCard, RankAndOutletCard, RemarksCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard } from "./CardContent";
+import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, RankAndOutletCard, RemarksCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard, ValueFirstCard } from "./CardContent";
 import ClientOnly from "./ClientOnly";
 import { v4 as uuidv4 } from 'uuid';
 import CustomSelect from "./cardcomponents/CustomSelect";
@@ -306,12 +306,18 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <div className="col-span-4">
                                     <SustainPerformanceCard total={totalPerYear} />
                                 </div>
-                                <div>
-                                    <div className="mb-2">
+                                <div className="flex flex-col gap-y-2">
+                                    <div>
                                         <BenchMarkComparisonCard totalKWHs={totalKWHs} />
                                     </div>
                                     <div>
                                         <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
+                                    </div>
+                                    <div>
+                                        <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={'$0,295'} valueColor={'custom-blue-card-font'} />
+                                    </div>
+                                    <div>
+                                        <ValueFirstCard title={'Savings @ Tariff'} subTitle={'$0,295'} value={'$196,53'} valueColor={'custom-green-card-font'} />
                                     </div>
                                 </div>
                                 {/* <div>
@@ -326,9 +332,9 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <div>
                                     {/* <RemarksCard /> */}
                                 </div>
-                                {/* <div>
-                                    <LastAvailableTarifCard date={getLastResultDate} />
-                                </div> */}
+                                <div>
+                                    {/* <LastAvailableTarifCard date={lastestLiveDate} /> */}
+                                </div>
                             </div>
                         </ClientOnly>
                     </div>
