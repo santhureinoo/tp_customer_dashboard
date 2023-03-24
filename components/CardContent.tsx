@@ -76,7 +76,7 @@ ChartJS.register(
 );
 
 interface StatusCardProps {
-    Title?: String, SubTitle?: String, className: string, textClassName?: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any, PostfixDirection?: 'horizontal' | 'vertical'
+    Title?: String, disableWidthFull?: boolean, SubTitle?: String, className: string, textClassName?: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any, PostfixDirection?: 'horizontal' | 'vertical'
 }
 
 const SavingMeter = ({ date, outletId, kiloWatHour }: any): JSX.Element => {
@@ -806,7 +806,7 @@ const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, cl
                 <span className=" text-extraSmall font-light">{SubTitle}</span>
             </div>}
 
-            <div className={`flex ${Title ? 'items-center justify-between' : 'p-6 justify-center'}`}>
+            <div className={`flex flex-row w-full ${Title ? 'mt-4 justify-between' : 'p-6 justify-center'}`}>
                 {PostfixDirection === 'vertical' ?
                     <React.Fragment>
                         <div className='flex flex-col'>
@@ -848,6 +848,56 @@ const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, cl
         </div>
     )
 }
+
+const StatusHorizontalCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, className, RightSideValue, PostfixDirection = 'horizontal', disableWidthFull = false }: StatusCardProps): JSX.Element => {
+
+    return (
+        <div className={`flex flex-row p-2 rounded-lg border-2 border-custom-lightgray justify-between h-auto 2xl:h-full min-w-[148.75px] ${className}`}>
+            {Title && <div className="text-left">
+                <h4 className="2xl:text-sm text-xs">
+                    {Title}
+                </h4>
+                <span className=" text-extraSmall font-light">{SubTitle}</span>
+            </div>}
+
+            <div className={`flex flex-row ${Title ? 'items-center justify-between' : 'p-6 justify-center'}`}>
+                {PostfixDirection === 'vertical' ?
+                    <React.Fragment>
+                        <div className='flex flex-col'>
+                            <div>
+                                <span className={`text-sm ${textClassName}`}>
+                                    {Prefix}
+                                </span>
+                                {Value}
+                            </div>
+                        </div>
+                        <div>
+                            {RightSideValue}
+                        </div>
+
+                    </React.Fragment>
+                    : <React.Fragment>
+                        <div>
+                            <span className={`${textClassName}`}>
+                                {Prefix}
+                            </span>
+                            <span className={`${textClassName} font-medium `}>
+                                {Value}
+                            </span>
+                            <span className={`self-end ${textClassName}`}>
+                                {Postfix}
+                            </span>
+                        </div>
+                        <div>
+                            {RightSideValue}
+                        </div>
+                    </React.Fragment>}
+
+            </div>
+        </div>
+    )
+}
+
 
 interface EqptProps {
     outlet?: outlet;
@@ -901,7 +951,7 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                 </select>
             </div>
             <div className="2xl:grid grid gap-y-2">
-                <StatusCard Title={'Baseline'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} />
+                <StatusHorizontalCard Title={'Baseline'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} />
                 {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
                 <StatusCard Title={'Savings @ Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} /> */}
 
@@ -919,12 +969,141 @@ const ValueFirst = ({ title, subTitle, value, valueColor }: any): JSX.Element =>
         <div className="flex flex-col gap-y-2">
             <div>
                 <CardHeader Titles={[title]} />
-                <span className='text-custom-gray text-custom-xs'>{subTitle}</span>
+                <span className="text-extraSmall">{subTitle}</span>
+                {/* <span className='text-custom-gray'>As of <span className="text-custom-darkblue">{subTitle}</span></span> */}
             </div>
-            <span className={`text-end text-custom-4xl text-${valueColor}`}>
+            <span className={`text-custom-4xl text-end text-${valueColor}`}>
                 {value}
             </span>
             {/* <StatusCard className='bg-custom-green-card text-custom-green-card-font' Value={"$12.5"} Postfix={"cent/kWh"} /> */}
+        </div>
+    )
+}
+
+/**
+ * Live outlet card
+ */
+const LiveOutlet = ({ data }: any): JSX.Element => {
+    return (
+        <div className="flex flex-col gap-y-2 py-4">
+            <CardHeader Titles={['Live Outlets']} />
+            <span className="font-bold text-5xl mt-4 text-center">
+                2
+            </span>
+        </div>
+    )
+}
+interface UsageCardProps {
+    Title?: String,
+    PreSubTitle?: String,
+    PostSubTitle?: any,
+    FirstPrefix?: any,
+    FirstValue?: any,
+    FirstPostfix?: any,
+    SecondPrefix?: any,
+    SecondValue?: any,
+    SecondPostfix?: any,
+    BgColor?: any,
+    Position?: String
+}
+
+/***
+ * Equipment Energy Card
+ */
+const EquipmentEnergy = (): JSX.Element => {
+    return (
+        <div className='flex flex-row gap-2 justify-between w-full h-full' >
+            <UsageCard BgColor={`bg-custom-blue-card`} PreSubTitle='W/O' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue="44,857" FirstPostfix="kWh" SecondPrefix="$" SecondValue="8,215" />
+            <UsageCard BgColor={`bg-custom-green-card`} PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue="34,356" FirstPostfix="kWh" SecondPrefix="$" SecondValue="6,136" />
+        </div>
+    )
+}
+
+/**
+ * Saving Energy Card
+ */
+const SavingEnergy = (): JSX.Element => {
+    return (
+        <div>
+            <div className='flex flex-row gap-2 justify-between w-full h-full' >
+                <UsageCard BgColor={`bg-custom-blue-card`} Title='Measured Savings' FirstValue="44,857" FirstPostfix="kWh" SecondPrefix="$" SecondValue="8,215" Position="vertical" />
+                <UsageCard BgColor={`bg-custom-blue-card`} Title='Saving @ Tariff' FirstValue="34,356" FirstPostfix="kWh" SecondPrefix="$" SecondValue="6,136" Position="vertical" />
+            </div>
+        </div>
+    )
+}
+
+/**
+ * Usage Card
+ */
+
+const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
+    return (
+        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray ${Position !== 'vertical' ? 'justify-between gap-8' : ''} h-auto 2xl:h-full w-2/3 ${BgColor}`}>
+            <div className={'flex flex-col'}>
+                <h2 className="font-bold text-sm">
+                    {Title}
+                </h2>
+                <div>
+                    <span className="font-bold text-sm mr-2">{PreSubTitle}</span>
+                    <span className="text-sm font-thin">{PostSubTitle}</span>
+                </div>
+            </div>
+            {
+                (Position == 'vertical') ?
+                    <div className='flex flex-col gap-6 relative'>
+                        <div className="text-left">
+                            <span className="font-bold text-xl">{FirstPrefix}</span>
+                            <span className="font-bold text-xl">{FirstValue}</span>
+                            <span className="text-lg">{FirstPostfix}</span>
+                        </div>
+                        <svg className="absolute inset-x-28" width="44" height="80" viewBox="0 0 44 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <line y1="-0.25" x2="118.955" y2="-0.25" transform="matrix(0.359554 -0.933124 0.860639 0.509216 0.714844 112)" stroke="#999999" strokeWidth="0.5" />
+                        </svg>
+                        <div className="text-right">
+                            <span className="font-bold text-xl">{SecondPrefix}</span>
+                            <span className="font-bold text-xl">{SecondValue}</span>
+                            <span className="text-lg">{SecondPostfix}</span>
+                        </div>
+                    </div> :
+                    <div className='flex flex-row justify-between mt-6'>
+                        <div>
+                            <span className="font-bold text-xl">{FirstPrefix}</span>
+                            <span className="font-bold text-xl">{FirstValue}</span>
+                            <span className="text-lg">{FirstPostfix}</span>
+                        </div>
+                        <div>
+                            <span className="font-bold text-xl">{SecondPrefix}</span>
+                            <span className="font-bold text-xl">{SecondValue}</span>
+                            <span className="text-lg">{SecondPostfix}</span>
+                        </div>
+                    </div>
+            }
+
+        </div>
+    )
+}
+interface YearlyEnergyProps {
+    Svg?: any,
+    Value: any,
+    Year: any,
+    TextColor: any,
+    BgColor: any,
+}
+const YearlyEnergy = ({ Svg, Value, Year, TextColor, BgColor }: YearlyEnergyProps): JSX.Element => {
+    return (
+        <div className="flex flex-col py-7 justify-between items-center h-auto">
+            <div className={`${BgColor} rounded-full w-3/4 h-3/4 text-center`}>
+                <img src={Svg} alt="" className="text-center" />
+            </div>
+            <div className="flex flex-col mt-28">
+                <div className={`${TextColor} text-3xl`}>
+                    {Value}
+                </div>
+                <div className={`${TextColor} text-xl`}>
+                    {Year}
+                </div>
+            </div>
         </div>
     )
 }
@@ -939,3 +1118,7 @@ export const BenchMarkComparisonCard = Card(BenchMarkComparison);
 export const EquipmentCard = Card(Equipment);
 export const ValueFirstCard = Card(ValueFirst);
 export const ChartCard = Card(CardSwitcher);
+export const LiveOutletCard = Card(LiveOutlet);
+export const EquipmentEnergyCard = Card(EquipmentEnergy);
+export const SavingEnergyCard = Card(SavingEnergy);
+export const YearlyEnergyCard = Card(YearlyEnergy);
