@@ -4,6 +4,8 @@ import PillButton from "./cardcomponents/PillButton";
 import SavingMeterDigits from "./cardcomponents/SavingMeterDigits";
 import CardHeader from "./CardHeader";
 import Jumbotron from "./cardcomponents/Jumbotron";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSortUp } from '@fortawesome/free-solid-svg-icons';
 import Image from "next/image";
 import ProgressiveMeter from "./cardcomponents/ProgressiveMeter";
 import BenchMarkMeter from "./cardcomponents/BenchMarkMeter";
@@ -1003,7 +1005,9 @@ interface UsageCardProps {
     SecondPrefix?: any,
     SecondValue?: any,
     SecondPostfix?: any,
+    TextColor?: any,
     BgColor?: any,
+    Icon: boolean,
     Position?: String
 }
 
@@ -1013,8 +1017,8 @@ interface UsageCardProps {
 const EquipmentEnergy = (): JSX.Element => {
     return (
         <div className='flex flex-row gap-2 justify-between w-full h-full' >
-            <UsageCard BgColor={`bg-custom-blue-card`} PreSubTitle='W/O' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue="44,857" FirstPostfix="kWh" SecondPrefix="$" SecondValue="8,215" />
-            <UsageCard BgColor={`bg-custom-green-card`} PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue="34,356" FirstPostfix="kWh" SecondPrefix="$" SecondValue="6,136" />
+            <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' PreSubTitle='W/O' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue="44,857" FirstPostfix="kWh" SecondPrefix="$" SecondValue="8,215" Icon={false} />
+            <UsageCard BgColor={`bg-custom-green-card`} TextColor='text-custom-green-card-font' PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue="34,356" FirstPostfix="kWh" SecondPrefix="$" SecondValue="6,136" Icon={false}/>
         </div>
     )
 }
@@ -1026,8 +1030,8 @@ const SavingEnergy = (): JSX.Element => {
     return (
         <div>
             <div className='flex flex-row gap-2 justify-between w-full h-full' >
-                <UsageCard BgColor={`bg-custom-blue-card`} Title='Measured Savings' FirstValue="44,857" FirstPostfix="kWh" SecondPrefix="$" SecondValue="8,215" Position="vertical" />
-                <UsageCard BgColor={`bg-custom-blue-card`} Title='Saving @ Tariff' FirstValue="34,356" FirstPostfix="kWh" SecondPrefix="$" SecondValue="6,136" Position="vertical" />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue="44,857" FirstPostfix="kWh" SecondPrefix="$" SecondValue="8,215" Position="vertical" Icon={false}/>
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Saving @ Tariff' FirstValue="34,356" FirstPostfix="kWh" SecondPrefix="$" SecondValue="6,136" Position="vertical"Icon={true} />
             </div>
         </div>
     )
@@ -1036,46 +1040,51 @@ const SavingEnergy = (): JSX.Element => {
 /**
  * Usage Card
  */
-
-const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
+const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, TextColor,Icon = false, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
     return (
         <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray ${Position !== 'vertical' ? 'justify-between gap-8' : ''} h-auto 2xl:h-full w-2/3 ${BgColor}`}>
             <div className={'flex flex-col'}>
-                <h2 className="font-bold text-sm">
-                    {Title}
-                </h2>
+                {
+                    (Icon == true) ? 
+                    <div className="flex">
+                       <h2 className="font-bold text-sm text">{Title} </h2> <FontAwesomeIcon className="px-2 text-2xl" icon={faSortUp} />
+                    </div> :
+                    <h2 className="font-bold text-sm">
+                        {Title}
+                    </h2>
+                }
                 <div>
-                    <span className="font-bold text-sm mr-2">{PreSubTitle}</span>
-                    <span className="text-sm font-thin">{PostSubTitle}</span>
+                    <span className={`font-bold text-sm mr-2 ${TextColor}`}>{PreSubTitle}</span>
+                    <span className={`text-sm font-thin ${TextColor}`}>{PostSubTitle}</span>
                 </div>
             </div>
             {
                 (Position == 'vertical') ?
-                    <div className='flex flex-col gap-6 relative'>
+                    <div className='flex flex-col gap-5 relative'>
                         <div className="text-left">
-                            <span className="font-bold text-xl">{FirstPrefix}</span>
-                            <span className="font-bold text-xl">{FirstValue}</span>
-                            <span className="text-lg">{FirstPostfix}</span>
+                            <span className={`font-bold text-2xl ${TextColor}`}>{FirstPrefix}</span>
+                            <span className={`font-bold text-2xl ${TextColor}`}>{FirstValue}</span>
+                            <span className={`text-sm ${TextColor}`}>{FirstPostfix}</span>
                         </div>
                         <svg className="absolute inset-x-28" width="44" height="80" viewBox="0 0 44 112" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <line y1="-0.25" x2="118.955" y2="-0.25" transform="matrix(0.359554 -0.933124 0.860639 0.509216 0.714844 112)" stroke="#999999" strokeWidth="0.5" />
                         </svg>
                         <div className="text-right">
-                            <span className="font-bold text-xl">{SecondPrefix}</span>
-                            <span className="font-bold text-xl">{SecondValue}</span>
-                            <span className="text-lg">{SecondPostfix}</span>
+                            <span className={`font-bold text-2xl ${TextColor}`}>{SecondPrefix}</span>
+                            <span className={`font-bold text-2xl ${TextColor}`}>{SecondValue}</span>
+                            <span className={`text-sm ${TextColor}`}>{SecondPostfix}</span>
                         </div>
                     </div> :
                     <div className='flex flex-row justify-between mt-6'>
                         <div>
-                            <span className="font-bold text-xl">{FirstPrefix}</span>
-                            <span className="font-bold text-xl">{FirstValue}</span>
-                            <span className="text-lg">{FirstPostfix}</span>
+                            <span className={`font-bold text-2xl ${TextColor}`}>{FirstPrefix}</span>
+                            <span className={`font-bold text-2xl ${TextColor}`}>{FirstValue}</span>
+                            <span className={`text-sm ${TextColor}`}>{FirstPostfix}</span>
                         </div>
                         <div>
-                            <span className="font-bold text-xl">{SecondPrefix}</span>
-                            <span className="font-bold text-xl">{SecondValue}</span>
-                            <span className="text-lg">{SecondPostfix}</span>
+                            <span className={`font-bold text-2xl ${TextColor}`}>{SecondPrefix}</span>
+                            <span className={`font-bold text-2xl ${TextColor}`}>{SecondValue}</span>
+                            <span className={`text-sm ${TextColor}`}>{SecondPostfix}</span>
                         </div>
                     </div>
             }
@@ -1083,24 +1092,30 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
         </div>
     )
 }
+
 interface YearlyEnergyProps {
     Svg?: any,
     Value: any,
     Year: any,
     TextColor: any,
     BgColor: any,
+    Height?: any,
+    Width?: any
 }
-const YearlyEnergy = ({ Svg, Value, Year, TextColor, BgColor }: YearlyEnergyProps): JSX.Element => {
+/**
+ * Yearly Energy Card
+ */
+const YearlyEnergy = ({ Svg, Value, Year, TextColor, BgColor, Height, Width }: YearlyEnergyProps): JSX.Element => {
     return (
-        <div className="flex flex-col py-7 justify-between items-center h-auto">
-            <div className={`${BgColor} rounded-full w-3/4 h-3/4 text-center`}>
-                <img src={Svg} alt="" className="text-center" />
+        <div className="flex flex-col pt-7 justify-between items-center h-auto col-span-1">
+            <div className={`${BgColor} flex justify-center rounded-full items-center w-full h-[250px]`}>
+                <img src={Svg} alt="" className="text-center" height={`${Height}`} width={`${Width}`}/>
             </div>
-            <div className="flex flex-col mt-28">
-                <div className={`${TextColor} text-3xl`}>
+            <div className="flex flex-col my-16 ">
+                <div className={`${TextColor} text-3xl font-medium`}>
                     {Value}
                 </div>
-                <div className={`${TextColor} text-xl`}>
+                <div className={`${TextColor} text-xl font-medium`}>
                     {Year}
                 </div>
             </div>

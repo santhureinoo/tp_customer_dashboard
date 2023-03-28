@@ -366,7 +366,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             <div>
                                 <span className='text-custom-darkblue font-bold text-sm'>Group</span>
                                 <FontAwesomeIcon className="px-2 text-custom-gray text-sm" icon={faAngleRight} />
-                                <span className='text-custom-grey text-sm'>KFC</span>
+                                <span className='text-custom-gray text-sm font-bold'>KFC</span>
                             </div>
                             <div className="flex justify-between h-full gap-4">
                                 <select id="countries" className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
@@ -438,11 +438,11 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                              * 4 cards
                              */
                         }
-                        <div className="flex gap-4 justify-between">
-                            <YearlyEnergyCard Svg="/asserts/energy.png" Value="$22,793 Energy" Year="Saved / Year" BgColor="bg-blue-200" TextColor="text-blue-500" />
-                            <YearlyEnergyCard Svg="/asserts/greycarbondioxide.svg" Value="89,000 kg CO2" Year="Saved / Year" BgColor="bg-grey-600" TextColor="text-gray-400/50" />
-                            <YearlyEnergyCard Svg="/asserts/bigtree.svg" Value="1,400 Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-green-600" />
-                            <YearlyEnergyCard Svg="/asserts/meals.png" Value="24.000 Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-orange-400" />
+                        <div className="flex gap-5 justify-between">
+                            <YearlyEnergyCard Svg="/asserts/energy-icon.png" Value="$22,793 Energy" Year="Saved / Year" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="90" Width="90" />
+                            <YearlyEnergyCard Svg="/asserts/greycarbondioxide.svg" Value="89,000 kg CO2" Year="Saved / Year" BgColor="bg-grey-600" TextColor="text-custom-gray" />
+                            <YearlyEnergyCard Svg="/asserts/bigtree.svg" Value="1,400 Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-custom-green-card-font" />
+                            <YearlyEnergyCard Svg="/asserts/meals.png" Value="24.000 Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="150" Width="150"/>
                         </div>
                     </div>
             }
