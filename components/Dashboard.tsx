@@ -1,4 +1,5 @@
 import { gql, useQuery } from "@apollo/client";
+import { numberWithCommas } from '../common/helper';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
@@ -17,6 +18,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
     const [currentOutletID, setCurrentOutletID] = React.useState("");
     const [title, setTitle] = React.useState(["Outlet", ""]);
+    const [group, setGroup] = React.useState("");
     const [totalKWHs, setTotalKWHs] = React.useState<{
         MinKWH: number,
         MaxKWH: number,
@@ -151,9 +153,25 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             }
         }
     };
+    //Group Query by Id
+    const getGroupQuery = gql`query Fetchgroup($GroupWhereUniqueInput: GroupWhereUniqueInput!) {
+        group (where: $GroupWhereUniqueInput){
+            group_id,
+            group_name
+        }
+         
+     }`
+
+     const getGroupVariable = {
+        "variables": 
+            {
+                "GroupWhereUniqueInput": {"group_id": groupId}
+            }
+     }
     const getResultsResult = useQuery(getResultsQuery, getResultsVariable);
 
     React.useEffect(() => {
+    //    console.log(getGroupByIdResult.data.group.group_name);
         if (getResultsResult.data && getResultsResult.data.findManyResults) {
 
             const currData = getResultsResult.data.findManyResults as results[];
@@ -223,6 +241,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     }, [getFindFirstLastestReportDateResult.data])
 
     React.useEffect(() => {
+        console.log(getOutletsByIdResult.data)
         if (getOutletsByIdResult.data && getOutletsByIdResult.data.findFirstGroup) {
             const currentOutlets: outlet[] = [];
             const group: group | undefined = getOutletsByIdResult.data.findFirstGroup;
@@ -278,6 +297,13 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
         </h3>)
     }, [title]);
+
+    const getGroupByIdResult = useQuery(getGroupQuery, getGroupVariable)
+    React.useEffect(()=> {
+        if(getGroupByIdResult.data) {
+            setGroup(getGroupByIdResult.data.group.group_name)
+        }
+    },[getGroupByIdResult.data])
 
     return (
         <React.Fragment>
@@ -366,11 +392,11 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             <div>
                                 <span className='text-custom-darkblue font-bold text-sm'>Group</span>
                                 <FontAwesomeIcon className="px-2 text-custom-gray text-sm" icon={faAngleRight} />
-                                <span className='text-custom-gray text-sm font-bold'>KFC</span>
+                                <span className='text-custom-gray text-sm font-bold'>{group}</span>
                             </div>
                             <div className="flex justify-between h-full gap-4">
                                 <select id="countries" className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                    <option selected>Month</option>
+                                    <option value="">Month</option>
                                     <option value="US">January</option>
                                     <option value="CA">February</option>
                                     <option value="FR">March</option>
@@ -385,7 +411,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     <option value="DE">December</option>
                                 </select>
                                 <select id="countries" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                    <option selected>Year</option>
+                                    <option value="">Year</option>
                                     <option value="US">1997</option>
                                     <option value="CA">1998</option>
                                     <option value="FR">1999</option>
@@ -439,10 +465,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                              */
                         }
                         <div className="flex gap-5 justify-between">
-                            <YearlyEnergyCard Svg="/asserts/energy-icon.png" Value="$22,793 Energy" Year="Saved / Year" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="90" Width="90" />
-                            <YearlyEnergyCard Svg="/asserts/greycarbondioxide.svg" Value="89,000 kg CO2" Year="Saved / Year" BgColor="bg-grey-600" TextColor="text-custom-gray" />
-                            <YearlyEnergyCard Svg="/asserts/bigtree.svg" Value="1,400 Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-custom-green-card-font" />
-                            <YearlyEnergyCard Svg="/asserts/meals.png" Value="24.000 Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="150" Width="150"/>
+                            <YearlyEnergyCard Svg="/asserts/energy-icon.png" Prefix="$" Value={numberWithCommas(totalPerYear.energy)} Postfix="Energy" Year="Saved / Year" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="90" Width="90" />
+                            <YearlyEnergyCard Svg="/asserts/greycarbondioxide.svg" Value={numberWithCommas(totalPerYear.co2)} Postfix="Kg CO2" Year="Saved / Year" BgColor="bg-grey-600" TextColor="text-custom-gray" />
+                            <YearlyEnergyCard Svg="/asserts/bigtree.svg" Value={numberWithCommas(totalPerYear.energy * 0.00084)} Postfix="Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-custom-green-card-font" />
+                            <YearlyEnergyCard Svg="/asserts/meals.png" Value={numberWithCommas(totalPerYear.energy * 2)} Postfix="Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="150" Width="150"/>
                         </div>
                     </div>
             }

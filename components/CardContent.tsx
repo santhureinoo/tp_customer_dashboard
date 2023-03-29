@@ -1094,6 +1094,8 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
 }
 
 interface YearlyEnergyProps {
+    Postfix?: any,
+    Prefix?: any,
     Svg?: any,
     Value: any,
     Year: any,
@@ -1105,7 +1107,7 @@ interface YearlyEnergyProps {
 /**
  * Yearly Energy Card
  */
-const YearlyEnergy = ({ Svg, Value, Year, TextColor, BgColor, Height, Width }: YearlyEnergyProps): JSX.Element => {
+const YearlyEnergy = ({Prefix, Svg, Value, Year, TextColor, Postfix, BgColor, Height, Width }: YearlyEnergyProps): JSX.Element => {
     return (
         <div className="flex flex-col pt-7 justify-between items-center h-auto col-span-1">
             <div className={`${BgColor} flex justify-center rounded-full items-center w-full h-[250px]`}>
@@ -1113,7 +1115,7 @@ const YearlyEnergy = ({ Svg, Value, Year, TextColor, BgColor, Height, Width }: Y
             </div>
             <div className="flex flex-col my-16 ">
                 <div className={`${TextColor} text-3xl font-medium`}>
-                    {Value}
+                    {Prefix} {Value} {Postfix}
                 </div>
                 <div className={`${TextColor} text-xl font-medium`}>
                     {Year}
