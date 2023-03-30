@@ -140,12 +140,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 "equals": groupId
                 }
             },
-            ...(selectedMonth !== 'All' && selectedYear !== 'All') && {
-                "resultWhere2": {
-                    "outlet_date": {
-                        "contains": '01/' + selectedMonth + '/' + selectedYear
-                    }
+            ...(selectedMonth !== 'All' || selectedYear !== 'All') && {
+            "resultsWhere2": {
+                "outlet_date": {
+                  "contains": "01/" + selectedMonth + "/" + selectedYear
                 }
+              }
             }
         }
     }
@@ -220,7 +220,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 co2Saving: tempCo2Saving
             }
 
-            setSummaryResults(tempResult)
+            setSummaryResults(result=> ({
+                ...summaryResults,
+                ...tempResult
+            }))
             console.log(summaryResults)
         }
     },[selectedMonth,selectedYear,getSummaryResult])
