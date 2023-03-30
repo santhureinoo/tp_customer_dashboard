@@ -143,7 +143,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             ...(selectedMonth !== 'All' && selectedYear !== 'All') && {
                 "resultWhere2": {
                     "outlet_date": {
-                        "contains": '01/' +selectedMonth + '/' + selectedYear
+                        "contains": '01/' + selectedMonth + '/' + selectedYear
                     }
                 }
             }
@@ -177,6 +177,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
     //useEffect hook for summary result 
     React.useEffect(()=> {
+        console.log(getSummaryResult)
         if(getSummaryResult.data) {
             const outletList = getSummaryResult.data.findFirstGroup.customers[0].outlet
     
@@ -192,7 +193,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             let tempCo2Saving = 0
     
             //Sum up all the values from results of outlets
-            outletList.forEach(outlet=> {
+            outletList.forEach((outlet: any)=> {
                 if(outlet.results.length > 0) {
 
                     tempUsageKwWithTP += (outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_kW as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_kW) : 0)
@@ -278,12 +279,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
      }
     //Select the month function
 
-    const handleMonthSelect = (event) => {
+    const handleMonthSelect = (event: any) => {
         setSelectedMonth(event.target.value)
     }
     
     //Select the year function
-    const handleYearSelect = (event) => {
+    const handleYearSelect = (event: any) => {
         setSelectedYear(event.target.value)
     }
     
