@@ -19,6 +19,21 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     const [currentOutletID, setCurrentOutletID] = React.useState("");
     const [title, setTitle] = React.useState(["Outlet", ""]);
     const [group, setGroup] = React.useState("");
+    //summary result
+    const [summaryResults, setSummaryResults] = React.useState({
+        usageKwWithTP: 0,
+        usageExpenseWithTP: 0,
+        usageKwWOTP: 0,
+        usageExpenseWOTP: 0,
+        measureKw: 0,
+        measureExpense: 0,
+        tariffExpense: 0,
+        energySaving: 0,
+        co2Saving: 0
+    })
+
+    const [selectedMonth, setSelectedMonth] = React.useState("All");
+    const [selectedYear, setSelectedYear] = React.useState("All");
     const [totalKWHs, setTotalKWHs] = React.useState<{
         MinKWH: number,
         MaxKWH: number,
@@ -117,6 +132,99 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             }
         }
     }
+//summary results query and variable
+    const findFirstGroupSummaryVariable = {
+        "variables": {
+            "where": {
+                "group_id": {
+                "equals": groupId
+                }
+            },
+            ...(selectedMonth !== 'All' && selectedYear !== 'All') && {
+                "resultWhere2": {
+                    "outlet_date": {
+                        "contains": '01/' +selectedMonth + '/' + selectedYear
+                    }
+                }
+            }
+        }
+    }
+
+    const findFirstGroupSummaryQuery = gql`
+    query Query($where: GroupWhereInput, $resultsWhere2: ResultsWhereInput) {
+        findFirstGroup(where: $where) {
+          group_id
+          group_name
+          customers {
+            outlet {
+              results(where: $resultsWhere2) {
+                outlet_eqpt_energy_usage_without_TP_month_kW
+                outlet_eqpt_energy_usage_without_TP_month_expenses
+                outlet_eqpt_energy_usage_with_TP_month_kW
+                outlet_eqpt_energy_usage_with_TP_month_expenses
+                outlet_measured_savings_kWh
+                outlet_measured_savings_expenses
+                savings_tariff_expenses
+                tp_sales_expenses
+                co2_savings_kg
+              }
+            }
+          }
+        }
+      }`
+
+    const getSummaryResult = useQuery(findFirstGroupSummaryQuery,findFirstGroupSummaryVariable)
+
+    //useEffect hook for summary result 
+    React.useEffect(()=> {
+        if(getSummaryResult.data) {
+            const outletList = getSummaryResult.data.findFirstGroup.customers[0].outlet
+    
+            //temp value for results
+            let tempUsageKwWithTP = 0
+            let tempUsageExpenseWithTP = 0
+            let tempUsageKwWOTP = 0
+            let tempUsageExpenseWOTP = 0
+            let tempMeasureKw = 0
+            let tempMeasureExpense = 0
+            let tempTariffExpense = 0
+            let tempEnergySaving = 0
+            let tempCo2Saving = 0
+    
+            //Sum up all the values from results of outlets
+            outletList.forEach(outlet=> {
+                if(outlet.results.length > 0) {
+
+                    tempUsageKwWithTP += (outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_kW as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_kW) : 0)
+                    tempUsageExpenseWithTP += (outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
+                    tempUsageKwWOTP += (outlet.results[0].outlet_eqpt_energy_usage_without_TP_month_kW as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_without_TP_month_kW) : 0)
+                    tempUsageExpenseWOTP += (outlet.results[0].outlet_eqpt_energy_usage_without_TP_month_expenses as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_without_TP_month_expenses) : 0)
+                    tempMeasureKw += (outlet.results[0].outlet_measured_savings_kWh as String ? parseInt(outlet.results[0].outlet_measured_savings_kWh) : 0)
+                    tempMeasureExpense += (outlet.results[0].outlet_measured_savings_expenses as String ? parseInt(outlet.results[0].outlet_measured_savings_expenses) : 0)
+                    tempTariffExpense += (outlet.results[0].savings_tariff_expenses as String ? parseInt(outlet.results[0].savings_tariff_expenses) : 0)
+                    tempEnergySaving += (outlet.results[0].tp_sales_expenses as String ? parseInt(outlet.results[0].tp_sales_expenses) : 0)
+                    tempCo2Saving += (outlet.results[0].co2_savings_kg as String ? parseInt(outlet.results[0].co2_savings_kg) : 0)
+                }
+            })
+
+            let tempResult = {
+                usageKwWithTP: tempUsageKwWithTP,
+                usageExpenseWithTP: tempUsageExpenseWithTP,
+                usageKwWOTP: tempUsageKwWOTP,
+                usageExpenseWOTP: tempUsageExpenseWOTP,
+                measureKw: tempMeasureKw,
+                measureExpense: tempMeasureExpense,
+                tariffExpense: tempTariffExpense,
+                energySaving: tempEnergySaving,
+                co2Saving: tempCo2Saving
+            }
+
+            setSummaryResults(tempResult)
+            console.log(summaryResults)
+        }
+    },[selectedMonth,selectedYear,getSummaryResult])
+
+    
     const getResultsQuery = gql`
     query FindManyResults($where: ResultsWhereInput) {
         findManyResults(where: $where) {
@@ -168,14 +276,23 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 "GroupWhereUniqueInput": {"group_id": groupId}
             }
      }
+    //Select the month function
+
+    const handleMonthSelect = (event) => {
+        setSelectedMonth(event.target.value)
+    }
+    
+    //Select the year function
+    const handleYearSelect = (event) => {
+        setSelectedYear(event.target.value)
+    }
+    
     const getResultsResult = useQuery(getResultsQuery, getResultsVariable);
 
     React.useEffect(() => {
-    //    console.log(getGroupByIdResult.data.group.group_name);
         if (getResultsResult.data && getResultsResult.data.findManyResults) {
 
             const currData = getResultsResult.data.findManyResults as results[];
-
             // Per month calculation
             const currentTotalKWHs = currData.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
@@ -241,7 +358,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     }, [getFindFirstLastestReportDateResult.data])
 
     React.useEffect(() => {
-        console.log(getOutletsByIdResult.data)
         if (getOutletsByIdResult.data && getOutletsByIdResult.data.findFirstGroup) {
             const currentOutlets: outlet[] = [];
             const group: group | undefined = getOutletsByIdResult.data.findFirstGroup;
@@ -395,68 +511,54 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <span className='text-custom-gray text-sm font-bold'>{group}</span>
                             </div>
                             <div className="flex justify-between h-full gap-4">
-                                <select id="countries" className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                    <option value="">Month</option>
-                                    <option value="US">January</option>
-                                    <option value="CA">February</option>
-                                    <option value="FR">March</option>
-                                    <option value="DE">April</option>
-                                    <option value="DE">May</option>
-                                    <option value="DE">June</option>
-                                    <option value="DE">July</option>
-                                    <option value="DE">August</option>
-                                    <option value="DE">September</option>
-                                    <option value="DE">October</option>
-                                    <option value="DE">November</option>
-                                    <option value="DE">December</option>
+                                <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                    <option value="All">Month</option>
+                                    <option value="01">January</option>
+                                    <option value="02">February</option>
+                                    <option value="03">March</option>
+                                    <option value="04">April</option>
+                                    <option value="05">May</option>
+                                    <option value="06">June</option>
+                                    <option value="07">July</option>
+                                    <option value="08">August</option>
+                                    <option value="09">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
                                 </select>
-                                <select id="countries" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                    <option value="">Year</option>
-                                    <option value="US">1997</option>
-                                    <option value="CA">1998</option>
-                                    <option value="FR">1999</option>
-                                    <option value="DE">2000</option>
-                                    <option value="DE">2001</option>
-                                    <option value="DE">2002</option>
-                                    <option value="DE">2003</option>
-                                    <option value="DE">2004</option>
-                                    <option value="DE">2005</option>
-                                    <option value="DE">2006</option>
-                                    <option value="DE">2007</option>
-                                    <option value="DE">2008</option>
-                                    <option value="DE">2009</option>
-                                    <option value="DE">2010</option>
-                                    <option value="DE">2011</option>
-                                    <option value="DE">2012</option>
-                                    <option value="DE">2013</option>
-                                    <option value="DE">2014</option>
-                                    <option value="DE">2015</option>
-                                    <option value="DE">2016</option>
-                                    <option value="DE">2017</option>
-                                    <option value="DE">2018</option>
-                                    <option value="DE">2019</option>
-                                    <option value="DE">2020</option>
-                                    <option value="DE">2021</option>
-                                    <option value="DE">2022</option>
-                                    <option value="DE">2023</option>
+                                <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                    <option value="All">Year</option>
+                                    <option value="2020">2020</option>
+                                    <option value="2021">2021</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2023">2023</option>
                                 </select>
                             </div>
                         </div>
                         {/**
                      * Energy card Div
+                     * usageKwWithTP: tempUsageKwWithTP,
+                usageExpenseWithTP: tempUsageExpenseWithTP,
+                usageKwWOTP: tempUsageKwWOTP,
+                usageExpenseWOTP: tempUsageExpenseWOTP,
+                measureKw: tempMeasureKw,
+                measureExpense: tempMeasureExpense,
+                tariffExpense: tempTariffExpense,
+                energySaving: tempEnergySaving,
+                co2Saving: tempCo2Saving
                      */}
                         <div className="flex gap-4 my-4">
                             {/**
                          * Live outlet card
                          */}
                             <div className="w-1/5">
-                                <LiveOutletCard />
+                                <LiveOutletCard Value={outlets.length}/>
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <EquipmentEnergyCard />
+                                <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP)} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <SavingEnergyCard />
+                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw)} MeasureExpense={numberWithCommas(summaryResults.measureExpense)} TariffExpense={numberWithCommas(summaryResults.tariffExpense)} TariffKw={numberWithCommas(34356)}/>
                             </div>
                         </div>
                         {
@@ -465,10 +567,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                              */
                         }
                         <div className="flex gap-5 justify-between">
-                            <YearlyEnergyCard Svg="/asserts/energy-icon.png" Prefix="$" Value={numberWithCommas(totalPerYear.energy)} Postfix="Energy" Year="Saved / Year" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="90" Width="90" />
-                            <YearlyEnergyCard Svg="/asserts/greycarbondioxide.svg" Value={numberWithCommas(totalPerYear.co2)} Postfix="Kg CO2" Year="Saved / Year" BgColor="bg-grey-600" TextColor="text-custom-gray" />
-                            <YearlyEnergyCard Svg="/asserts/bigtree.svg" Value={numberWithCommas(totalPerYear.energy * 0.00084)} Postfix="Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-custom-green-card-font" />
-                            <YearlyEnergyCard Svg="/asserts/meals.png" Value={numberWithCommas(totalPerYear.energy * 2)} Postfix="Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="150" Width="150"/>
+                            <YearlyEnergyCard Svg="/asserts/energy-icon.png" Prefix="$" Value={numberWithCommas(summaryResults.energySaving)} Postfix="Energy" Year="Saved / Year" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="90" Width="90" />
+                            <YearlyEnergyCard Svg="/asserts/greycarbondioxide.svg" Value={numberWithCommas(summaryResults.co2Saving)} Postfix="Kg CO" SmallPostfix="2" Year="Saved / Year" BgColor="bg-grey-600" TextColor="text-custom-gray" />
+                            <YearlyEnergyCard Svg="/asserts/bigtree.svg" Value={numberWithCommas(summaryResults.energySaving * 0.00084)} Postfix="Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-custom-green-card-font" />
+                            <YearlyEnergyCard Svg="/asserts/meals.png" Value={numberWithCommas(summaryResults.co2Saving * 2)} Postfix="Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="150" Width="150"/>
                         </div>
                     </div>
             }
