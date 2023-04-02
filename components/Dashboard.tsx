@@ -1,9 +1,9 @@
-import { gql, useQuery } from "@apollo/client";
-import { numberWithCommas } from '../common/helper';
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { numberWithCommas, zeroPad } from '../common/helper';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
-import { customer, group, outlet, results } from "../common/types";
+import { customer, group, invoice, outlet, results } from "../common/types";
 import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, EquipmentEnergyCard, LiveOutletCard, RankAndOutletCard, RemarksCard, SavingEnergyCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard, ValueFirstCard, YearlyEnergyCard } from "./CardContent";
 import ClientOnly from "./ClientOnly";
 import { v4 as uuidv4 } from 'uuid';
@@ -17,6 +17,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
     const [currentOutletID, setCurrentOutletID] = React.useState("");
+    const [currentInvoice, setCurrentInvoice] = React.useState<invoice>();
     const [title, setTitle] = React.useState(["Outlet", ""]);
     const [group, setGroup] = React.useState("");
     //summary result
@@ -39,11 +40,13 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         MaxKWH: number,
         CurrentKHW: number,
         OutletSavingKHW: number,
+        SavingTariff: number,
     }>({
         MinKWH: 0,
         MaxKWH: 0,
         CurrentKHW: 0,
         OutletSavingKHW: 0,
+        SavingTariff: 0,
     });
 
     const [totalPerYear, setTotalPerYear] = React.useState<{
@@ -132,20 +135,20 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             }
         }
     }
-//summary results query and variable
+    //summary results query and variable
     const findFirstGroupSummaryVariable = {
         "variables": {
             "where": {
                 "group_id": {
-                "equals": groupId
+                    "equals": groupId
                 }
             },
             ...(selectedMonth !== 'All' || selectedYear !== 'All') && {
-            "resultsWhere2": {
-                "outlet_date": {
-                  "contains": "01/" + selectedMonth + "/" + selectedYear
+                "resultsWhere2": {
+                    "outlet_date": {
+                        "contains": "01/" + selectedMonth + "/" + selectedYear
+                    }
                 }
-              }
             }
         }
     }
@@ -173,14 +176,13 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
       }`
 
-    const getSummaryResult = useQuery(findFirstGroupSummaryQuery,findFirstGroupSummaryVariable)
+    const getSummaryResult = useQuery(findFirstGroupSummaryQuery, findFirstGroupSummaryVariable)
 
     //useEffect hook for summary result 
-    React.useEffect(()=> {
-        console.log(getSummaryResult)
-        if(getSummaryResult.data) {
+    React.useEffect(() => {
+        if (getSummaryResult.data) {
             const outletList = getSummaryResult.data.findFirstGroup.customers[0].outlet
-    
+
             //temp value for results
             let tempUsageKwWithTP = 0
             let tempUsageExpenseWithTP = 0
@@ -191,10 +193,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             let tempTariffExpense = 0
             let tempEnergySaving = 0
             let tempCo2Saving = 0
-    
+
             //Sum up all the values from results of outlets
-            outletList.forEach((outlet: any)=> {
-                if(outlet.results.length > 0) {
+            outletList.forEach((outlet: any) => {
+                if (outlet.results.length > 0) {
 
                     tempUsageKwWithTP += (outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_kW as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_kW) : 0)
                     tempUsageExpenseWithTP += (outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
@@ -220,15 +222,23 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 co2Saving: tempCo2Saving
             }
 
-            setSummaryResults(result=> ({
+            setSummaryResults(result => ({
                 ...summaryResults,
                 ...tempResult
             }))
-            console.log(summaryResults)
         }
-    },[selectedMonth,selectedYear,getSummaryResult])
+    }, [selectedMonth, selectedYear, getSummaryResult]);
 
-    
+    const getInvoiceQuery = gql`
+    query FindFirstInvoice($where: InvoiceWhereInput) {
+        findFirstInvoice(where: $where) {
+          year
+          month
+          last_available_tariff
+          invoice_id
+        }
+      }`;
+
     const getResultsQuery = gql`
     query FindManyResults($where: ResultsWhereInput) {
         findManyResults(where: $where) {
@@ -242,6 +252,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
           outlet_measured_savings_percent
           tp_sales_expenses
           co2_savings_kg
+          savings_tariff_expenses
         }
       }
     `;
@@ -274,29 +285,32 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
          
      }`
 
-     const getGroupVariable = {
-        "variables": 
-            {
-                "GroupWhereUniqueInput": {"group_id": groupId}
-            }
-     }
+    const getGroupVariable = {
+        "variables":
+        {
+            "GroupWhereUniqueInput": { "group_id": groupId }
+        }
+    }
+
     //Select the month function
 
     const handleMonthSelect = (event: any) => {
         setSelectedMonth(event.target.value)
     }
-    
+
     //Select the year function
     const handleYearSelect = (event: any) => {
         setSelectedYear(event.target.value)
     }
-    
+
     const getResultsResult = useQuery(getResultsQuery, getResultsVariable);
+    const getInvoice = useLazyQuery(getInvoiceQuery);
 
     React.useEffect(() => {
         if (getResultsResult.data && getResultsResult.data.findManyResults) {
 
             const currData = getResultsResult.data.findManyResults as results[];
+
             // Per month calculation
             const currentTotalKWHs = currData.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
@@ -308,6 +322,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                     MaxKWH: parseInt(dat.acmv_25percent_benchmark_comparison_kWh || "0"),
                     CurrentKHW: parseInt(dat.acmv_measured_savings_kWh || "0"),
                     OutletSavingKHW: parseInt(dat.outlet_measured_savings_kWh || "0"),
+                    SavingTariff: parseInt(dat.savings_tariff_expenses || "0"),
                 }
             }).reduce((prev, curr) => {
                 return {
@@ -315,12 +330,14 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                     MaxKWH: prev.MaxKWH + curr.MaxKWH,
                     CurrentKHW: prev.CurrentKHW + curr.CurrentKHW,
                     OutletSavingKHW: prev.OutletSavingKHW + curr.OutletSavingKHW,
+                    SavingTariff: prev.SavingTariff + curr.SavingTariff
                 }
             }, {
                 MinKWH: 0,
                 MaxKWH: 0,
                 CurrentKHW: 0,
                 OutletSavingKHW: 0,
+                SavingTariff: 0,
             });
             setTotalKWHs(currentTotalKWHs);
 
@@ -359,7 +376,29 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         } else {
             setLastestLiveDate('');
         }
-    }, [getFindFirstLastestReportDateResult.data])
+    }, [getFindFirstLastestReportDateResult.data]);
+
+    React.useEffect(() => {
+        if (lastestLiveDate) {
+            const latestLiveDateInMoment = moment(lastestLiveDate, 'DD/MM/YYYY');
+            getInvoice[0]({
+                "variables": {
+                    "where": {
+                        "month": {
+                            "equals": zeroPad(latestLiveDateInMoment.month() + 1, 2).toString()
+                        },
+                        "year": {
+                            "equals": latestLiveDateInMoment.year().toString()
+                        }
+                    }
+                }
+            }).then((res) => {
+                if (res.data && res.data.findFirstInvoice) {
+                    setCurrentInvoice(res.data.findFirstInvoice);
+                }
+            });
+        }
+    }, [lastestLiveDate])
 
     React.useEffect(() => {
         if (getOutletsByIdResult.data && getOutletsByIdResult.data.findFirstGroup) {
@@ -419,11 +458,11 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     }, [title]);
 
     const getGroupByIdResult = useQuery(getGroupQuery, getGroupVariable)
-    React.useEffect(()=> {
-        if(getGroupByIdResult.data) {
+    React.useEffect(() => {
+        if (getGroupByIdResult.data) {
             setGroup(getGroupByIdResult.data.group.group_name)
         }
-    },[getGroupByIdResult.data])
+    }, [getGroupByIdResult.data])
 
     return (
         <React.Fragment>
@@ -470,10 +509,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                     <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
                                                 </div>
                                                 <div>
-                                                    <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={'$0,295'} valueColor={'custom-blue-card-font'} />
+                                                    <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(currentInvoice?.last_available_tariff || '0'))}`} valueColor={'custom-blue-card-font'} />
                                                 </div>
                                                 <div>
-                                                    <ValueFirstCard title={'Savings @ Tariff'} subTitle={'$0,295'} value={'$196,53'} valueColor={'custom-green-card-font'} />
+                                                    <ValueFirstCard title={'Savings @ Tariff'} subTitle={`$${Number(currentInvoice?.last_available_tariff || '0')}`} value={`$${numberWithCommas(totalKWHs.SavingTariff)}`} valueColor={'custom-green-card-font'} />
                                                 </div>
                                             </div>
                                             {/* <div>
@@ -482,15 +521,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                             <div className="col-span-5">
                                                 <ChartCard latestLiveDate={lastestLiveDate} currentOutletID={currentOutletID} />
                                             </div>
-                                            <div>
-                                                {/* <RankAndOutletCard outlets={outlets} /> */}
-                                            </div>
-                                            <div>
-                                                {/* <RemarksCard /> */}
-                                            </div>
-                                            {/* <div>
-                                            <LastAvailableTarifCard date={getLastResultDate} />
-                                        </div> */}
                                         </div>
                                     </ClientOnly>
                                 </div>
@@ -556,13 +586,13 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                          * Live outlet card
                          */}
                             <div className="w-1/5">
-                                <LiveOutletCard Value={outlets.length}/>
+                                <LiveOutletCard Value={outlets.length} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
                                 <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP)} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw)} MeasureExpense={numberWithCommas(summaryResults.measureExpense)} TariffExpense={numberWithCommas(summaryResults.tariffExpense)} TariffKw={numberWithCommas(34356)}/>
+                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw)} MeasureExpense={numberWithCommas(summaryResults.measureExpense)} TariffExpense={numberWithCommas(summaryResults.tariffExpense)} TariffKw={numberWithCommas(34356)} />
                             </div>
                         </div>
                         {
@@ -574,7 +604,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             <YearlyEnergyCard Svg="/asserts/energy-icon.png" Prefix="$" Value={numberWithCommas(summaryResults.energySaving)} Postfix="Energy" Year="Saved / Year" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="90" Width="90" />
                             <YearlyEnergyCard Svg="/asserts/greycarbondioxide.svg" Value={numberWithCommas(summaryResults.co2Saving)} Postfix="Kg CO" SmallPostfix="2" Year="Saved / Year" BgColor="bg-grey-600" TextColor="text-custom-gray" />
                             <YearlyEnergyCard Svg="/asserts/bigtree.svg" Value={numberWithCommas(summaryResults.energySaving * 0.00084)} Postfix="Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-custom-green-card-font" />
-                            <YearlyEnergyCard Svg="/asserts/meals.png" Value={numberWithCommas(summaryResults.co2Saving * 2)} Postfix="Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="150" Width="150"/>
+                            <YearlyEnergyCard Svg="/asserts/meals.png" Value={numberWithCommas(summaryResults.co2Saving * 2)} Postfix="Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="150" Width="150" />
                         </div>
                     </div>
             }

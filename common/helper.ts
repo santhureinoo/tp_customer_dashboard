@@ -11,11 +11,14 @@ export function bytesToSize(bytes: number) {
 }
 
 export function numberWithCommas(x?: number) {
-  if (x && x > 0) {
-    return Number(x).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (x && x > 999) {
+    return Number(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   else {
-    return 0;
+    return x;
   }
-
 }
+
+export function zeroPad(num: number, places: number) {
+  return String(num).padStart(places, '0');
+} 
