@@ -475,11 +475,11 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                      * outlet page
                      */
                     <div>
-                        <div className="flex justify-between mb-4 w-1/4 gap-2">
+                        <div className="flex justify-between w-1/4 gap-2 mb-[50px]">
                             <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${currentPage === 'summary' ? 'bg-custom-darkblue text-white' : 'text-custom-darkblue border-solid border-2'}`} onClick={() => setCurrentPage('summary')}>Summary</span>
                             <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${currentPage == 'summary' ? 'text-custom-darkblue border-solid border-2' : 'bg-custom-darkblue text-white'}`} onClick={() => setCurrentPage('outlet')}>Outlet</span>
                         </div>
-                        <div className="flex justify-between h-full">
+                        <div className="flex justify-between h-full mb-[50px]">
                             {getHeaderBreadCrumb}
                             <CustomSelect setSelectedValue={(val) => {
                                 setCurrentOutletID(val);

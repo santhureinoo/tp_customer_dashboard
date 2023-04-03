@@ -78,7 +78,7 @@ ChartJS.register(
 );
 
 interface StatusCardProps {
-    Title?: String, disableWidthFull?: boolean, SubTitle?: String, className: string, textClassName?: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any, PostfixDirection?: 'horizontal' | 'vertical'
+    Title?: String, disableWidthFull?: boolean, SubTitle?: String, className: string, textClassName?: string, Value: any, Prefix?: String, Postfix?: any, RightSideValue?: any, PostfixDirection?: 'horizontal' | 'vertical',
 }
 
 const SavingMeter = ({ date, outletId, kiloWatHour }: any): JSX.Element => {
@@ -129,7 +129,7 @@ const SustainPerformance = ({ total }: any): JSX.Element => {
                 <CardHeader Titles={['Sustainability Performance']} SubTitle={'Accummulative'} />
             </div>
             <div className="2xl:grid 2xl:grid-cols-4 grid grid-cols-2 gap-2">
-                <StatusCard Title={'Energy Savings/Year'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
+                <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings/Year'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
                 <StatusCard Title={'CO2 Saved/Year'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
                 <StatusCard Title={'Planted Tree/Year'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.energy * 0.00084))} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
                 <StatusCard Title={'Meals to be sold/Year'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(total.energy * 2)} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
@@ -362,7 +362,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
             return [
                 {
                     type: 'line' as const,
-                    label: 'Measured Savings',
+                    label: 'Without TablePointer',
                     lineTension: 0,
                     borderColor: 'rgb(255, 99, 132)',
                     borderWidth: 2,
@@ -372,7 +372,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                 },
                 {
                     type: 'bar' as const,
-                    label: 'Without Tablepointer',
+                    label: 'Measured Savings',
                     backgroundColor: 'rgb(191 219 254)',
                     data: firstIntermediaryData.map(data => Math.round(parseInt(data.all_eqpt_without_TP_kWh || "0")) - Math.round(parseInt(data.all_eqpt_with_TP_kWh || "0"))),
                     barThickness: 25,
@@ -707,13 +707,13 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
 
 const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     const [selectedCard, setSelectedCard] = React.useState<DropdownProps>({
-        display: <CardHeader Titles={['Savings Performace']} />,
+        display: <CardHeader Titles={['Savings Performance']} />,
         value: 'savingPerformance',
     });
 
     const titleDropdowns: DropdownProps[] = [
         {
-            display: <CardHeader Titles={['Savings Performace']} />,
+            display: <CardHeader Titles={['Savings Performance']} />,
             value: 'savingPerformance',
         },
         {
@@ -800,7 +800,7 @@ const Remarks = (): JSX.Element => {
 const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, className, RightSideValue, PostfixDirection = 'horizontal' }: StatusCardProps): JSX.Element => {
 
     return (
-        <div className={`flex flex-row p-2 rounded-lg border-2 border-custom-lightgray justify-between h-auto 2xl:h-full min-w-[148.75px] ${className}`}>
+        <div className={`p-2 rounded-lg border-2 border-custom-lightgray justify-between h-auto 2xl:h-full min-w-[148.75px] ${className}`}>
             {Title && <div className="text-left">
                 <h4 className="2xl:text-sm text-xs">
                     {Title}
@@ -816,7 +816,10 @@ const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, cl
                                 <span className={`text-sm ${textClassName}`}>
                                     {Prefix}
                                 </span>
-                                {Value}
+                                <span className={`text-[35px]`}>
+                                    {Value}
+                                </span>
+
                             </div>
                             <div>
                                 <span className={`text-xs self-end ${textClassName}`}>
