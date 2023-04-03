@@ -603,7 +603,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                         <div className="flex gap-5 justify-between">
                             <YearlyEnergyCard Svg="/asserts/energy-icon.png" Prefix="$" Value={numberWithCommas(summaryResults.energySaving)} Postfix="Energy" Year="Saved / Year" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="90" Width="90" />
                             <YearlyEnergyCard Svg="/asserts/greycarbondioxide.svg" Value={numberWithCommas(summaryResults.co2Saving)} Postfix="Kg CO" SmallPostfix="2" Year="Saved / Year" BgColor="bg-grey-600" TextColor="text-custom-gray" />
-                            <YearlyEnergyCard Svg="/asserts/bigtree.svg" Value={numberWithCommas(summaryResults.energySaving * 0.00084)} Postfix="Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-custom-green-card-font" />
+                            <YearlyEnergyCard Svg="/asserts/bigtree.svg" Value={numberWithCommas(Math.round(summaryResults.energySaving * 0.00084))} Postfix="Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-custom-green-card-font" />
                             <YearlyEnergyCard Svg="/asserts/meals.png" Value={numberWithCommas(summaryResults.co2Saving * 2)} Postfix="Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="150" Width="150" />
                         </div>
                     </div>

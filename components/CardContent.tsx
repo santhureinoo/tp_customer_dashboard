@@ -131,7 +131,7 @@ const SustainPerformance = ({ total }: any): JSX.Element => {
             <div className="2xl:grid 2xl:grid-cols-4 grid grid-cols-2 gap-2">
                 <StatusCard Title={'Energy Savings/Year'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
                 <StatusCard Title={'CO2 Saved/Year'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
-                <StatusCard Title={'Planted Tree/Year'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(total.energy * 0.00084)} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
+                <StatusCard Title={'Planted Tree/Year'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.energy * 0.00084))} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
                 <StatusCard Title={'Meals to be sold/Year'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(total.energy * 2)} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
                 {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
@@ -1020,11 +1020,11 @@ interface EquipmentEnergyProps {
 /***
  * Equipment Energy Card
  */
-const EquipmentEnergy = ({WithTableKw, WithTableExpense, WithoutTableKw, WithoutTableExpense}: EquipmentEnergyProps): JSX.Element => {
+const EquipmentEnergy = ({ WithTableKw, WithTableExpense, WithoutTableKw, WithoutTableExpense }: EquipmentEnergyProps): JSX.Element => {
     return (
         <div className='flex flex-row gap-2 justify-between w-full h-full' >
             <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' PreSubTitle='W/O' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
-            <UsageCard BgColor={`bg-custom-green-card`} TextColor='text-custom-green-card-font' PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false}/>
+            <UsageCard BgColor={`bg-custom-green-card`} TextColor='text-custom-green-card-font' PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
         </div>
     )
 }
@@ -1038,12 +1038,12 @@ interface SavingEnergyProps {
 /**
  * Saving Energy Card
  */
-const SavingEnergy = ({MeasureKw, MeasureExpense, TariffExpense, TariffKw}: SavingEnergyProps): JSX.Element => {
+const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: SavingEnergyProps): JSX.Element => {
     return (
         <div>
             <div className='flex flex-row gap-2 justify-between w-full h-full' >
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false}/>
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Saving @ Tariff' FirstValue={TariffKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={TariffExpense} Position="vertical"Icon={true} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Saving @ Tariff' FirstValue={TariffKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
             </div>
         </div>
     )
@@ -1052,18 +1052,18 @@ const SavingEnergy = ({MeasureKw, MeasureExpense, TariffExpense, TariffKw}: Savi
 /**
  * Usage Card
  */
-const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, TextColor,Icon = false, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
+const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, TextColor, Icon = false, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
     return (
         <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray ${Position !== 'vertical' ? 'justify-between gap-8' : ''} h-auto 2xl:h-full w-2/3 ${BgColor}`}>
             <div className={'flex flex-col'}>
                 {
-                    (Icon == true) ? 
-                    <div className="flex">
-                       <h2 className="font-bold text-sm text">{Title} </h2> <FontAwesomeIcon className="px-2 text-2xl" icon={faSortUp} />
-                    </div> :
-                    <h2 className="font-bold text-sm">
-                        {Title}
-                    </h2>
+                    (Icon == true) ?
+                        <div className="flex">
+                            <h2 className="font-bold text-sm text">{Title} </h2> <FontAwesomeIcon className="px-2 text-2xl" icon={faSortUp} />
+                        </div> :
+                        <h2 className="font-bold text-sm">
+                            {Title}
+                        </h2>
                 }
                 <div>
                     <span className={`font-bold text-sm mr-2 ${TextColor}`}>{PreSubTitle}</span>
@@ -1120,11 +1120,11 @@ interface YearlyEnergyProps {
 /**
  * Yearly Energy Card
  */
-const YearlyEnergy = ({SmallPostfix, Prefix, Svg, Value, Year, TextColor, Postfix, BgColor, Height, Width }: YearlyEnergyProps): JSX.Element => {
+const YearlyEnergy = ({ SmallPostfix, Prefix, Svg, Value, Year, TextColor, Postfix, BgColor, Height, Width }: YearlyEnergyProps): JSX.Element => {
     return (
         <div className="flex flex-col pt-7 justify-between items-center h-auto col-span-1">
             <div className={`${BgColor} flex justify-center rounded-full items-center w-full h-[250px]`}>
-                <img src={Svg} alt="" className="text-center" height={`${Height}`} width={`${Width}`}/>
+                <img src={Svg} alt="" className="text-center" height={`${Height}`} width={`${Width}`} />
             </div>
             <div className="flex flex-col my-16 ">
                 <div className={`${TextColor} text-3xl font-medium`}>
