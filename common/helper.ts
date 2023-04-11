@@ -21,4 +21,22 @@ export function numberWithCommas(x?: number) {
 
 export function zeroPad(num: number, places: number) {
   return String(num).padStart(places, '0');
-} 
+}
+
+
+export function dateValueForQuery(month: string, year: string) {
+  let finalStr = "";
+
+  if(month !== 'All') {
+    finalStr = '01/' + month;
+  }
+
+  if(year !== 'All') {
+    finalStr = finalStr + '/' + year;
+  } else {
+    finalStr = finalStr + '/';
+  }
+  
+  return finalStr;
+
+}

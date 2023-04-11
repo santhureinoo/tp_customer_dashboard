@@ -1027,7 +1027,7 @@ const EquipmentEnergy = ({ WithTableKw, WithTableExpense, WithoutTableKw, Withou
     return (
         <div className='flex flex-row gap-2 justify-between w-full h-full' >
             <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' PreSubTitle='W/O' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
-            <UsageCard BgColor={`bg-custom-green-card`} TextColor='text-custom-green-card-font' PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
+            <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
         </div>
     )
 }
@@ -1068,9 +1068,9 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
                             {Title}
                         </h2>
                 }
-                <div>
-                    <span className={`font-bold text-sm mr-2 ${TextColor}`}>{PreSubTitle}</span>
-                    <span className={`text-sm font-thin ${TextColor}`}>{PostSubTitle}</span>
+                <div className={`text-custom-blue-card-font`}>
+                    <span className={`font-bold text-sm mr-2`}>{PreSubTitle}</span>
+                    <span className={`text-sm font-thin`}>{PostSubTitle}</span>
                 </div>
             </div>
             {
@@ -1126,7 +1126,7 @@ interface YearlyEnergyProps {
 const YearlyEnergy = ({ SmallPostfix, Prefix, Svg, Value, Year, TextColor, Postfix, BgColor, Height, Width }: YearlyEnergyProps): JSX.Element => {
     return (
         <div className="flex flex-col pt-7 justify-between items-center h-auto col-span-1">
-            <div className={`${BgColor} flex justify-center rounded-full items-center w-full h-[250px]`}>
+            <div className={`${BgColor} flex justify-center rounded-[100%] items-center w-full h-[250px]`}>
                 <img src={Svg} alt="" className="text-center" height={`${Height}`} width={`${Width}`} />
             </div>
             <div className="flex flex-col my-16 ">

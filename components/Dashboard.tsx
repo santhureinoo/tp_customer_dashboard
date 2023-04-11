@@ -1,5 +1,5 @@
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { numberWithCommas, zeroPad } from '../common/helper';
+import { dateValueForQuery, numberWithCommas, zeroPad } from '../common/helper';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
@@ -34,7 +34,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     })
 
     const [selectedMonth, setSelectedMonth] = React.useState("All");
-    const [selectedYear, setSelectedYear] = React.useState("All");
+    const [selectedYear, setSelectedYear] = React.useState("2023");
     const [totalKWHs, setTotalKWHs] = React.useState<{
         MinKWH: number,
         MaxKWH: number,
@@ -146,7 +146,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             ...(selectedMonth !== 'All' || selectedYear !== 'All') && {
                 "resultsWhere2": {
                     "outlet_date": {
-                        "contains": "01/" + selectedMonth + "/" + selectedYear
+                        "contains": dateValueForQuery(selectedMonth, selectedYear)
                     }
                 }
             }
@@ -538,7 +538,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                         {/**
                      * Group Div
                      */}
-                        <div className="flex justify-between h-full">
+                        <div className="flex justify-between h-full mt-5">
                             <div>
                                 <span className='text-custom-darkblue font-bold text-sm'>Group</span>
                                 <FontAwesomeIcon className="px-2 text-custom-gray text-sm" icon={faAngleRight} />
