@@ -30,7 +30,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         measureExpense: 0,
         tariffExpense: 0,
         energySaving: 0,
-        co2Saving: 0
+        co2Saving: 0,
+        tariffKWH: 0,
     })
 
     const [selectedMonth, setSelectedMonth] = React.useState("All");
@@ -149,12 +150,20 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                         "contains": dateValueForQuery(selectedMonth, selectedYear)
                     }
                 }
-            }
+            },
+
+            ...(selectedMonth !== 'All' || selectedYear !== 'All') && {
+                "outletMonthWhere2": {
+                    "outlet_date": {
+                        "contains": dateValueForQuery(selectedMonth, selectedYear)
+                    }
+                }
+            },
         }
     }
 
     const findFirstGroupSummaryQuery = gql`
-    query Query($where: GroupWhereInput, $resultsWhere2: ResultsWhereInput) {
+    query Query($where: GroupWhereInput, $resultsWhere2: ResultsWhereInput, $outletMonthWhere2: Outlet_monthWhereInput) {
         findFirstGroup(where: $where) {
           group_id
           group_name
@@ -171,6 +180,9 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 tp_sales_expenses
                 co2_savings_kg
               }
+              outlet_month(where: $outletMonthWhere2) {
+                last_avail_tariff
+              }
             }
           }
         }
@@ -181,7 +193,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     //useEffect hook for summary result 
     React.useEffect(() => {
         if (getSummaryResult.data) {
-            const outletList = getSummaryResult.data.findFirstGroup.customers[0].outlet
+            const outletList = getSummaryResult.data.findFirstGroup.customers[0].outlet;
 
             //temp value for results
             let tempUsageKwWithTP = 0
@@ -193,11 +205,11 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             let tempTariffExpense = 0
             let tempEnergySaving = 0
             let tempCo2Saving = 0
+            let tempSavingTariff = 0
 
             //Sum up all the values from results of outlets
             outletList.forEach((outlet: any) => {
                 if (outlet.results.length > 0) {
-
                     tempUsageKwWithTP += (outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_kW as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_kW) : 0)
                     tempUsageExpenseWithTP += (outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
                     tempUsageKwWOTP += (outlet.results[0].outlet_eqpt_energy_usage_without_TP_month_kW as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_without_TP_month_kW) : 0)
@@ -207,6 +219,13 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                     tempTariffExpense += (outlet.results[0].savings_tariff_expenses as String ? parseInt(outlet.results[0].savings_tariff_expenses) : 0)
                     tempEnergySaving += (outlet.results[0].tp_sales_expenses as String ? parseInt(outlet.results[0].tp_sales_expenses) : 0)
                     tempCo2Saving += (outlet.results[0].co2_savings_kg as String ? parseInt(outlet.results[0].co2_savings_kg) : 0)
+                }
+
+                if(outlet.outlet_month.length > 0 ) {
+                    outlet.outlet_month.forEach((month:any) =>{
+                        tempSavingTariff += Number(month.last_avail_tariff);
+                    })
+                    
                 }
             })
 
@@ -219,7 +238,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 measureExpense: tempMeasureExpense,
                 tariffExpense: tempTariffExpense,
                 energySaving: tempEnergySaving,
-                co2Saving: tempCo2Saving
+                co2Saving: tempCo2Saving,
+                tariffKWH: tempSavingTariff
             }
 
             setSummaryResults(result => ({
@@ -538,7 +558,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                         {/**
                      * Group Div
                      */}
-                        <div className="flex justify-between h-full mt-5">
+                        <div className="flex justify-between h-full mt-10">
                             <div>
                                 <span className='text-custom-darkblue font-bold text-sm'>Group</span>
                                 <FontAwesomeIcon className="px-2 text-custom-gray text-sm" icon={faAngleRight} />
@@ -592,7 +612,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP)} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw)} MeasureExpense={numberWithCommas(summaryResults.measureExpense)} TariffExpense={numberWithCommas(summaryResults.tariffExpense)} TariffKw={numberWithCommas(34356)} />
+                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw)} MeasureExpense={numberWithCommas(summaryResults.measureExpense)} TariffExpense={numberWithCommas(summaryResults.tariffExpense)} TariffKw={numberWithCommas(summaryResults.tariffKWH)} />
                             </div>
                         </div>
                         {
