@@ -24,19 +24,19 @@ export function zeroPad(num: number, places: number) {
 }
 
 
-export function dateValueForQuery(month: string, year: string) {
+export function dateValueForQuery(month: string, year: string, noDay = false) {
   let finalStr = "";
 
-  if(month !== 'All') {
-    finalStr = '01/' + month;
+  if (month !== 'All') {
+    finalStr = (noDay ? '' : '01/') + month;
   }
 
-  if(year !== 'All') {
+  if (year !== 'All') {
     finalStr = finalStr + '/' + year;
   } else {
     finalStr = finalStr + '/';
   }
-  
+
   return finalStr;
 
 }

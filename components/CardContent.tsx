@@ -45,7 +45,7 @@ import { DropdownProps, first_intermediary_table, outlet, results, secondary_int
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
 import { cloneDeep } from '@apollo/client/utilities';
-import { numberWithCommas } from '../common/helper';
+import { dateValueForQuery, numberWithCommas } from '../common/helper';
 
 // ChartJS.register(...registerablesJS);
 
@@ -131,7 +131,7 @@ const SustainPerformance = ({ total }: any): JSX.Element => {
             <div className="2xl:grid 2xl:grid-cols-4 grid grid-cols-2 gap-2">
                 <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings/Year'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
                 <StatusCard Title={'CO2 Saved/Year'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
-                <StatusCard Title={'Planted Tree/Year'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.energy * 0.00084))} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
+                <StatusCard Title={'Planted Tree/Year'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 22))} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
                 <StatusCard Title={'Meals to be sold/Year'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(total.energy * 2)} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
                 {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
@@ -228,6 +228,9 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
     const [firstIntermediaryData, setFirstIntermediaryData] = React.useState<first_intermediary_table[]>([]);
     const [selectedSavingPerformanceIndex, setSelectedSavingPerformanceIndex] = React.useState(1);
     const [selectedTab, setSelectedTab] = React.useState<'kwh' | 'saving'>('kwh');
+
+    const [selectedMonth, setSelectedMonth] = React.useState(moment().format('MM'));
+    const [selectedYear, setSelectedYear] = React.useState("2023");
     const getFirstIntermediaryQuery = gql`
     query First_intermediary_tables($where: First_intermediary_tableWhereInput) {
         first_intermediary_tables(where: $where) {
@@ -269,80 +272,118 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
         let variable = {};
         const currentMoment = moment(latestLiveDate, 'DD/MM/YYYY');
         if (currentOutletID) {
-            switch (selectedSavingPerformanceIndex) {
-                case 0: variable = {
-                    "variables": {
-                        "where": {
-                            "AND": [
-                                {
-                                    "outlet_month_year": {
-                                        "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
-                                    },
-                                    "outlet_id": {
-                                        "equals": parseInt(currentOutletID)
-                                    }
+
+            variable = {
+                "variables": {
+                    "where": {
+                        "AND": [
+                            {
+                                "outlet_month_year": {
+                                    "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
+                                },
+                                "outlet_id": {
+                                    "equals": parseInt(currentOutletID)
                                 }
-                            ],
+                            }
+                        ],
 
-                            // "outlet_id": {
-                            //     "equals": parseInt(currentOutletID)
-                            // }
+                        // "outlet_id": {
+                        //     "equals": parseInt(currentOutletID)
+                        // }
 
-                        }
                     }
-                }; break;
-                case 1: variable = {
-                    "variables": {
-                        "where": {
-                            "AND": [
-                                {
-                                    "outlet_month_year": {
-                                        "equals": currentMoment.format("MM/YYYY")
-                                    },
-                                    "outlet_id": {
-                                        "equals": parseInt(currentOutletID)
-                                    }
-                                }
-                            ],
+                }
+            };
+            // switch (selectedSavingPerformanceIndex) {
+            //     case 0: variable = {
+            //         "variables": {
+            //             "where": {
+            //                 "AND": [
+            //                     {
+            //                         "outlet_month_year": {
+            //                             "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
+            //                         },
+            //                         "outlet_id": {
+            //                             "equals": parseInt(currentOutletID)
+            //                         }
+            //                     }
+            //                 ],
 
-                            // "outlet_id": {
-                            //     "equals": parseInt(currentOutletID)
-                            // }
+            //                 // "outlet_id": {
+            //                 //     "equals": parseInt(currentOutletID)
+            //                 // }
 
-                        }
-                    }
-                }; break;
-                default: variable = {
-                    "variables": {
-                        "where": {
-                            "AND": [
-                                {
-                                    "OR": getLastSevenDays(currentMoment).map(mom => {
-                                        return {
-                                            "outlet_month_year": {
-                                                "equals": mom.format("MM/YYYY")
-                                            },
-                                            "day_of_month": {
-                                                "equals": mom.format("D")
-                                            }
-                                        }
-                                    }),
-                                    "outlet_id": {
-                                        "equals": parseInt(currentOutletID)
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }; break;
-            }
+            //             }
+            //         }
+            //     }; break;
+            //     case 1: variable = {
+            //         "variables": {
+            //             "where": {
+            //                 "AND": [
+            //                     {
+            //                         "outlet_month_year": {
+            //                             "equals": currentMoment.format("MM/YYYY")
+            //                         },
+            //                         "outlet_id": {
+            //                             "equals": parseInt(currentOutletID)
+            //                         }
+            //                     }
+            //                 ],
+
+            //                 // "outlet_id": {
+            //                 //     "equals": parseInt(currentOutletID)
+            //                 // }
+
+            //             }
+            //         }
+            //     }; break;
+            //     default: variable = {
+            //         "variables": {
+            //             "where": {
+            //                 "AND": [
+            //                     {
+            //                         "OR": getLastSevenDays(currentMoment).map(mom => {
+            //                             return {
+            //                                 "outlet_month_year": {
+            //                                     "equals": mom.format("MM/YYYY")
+            //                                 },
+            //                                 "day_of_month": {
+            //                                     "equals": mom.format("D")
+            //                                 }
+            //                             }
+            //                         }),
+            //                         "outlet_id": {
+            //                             "equals": parseInt(currentOutletID)
+            //                         }
+            //                     }
+            //                 ]
+            //             }
+            //         }
+            //     }; break;
+            // }
         }
         return variable;
     }, [currentOutletID, latestLiveDate, selectedSavingPerformanceIndex]);
 
     React.useEffect(() => {
         if (currentOutletID) {
-            getFirstIntermediaryResult[0](getFirstIntermediaryVariable).then(result => {
+            console.log(selectedMonth, selectedYear);
+            getFirstIntermediaryResult[0]({
+                "variables": {
+                    "where": {
+                        "AND": [
+                            {
+                                "outlet_month_year": {
+                                    "contains": dateValueForQuery(selectedMonth, selectedYear, true)
+                                },
+                                "outlet_id": {
+                                    "equals": parseInt(currentOutletID)
+                                }
+                            }
+                        ],
+                    }
+                }
+            }).then(result => {
                 if (result.data && result.data.first_intermediary_tables) {
                     const cloned_first_intermediary_tables = cloneDeep(result.data.first_intermediary_tables);
                     const sortDat = cloned_first_intermediary_tables.sort(function (left: any, right: any) {
@@ -355,7 +396,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
             setFirstIntermediaryData([]);
         }
 
-    }, [currentOutletID, selectedSavingPerformanceIndex]);
+    }, [currentOutletID, selectedSavingPerformanceIndex, selectedMonth, selectedYear]);
 
     const getChartData = React.useMemo(() => {
         if (selectedTab === 'kwh') {
@@ -380,7 +421,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                 },
                 {
                     type: 'bar' as const,
-                    label: 'With Tablepointer',
+                    label: 'With TablePointer',
                     backgroundColor: 'rgb(96 165 250)',
                     data: firstIntermediaryData.map(data => Math.round(parseInt(data.all_eqpt_with_TP_kWh || "0"))),
                     barThickness: 25,
@@ -452,7 +493,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
             }, tooltip: {
                 callbacks: {
                     label: function (context: any) {
-                        if (context.dataset.label === "Without Tablepointer") {
+                        if (context.dataset.label === "Without TablePointer") {
                             return Math.round(parseInt(firstIntermediaryData[context.dataIndex].all_eqpt_without_TP_kWh || '0'))
                         } else {
                             return context.formattedValue;
@@ -478,6 +519,17 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
         }
     }
 
+    //Select the month function
+
+    const handleMonthSelect = (event: any) => {
+        setSelectedMonth(event.target.value)
+    }
+
+    //Select the year function
+    const handleYearSelect = (event: any) => {
+        setSelectedYear(event.target.value)
+    }
+
     return (
         <div className="flex flex-col gap-4">
             <div className="flex justify-between items-baseline">
@@ -494,16 +546,38 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                         </button>
                     </div>
                 </div>
-                {/* <div className='flex flex-row gap-x-2 text-xs'>
-                    <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
+                <div className='flex flex-row gap-x-2 text-xs'>
+                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                        <option value="All">Month</option>
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="All">Year</option>
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                    </select>
+                    {/* <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
                         <option>Start Date</option>
                         <option>Start Date</option>
                     </select>
                     <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
                         <option>End Date</option>
                         <option>End Date</option>
-                    </select>
-                </div> */}
+                    </select> */}
+                </div>
 
             </div>
             <div>
@@ -517,6 +591,8 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     // const labels = ['10', '10.5', '11', '11.5', '12', '12.5', '13', '13.5', '14','14.5','15','15.5','16','16.5','17','17.5','18','18.5','19','19.5','20','20.5','21','21.5','22'];
     const [secondaryIntermediary, setSecondIntermediary] = React.useState<secondary_intermediary_table[]>([]);
     const [selectedEqptEnergyIndex, setSelectedEqptEnergyIndex] = React.useState(1);
+    const [selectedMonth, setSelectedMonth] = React.useState(moment().format('MM'));
+    const [selectedYear, setSelectedYear] = React.useState("2023");
     const currentMoment = moment(latestLiveDate, 'DD/MM/YYYY');
     const getSecondIntermediaryQuery = gql`
     query Secondary_intermediary_tables($where: Secondary_intermediary_tableWhereInput) {
@@ -582,7 +658,22 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                     }
                 }; break;
             }
-            getSecondIntermediaryResult[0](getSecondIntermediaryVariable).then(result => {
+            getSecondIntermediaryResult[0]({
+                "variables": {
+                    "where": {
+                        "AND": [
+                            {
+                                "outlet_month_year": {
+                                    "contains": dateValueForQuery(selectedMonth, selectedYear, true)
+                                },
+                                "outlet_id": {
+                                    "equals": parseInt(currentOutletID)
+                                }
+                            }
+                        ],
+                    }
+                }
+            }).then(result => {
                 const cloned_second_intermediary_tables = cloneDeep(result.data.secondary_intermediary_tables);
                 const sortDat = cloned_second_intermediary_tables.sort(function (left: any, right: any) {
                     return moment(left.day_of_month + "/" + left.outlet_month_year, "DD/MM/YYYY").diff(moment(right.day_of_month + "/" + right.outlet_month_year, "DD/MM/YYYY"));
@@ -592,7 +683,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
         } else {
             setSecondIntermediary([]);
         }
-    }, [currentOutletID, selectedEqptEnergyIndex])
+    }, [currentOutletID, selectedMonth, selectedYear, selectedEqptEnergyIndex])
 
     const labels = React.useMemo(() => {
         return secondaryIntermediary.map(data => {
@@ -677,23 +768,49 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
         }
     }
 
+    //Select the month function
+
+    const handleMonthSelect = (event: any) => {
+        setSelectedMonth(event.target.value)
+    }
+
+    //Select the year function
+    const handleYearSelect = (event: any) => {
+        setSelectedYear(event.target.value)
+    }
+
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-baseline">
+            <div className="flex justify-end items-baseline">
+
                 {/* <div className='flex flex-row gap-x-2 text-xs font-extrabold text-custom-gray'>
                     <button onClick={e => { setSelectedEqptEnergyIndex(1) }} className={selectedEqptEnergyIndex === 1 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last 3 Months</button>
                     <button onClick={e => { setSelectedEqptEnergyIndex(2) }} className={selectedEqptEnergyIndex === 2 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last Month</button>
-                </div>
+    </div> */}
                 <div className='flex flex-row gap-x-2 text-xs'>
-                    <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
-                        <option>Start Date</option>
-                        <option>Start Date</option>
+                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                        <option value="All">Month</option>
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
                     </select>
-                    <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
-                        <option>End Date</option>
-                        <option>End Date</option>
+                    <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="All">Year</option>
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
                     </select>
-                </div> */}
+                </div>
 
             </div>
             <div className='flex flex-col'>
@@ -1126,8 +1243,8 @@ interface YearlyEnergyProps {
 const YearlyEnergy = ({ SmallPostfix, Prefix, Svg, Value, Year, TextColor, Postfix, BgColor, Height, Width }: YearlyEnergyProps): JSX.Element => {
     return (
         <div className="flex flex-col pt-7 justify-between items-center h-auto col-span-1">
-            <div className={`${BgColor} flex justify-center rounded-[100%] items-center h-[250px]`}>
-                <img src={Svg} alt="" className="text-center m-20" height={`${Height}`} width={`${Width}`} />
+            <div className={`${BgColor} flex justify-center rounded-[100%] items-center w-full h-[250px]`}>
+                <img src={Svg} alt="" className="text-center m-auto" height={`${Height}`} width={`${Width}`} />
             </div>
             <div className="flex flex-col my-16 ">
                 <div className={`${TextColor} text-3xl font-medium`}>
