@@ -128,7 +128,7 @@ const SustainPerformance = ({ total }: any): JSX.Element => {
             <div className="flex justify-between items-baseline">
                 <CardHeader Titles={['Sustainability Performance']} SubTitle={'Accummulative'} />
             </div>
-            <div className="2xl:grid 2xl:grid-cols-4 grid grid-cols-2 gap-2">
+            <div className="lg:grid lg:grid-cols-4 grid grid-cols-2 gap-2">
                 <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings/Year'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
                 <StatusCard Title={'CO2 Saved/Year'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
                 <StatusCard Title={'Planted Tree/Year'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 22))} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
@@ -1246,7 +1246,7 @@ const YearlyEnergy = ({ SmallPostfix, Prefix, Svg, Value, Year, TextColor, Postf
             <div className={`${BgColor} flex justify-center rounded-[100%] items-center w-full h-[250px]`}>
                 <img src={Svg} alt="" className="text-center m-auto" height={`${Height}`} width={`${Width}`} />
             </div>
-            <div className="flex flex-col my-16 ">
+            <div className="flex flex-col my-16 text-center">
                 <div className={`${TextColor} text-3xl font-medium`}>
                     {Prefix} {Value} {Postfix}<sub>{SmallPostfix}</sub>
                 </div>
