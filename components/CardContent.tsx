@@ -481,28 +481,6 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
         )
     }
 
-    const getOrCreateLegendList = (chart, id) => {
-        const legendContainer = document.getElementById(id);
-        if (legendContainer) {
-            let listContainer = legendContainer.querySelector('ul');
-
-            if (!listContainer) {
-                listContainer = document.createElement('ul');
-                listContainer.style.display = 'flex';
-                listContainer.style.flexDirection = 'row';
-                listContainer.style.margin = "0px";
-                listContainer.style.padding = "0px";
-
-                legendContainer.appendChild(listContainer);
-            }
-
-            return listContainer;
-        } else {
-            return undefined;
-        }
-
-    };
-
     const option = {
 
         plugins: {
