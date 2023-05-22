@@ -1243,7 +1243,7 @@ interface YearlyEnergyProps {
 const YearlyEnergy = ({ SmallPostfix, Prefix, Svg, Value, Year, TextColor, Postfix, BgColor, Height, Width }: YearlyEnergyProps): JSX.Element => {
     return (
         <div className="flex flex-col pt-7 justify-between items-center h-auto col-span-1">
-            <div className={`${BgColor} flex justify-center rounded-[100%] items-center w-full h-[250px]`}>
+            <div className={`${BgColor} flex justify-center rounded-[100%] items-center w-[250px] h-[250px]`}>
                 <img src={Svg} alt="" className="text-center m-auto" height={`${Height}`} width={`${Width}`} />
             </div>
             <div className="flex flex-col my-16 text-center">
