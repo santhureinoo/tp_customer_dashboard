@@ -367,7 +367,6 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
 
     React.useEffect(() => {
         if (currentOutletID) {
-            console.log(selectedMonth, selectedYear);
             getFirstIntermediaryResult[0]({
                 "variables": {
                     "where": {
@@ -482,14 +481,42 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
         )
     }
 
+    const getOrCreateLegendList = (chart, id) => {
+        const legendContainer = document.getElementById(id);
+        if (legendContainer) {
+            let listContainer = legendContainer.querySelector('ul');
+
+            if (!listContainer) {
+                listContainer = document.createElement('ul');
+                listContainer.style.display = 'flex';
+                listContainer.style.flexDirection = 'row';
+                listContainer.style.margin = "0px";
+                listContainer.style.padding = "0px";
+
+                legendContainer.appendChild(listContainer);
+            }
+
+            return listContainer;
+        } else {
+            return undefined;
+        }
+
+    };
+
     const option = {
 
         plugins: {
             legend: {
+
                 position: 'bottom' as const,
                 onClick: function (event: any, elem: any) {
                     // console.log(elem.text);
                 },
+                labels: {
+                    padding: 30,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                }
             }, tooltip: {
                 callbacks: {
                     label: function (context: any) {
@@ -593,7 +620,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     const [selectedEqptEnergyIndex, setSelectedEqptEnergyIndex] = React.useState(1);
     const [selectedMonth, setSelectedMonth] = React.useState(moment().format('MM'));
     const [selectedYear, setSelectedYear] = React.useState("2023");
-    const currentMoment = moment(latestLiveDate, 'DD/MM/YYYY');
+    const currentMoment = moment(selectedMonth, 'DD/MM/YYYY');
     const getSecondIntermediaryQuery = gql`
     query Secondary_intermediary_tables($where: Secondary_intermediary_tableWhereInput) {
         secondary_intermediary_tables(where: $where) {
@@ -779,6 +806,19 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
         setSelectedYear(event.target.value)
     }
 
+    const getValidDate = React.useMemo(() => {
+        if (selectedMonth === 'All' && selectedYear === 'All') {
+            return 'All';
+        } else if (selectedMonth === 'All') {
+            return moment(`01/${selectedYear}`, 'DD/YYYY').format('YYYY');
+        } else if (selectedYear === 'All') {
+            return moment(`01/${selectedMonth}`, 'DD/MM').format('Mo');
+        } else {
+            return moment(`01/${selectedMonth}/${selectedYear}`, 'DD/MM/YYYY').format('Mo YYYY');
+        }
+
+    }, [selectedMonth, selectedYear])
+
     return (
         <div className="flex flex-col gap-4">
             <div className="flex justify-end items-baseline">
@@ -815,8 +855,8 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
             </div>
             <div className='flex flex-col'>
                 <Chart type='scatter' data={data()} options={option} />
-                <span className='text-custom-gray self-end'>Valid as of {currentMoment.format('Mo YYYY')}</span>
-                <span className='text-custom-gray text-custom-subtitle w-1/3  px-4'>Eqpt. Energy Baseline represents the equipment energy usage over a typical hour without TablePointer, and is continuously and dynamically sampled for statistical best-averaging to ensure validity of time</span>
+                <span className='text-custom-gray self-end'>Valid as of {getValidDate}</span>
+                <span className='text-custom-gray text-custom-subtitle w-2/3  px-4'>Eqpt. Energy Baseline represents the equipment energy usage over a typical hour without TablePointer, and is continuously and dynamically sampled for statistical best-averaging to ensure validity of time</span>
             </div>
         </div>
     )
