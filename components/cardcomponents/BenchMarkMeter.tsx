@@ -5,7 +5,7 @@ import { off } from "process";
 
 const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
     const progressDivRef: React.RefObject<HTMLDivElement> = React.createRef();
-    const orgHeight = 230; // Equivalent to w-48 of tailwind v3.0.24
+    const orgHeight = 176; // Equivalent to h-36 of tailwind v3.0.24
 
     const yScale = d3.scaleBand()
         .domain([props.MinKWH.Percentage, props.MaxKWH.Percentage])
@@ -49,7 +49,7 @@ const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
             .duration(1000)
             .attr('y', orgHeight / 8)
             // .attr('y', orgHeight - (yScale(props.MinKWH.Percentage) || 0))
-            .attr('height', (yScale(props.MaxKWH.Percentage) || 0) + 60);
+            .attr('height', (yScale(props.MaxKWH.Percentage) || 0) + 50);
 
         progressRectGroup.append("foreignObject")
             .attr("width", '100%')

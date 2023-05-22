@@ -199,8 +199,8 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
     }, [totalKWHs])
 
     return (
-        <div className="flex flex-col gap-4 h-3/6">
-            <CardHeader Titles={['Benchmark', 'Comparison']} SubTitle={"vs. Industry Peer"} />
+        <div className="flex flex-col gap-4">
+            <CardHeader Titles={['Benchmark Comparison']} SubTitle={"vs. Industry Peer"} />
             <div className="h-full">
                 {getBMM}
             </div>
@@ -531,9 +531,9 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
     }
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 px-4">
             <div className="flex justify-between items-baseline">
-                <div className='flex flex-row gap-x-2 text-xs font-extrabold text-custom-gray'>
+                <div className='flex flex-row gap-x-2 text-xs font-extrabold text-custom-gray my-4'>
                     {/* <button onClick={e => { setSelectedSavingPerformanceIndex(0) }} className={`${selectedSavingPerformanceIndex === 0 ? 'active-sp ' : ''}p-2`}>Last 3 Months</button>
                     <button onClick={e => { setSelectedSavingPerformanceIndex(1) }} className={`${selectedSavingPerformanceIndex === 1 ? 'active-sp ' : ''}p-2`}>Last Month</button>
                     <button onClick={e => { setSelectedSavingPerformanceIndex(2) }} className={`${selectedSavingPerformanceIndex === 2 ? 'active-sp ' : ''}p-2`}>Last Week</button> */}
@@ -824,17 +824,17 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
 
 const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     const [selectedCard, setSelectedCard] = React.useState<DropdownProps>({
-        display: <CardHeader Titles={['Savings Performance']} />,
+        display: <CardHeader className={'text-base'} Titles={['Savings Performance']} />,
         value: 'savingPerformance',
     });
 
     const titleDropdowns: DropdownProps[] = [
         {
-            display: <CardHeader Titles={['Savings Performance']} />,
+            display: <CardHeader Titles={['Savings Performance']} className={'text-base'} />,
             value: 'savingPerformance',
         },
         {
-            display: <CardHeader Titles={['Eqpt. Energy Baseline']} SubTitleAlign="end" SubTitle={<span className='text-custom-subtitle'>Avg. Hourly</span>} />,
+            display: <CardHeader Titles={['Eqpt. Energy Baseline']} className={'text-base'} SubTitleAlign="end" SubTitle={<span className='text-custom-subtitle'>Avg. Hourly</span>} />,
             value: 'energyBaseline',
         }
     ]
@@ -975,7 +975,7 @@ const StatusHorizontalCard = ({ Title, SubTitle, Value, textClassName, Prefix, P
 
     return (
         <div className={`flex flex-row p-2 rounded-lg border-2 border-custom-lightgray justify-between h-auto 2xl:h-full min-w-[148.75px] ${className}`}>
-            {Title && <div className="text-left">
+            {Title && <div className="text-left leading-3">
                 <h4 className="2xl:text-sm text-xs">
                     {Title}
                 </h4>
@@ -1091,7 +1091,7 @@ const ValueFirst = ({ title, subTitle, value, valueColor }: any): JSX.Element =>
         <div className="flex flex-col gap-y-2">
             <div>
                 <CardHeader Titles={[title]} />
-                <span className="text-extraSmall">{subTitle}</span>
+                <span className="text-sm text-custom-gray font-thin self-start">{subTitle}</span>
                 {/* <span className='text-custom-gray'>As of <span className="text-custom-darkblue">{subTitle}</span></span> */}
             </div>
             <span className={`text-custom-4xl text-end text-${valueColor}`}>
