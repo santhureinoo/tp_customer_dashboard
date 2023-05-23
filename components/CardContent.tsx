@@ -415,7 +415,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     label: 'Measured Savings',
                     backgroundColor: 'rgb(191 219 254)',
                     data: firstIntermediaryData.map(data => Math.round(parseInt(data.all_eqpt_without_TP_kWh || "0")) - Math.round(parseInt(data.all_eqpt_with_TP_kWh || "0"))),
-                    barThickness: 25,
+                    barThickness: 15,
                     order: 3,
                 },
                 {
@@ -423,7 +423,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     label: 'With TablePointer',
                     backgroundColor: 'rgb(96 165 250)',
                     data: firstIntermediaryData.map(data => Math.round(parseInt(data.all_eqpt_with_TP_kWh || "0"))),
-                    barThickness: 25,
+                    barThickness: 15,
                     order: 2,
                 }
 
@@ -451,7 +451,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     type: 'line' as const,
                     label: 'AC Saving Expenses',
                     lineTension: 0,
-                    borderColor: 'rgb(255, 99, 132)',
+                    borderColor: 'rgb(96 165 250)',
                     borderWidth: 2,
                     fill: true,
                     backgroundColor: 'transparent',
@@ -461,7 +461,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     type: 'line' as const,
                     label: 'Total Saving Expenses',
                     lineTension: 0,
-                    borderColor: 'rgb(255, 99, 132)',
+                    borderColor: 'rgb(191 219 254)',
                     borderWidth: 2,
                     fill: true,
                     backgroundColor: 'transparent',
@@ -510,10 +510,11 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
         elements: {
             bar: {
                 borderRadius: 30,
+                barPercentage: 0.8,
             }
         },
         responsive: true,
-        aspectRatio: 1.7,
+        aspectRatio: 1.5,
         // maintainAspectRatio: false,
         scales: {
             x: {
