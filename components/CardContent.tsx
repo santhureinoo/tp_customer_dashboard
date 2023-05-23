@@ -992,7 +992,7 @@ const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, cl
 const StatusHorizontalCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, className, RightSideValue, PostfixDirection = 'horizontal', disableWidthFull = false }: StatusCardProps): JSX.Element => {
 
     return (
-        <div className={`flex flex-row p-2 rounded-lg border-2 border-custom-lightgray justify-between h-auto 2xl:h-full min-w-[148.75px] ${className}`}>
+        <div className={`flex flex-row p-2 rounded-lg border-2 border-custom-lightgray justify-between h-auto ${className}`}>
             {Title && <div className="text-left leading-3">
                 <h4 className="2xl:text-sm text-xs">
                     {Title}
@@ -1091,7 +1091,7 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                 </select>
             </div>
             <div className="2xl:grid grid gap-y-2">
-                <StatusHorizontalCard Title={'Baseline'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} />
+                <StatusHorizontalCard Title={'Baseline'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} />
                 {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
                 <StatusCard Title={'Savings @ Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} /> */}
 
@@ -1261,7 +1261,7 @@ interface YearlyEnergyProps {
 const YearlyEnergy = ({ SmallPostfix, Prefix, Svg, Value, Year, TextColor, Postfix, BgColor, Height, Width }: YearlyEnergyProps): JSX.Element => {
     return (
         <div className="flex flex-col pt-7 justify-between items-center h-auto col-span-1">
-            <div className={`${BgColor} flex justify-center rounded-[100%] items-center w-[250px] h-[250px]`}>
+            <div className={`flex justify-center rounded-[100%] items-center`}>
                 <img src={Svg} alt="" className="text-center m-auto" height={`${Height}`} width={`${Width}`} />
             </div>
             <div className="flex flex-col my-16 text-center">
