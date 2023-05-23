@@ -513,6 +513,8 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
             }
         },
         responsive: true,
+        aspectRatio: 1.7,
+        // maintainAspectRatio: false,
         scales: {
             x: {
                 stacked: true,
@@ -585,9 +587,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                 </div>
 
             </div>
-            <div>
-                <Chart type='bar' data={data()} options={option} />
-            </div>
+            <Chart className='h-full' type='bar' data={data()} options={option} />
         </div>
     )
 }
@@ -1180,8 +1180,8 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
     return (
         <div>
             <div className='flex flex-row gap-2 justify-between w-full h-full' >
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Saving @ Tariff' FirstValue={TariffKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw?.toFixed(1)} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Saving @ Tariff' FirstValue={TariffKw?.toFixed(1)} FirstPostfix="kWh" SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
             </div>
         </div>
     )
@@ -1216,7 +1216,7 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
                             <span className={`font-bold text-2xl ${TextColor}`}>{FirstValue}</span>
                             <span className={`text-sm ${TextColor}`}>{FirstPostfix}</span>
                         </div>
-                        <svg className="absolute inset-x-28" width="44" height="80" viewBox="0 0 44 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="absolute left-0 right-0 mx-auto" width="44" height="80" viewBox="0 0 44 112" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <line y1="-0.25" x2="118.955" y2="-0.25" transform="matrix(0.359554 -0.933124 0.860639 0.509216 0.714844 112)" stroke="#999999" strokeWidth="0.5" />
                         </svg>
                         <div className="text-right">
