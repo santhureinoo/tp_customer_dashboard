@@ -345,7 +345,6 @@ export interface outlet {
 
 export namespace outlet_device_ac_inputFields {
     export type outlet_id = number;
-    export type od_device_input_id = number;
     export type outlet_date = string;
     export type device_num = string;
     export type ac_baseline_kW = string | null;
@@ -363,7 +362,6 @@ export namespace outlet_device_ac_inputFields {
 export interface outlet_device_ac_input {
     [key: string]: any;
     outlet_id: outlet_device_ac_inputFields.outlet_id;
-    od_device_input_id: outlet_device_ac_inputFields.od_device_input_id;
     outlet_date: outlet_device_ac_inputFields.outlet_date;
     device_num: outlet_device_ac_inputFields.device_num;
     ac_baseline_kW: outlet_device_ac_inputFields.ac_baseline_kW;
@@ -380,7 +378,6 @@ export interface outlet_device_ac_input {
 
 export namespace outlet_device_ex_fa_inputFields {
     export type outlet_id = number;
-    export type od_device_input_id = number;
     export type name = string;
     export type outlet_date = string;
     export type device_type = string;
@@ -403,7 +400,6 @@ export namespace outlet_device_ex_fa_inputFields {
 export interface outlet_device_ex_fa_input {
     [key: string]: any;
     outlet_id: outlet_device_ex_fa_inputFields.outlet_id;
-    od_device_input_id: outlet_device_ex_fa_inputFields.od_device_input_id;
     name: outlet_device_ex_fa_inputFields.name;
     outlet_date: outlet_device_ex_fa_inputFields.outlet_date;
     device_type: outlet_device_ex_fa_inputFields.device_type;
@@ -426,7 +422,6 @@ export interface outlet_device_ex_fa_input {
 export interface outlet_device_ex_fa_ac_input {
     [key: string]: any;
     outlet_id: outlet_device_ex_fa_inputFields.outlet_id;
-    od_device_input_id: outlet_device_ex_fa_inputFields.od_device_input_id;
     name: outlet_device_ex_fa_inputFields.name;
     outlet_date: outlet_device_ex_fa_inputFields.outlet_date;
     device_type: outlet_device_ex_fa_inputFields.device_type;
@@ -497,6 +492,8 @@ export interface outlet_month {
     no_of_ac_installed: outlet_monthFields.no_of_ac_installed;
     remarks_on_eqpt_in_outlet_or_installed: outlet_monthFields.remarks_on_eqpt_in_outlet_or_installed;
     remarks_on_overall_outlet: outlet_monthFields.remarks_on_overall_outlet;
+
+    outlet?: outlet;
 
 }
 

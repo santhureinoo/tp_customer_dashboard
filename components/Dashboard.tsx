@@ -3,7 +3,7 @@ import { dateValueForQuery, numberWithCommas, zeroPad } from '../common/helper';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
-import { customer, group, invoice, outlet, results } from "../common/types";
+import { customer, group, invoice, outlet, outlet_month, results } from "../common/types";
 import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, EquipmentEnergyCard, LiveOutletCard, RankAndOutletCard, RemarksCard, SavingEnergyCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard, ValueFirstCard, YearlyEnergyCard } from "./CardContent";
 import ClientOnly from "./ClientOnly";
 import { v4 as uuidv4 } from 'uuid';
@@ -34,8 +34,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         tariffKWH: 0,
     })
 
-    const [selectedMonth, setSelectedMonth] = React.useState(moment().format('MM'));
-    const [selectedYear, setSelectedYear] = React.useState("2023");
+    const [selectedMonth, setSelectedMonth] = React.useState('All');
+    const [selectedYear, setSelectedYear] = React.useState('All');
     const [totalKWHs, setTotalKWHs] = React.useState<{
         MinKWH: number,
         MaxKWH: number,
@@ -67,71 +67,69 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
       }
     `;
 
-    const getOutletsByGroupIdQuery = gql`
-    query FindFirstGroup($findFirstGroupWhere: GroupWhereInput) {
-        findFirstGroup(where: $findFirstGroupWhere) {
-          customers {
+    const getOutletsByLatestDateQuery = gql`
+    query Outlet_months($where: Outlet_monthWhereInput) {
+        outlet_months(where: $where) {
             outlet {
-              outlet_id
-                name
-                customer_id
-                outlet_device_ac_input {
-                  od_device_input_id
-                }
-                outlet_device_ex_fa_input {
-                  od_device_input_id
-                }
-                results {
-                  outlet_id
-                  outlet_date
-                  ke_measured_savings_kWh
-                  ac_measured_savings_kWh
-                  acmv_measured_savings_kWh
-                  outlet_measured_savings_kWh
-                  outlet_measured_savings_expenses
-                  outlet_measured_savings_percent
-                  co2_savings_kg
-                  savings_tariff_expenses
-                  tp_sales_expenses
-                  ke_eqpt_energy_baseline_avg_hourly_kW
-                  ac_eqpt_energy_baseline_avg_hourly_kW
-                  acmv_eqpt_energy_baseline_avg_hourly_kW
-                  ke_eqpt_energy_baseline_avg_hourly_as_date
-                  ac_eqpt_energy_baseline_avg_hourly_as_date
-                  acmv_eqpt_energy_baseline_avg_hourly_as_date
-                  ke_eqpt_energy_usage_without_TP_month_kW
-                  ac_eqpt_energy_usage_without_TP_month_kW
-                  outlet_eqpt_energy_usage_without_TP_month_kW
-                  outlet_eqpt_energy_usage_without_TP_month_expenses
-                  ke_eqpt_energy_usage_with_TP_month_kW
-                  ac_eqpt_energy_usage_with_TP_month_kW
-                  outlet_eqpt_energy_usage_with_TP_month_kW
-                  outlet_eqpt_energy_usage_with_TP_month_expenses
-                  acmv_25percent_benchmark_comparison_kWh
-                  acmv_25percent_benchmark_comparison_expenses
-                  acmv_10percent_benchmark_comparison_kWh
-                  acmv_10percent_benchmark_comparison_expenses
-                  ke_and_ac_25percent_benchmark_comparison_kWh
-                  ke_and_ac_25percent_benchmark_comparison_expenses
-                  monday
-                  tuesday
-                  wednesday
-                  thursday
-                  friday
-                  saturday
-                  sunday
-                  holiday
-                }
-            }
-          }
+                outlet_id
+                  name
+                  customer_id
+                  outlet_device_ac_input {
+                    device_num
+                  }
+                  outlet_device_ex_fa_input {
+                    device_num
+                  }
+                  results {
+                    outlet_id
+                    outlet_date
+                    ke_measured_savings_kWh
+                    ac_measured_savings_kWh
+                    acmv_measured_savings_kWh
+                    outlet_measured_savings_kWh
+                    outlet_measured_savings_expenses
+                    outlet_measured_savings_percent
+                    co2_savings_kg
+                    savings_tariff_expenses
+                    tp_sales_expenses
+                    ke_eqpt_energy_baseline_avg_hourly_kW
+                    ac_eqpt_energy_baseline_avg_hourly_kW
+                    acmv_eqpt_energy_baseline_avg_hourly_kW
+                    ke_eqpt_energy_baseline_avg_hourly_as_date
+                    ac_eqpt_energy_baseline_avg_hourly_as_date
+                    acmv_eqpt_energy_baseline_avg_hourly_as_date
+                    ke_eqpt_energy_usage_without_TP_month_kW
+                    ac_eqpt_energy_usage_without_TP_month_kW
+                    outlet_eqpt_energy_usage_without_TP_month_kW
+                    outlet_eqpt_energy_usage_without_TP_month_expenses
+                    ke_eqpt_energy_usage_with_TP_month_kW
+                    ac_eqpt_energy_usage_with_TP_month_kW
+                    outlet_eqpt_energy_usage_with_TP_month_kW
+                    outlet_eqpt_energy_usage_with_TP_month_expenses
+                    acmv_25percent_benchmark_comparison_kWh
+                    acmv_25percent_benchmark_comparison_expenses
+                    acmv_10percent_benchmark_comparison_kWh
+                    acmv_10percent_benchmark_comparison_expenses
+                    ke_and_ac_25percent_benchmark_comparison_kWh
+                    ke_and_ac_25percent_benchmark_comparison_expenses
+                    monday
+                    tuesday
+                    wednesday
+                    thursday
+                    friday
+                    saturday
+                    sunday
+                    holiday
+                  }
+              }
         }
       }`;
 
-    const getOutletsByGroupIdVariable = {
+    const getOutletsByLatestDateVariable = {
         "variables": {
-            "findFirstGroupWhere": {
-                "group_id": {
-                    "equals": groupId
+            "where": {
+                "outlet_date": {
+                    "contains": lastestLiveDate
                 }
             }
         }
@@ -385,7 +383,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [getResultsResult.data]);
 
-    const getOutletsByIdResult = useQuery(getOutletsByGroupIdQuery, getOutletsByGroupIdVariable);
+    const getOutletsByIdResult = useQuery(getOutletsByLatestDateQuery, getOutletsByLatestDateVariable);
     const getFindFirstLastestReportDateResult = useQuery(getFindFirstLastestReportDateQuery);
 
     React.useEffect(() => {
@@ -400,7 +398,9 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
     React.useEffect(() => {
         if (lastestLiveDate) {
-            const latestLiveDateInMoment = moment(lastestLiveDate, 'DD/MM/YYYY');
+            const latestLiveDateInMoment = moment(lastestLiveDate, 'MM/YYYY');
+            setSelectedMonth(latestLiveDateInMoment.format('MM'));
+            setSelectedYear(latestLiveDateInMoment.format('YYYY'));
             getInvoice[0]({
                 "variables": {
                     "where": {
@@ -421,16 +421,15 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     }, [lastestLiveDate])
 
     React.useEffect(() => {
-        if (getOutletsByIdResult.data && getOutletsByIdResult.data.findFirstGroup) {
+        if (getOutletsByIdResult.data && getOutletsByIdResult.data.outlet_months) {
             const currentOutlets: outlet[] = [];
-            const group: group | undefined = getOutletsByIdResult.data.findFirstGroup;
-            if (group) {
-                group.customers && group.customers.forEach(custom => {
-                    custom.outlet && custom.outlet.forEach(outlet => {
-                        currentOutlets.push(outlet);
-                    })
+            const outletmonths: outlet_month[] | undefined = getOutletsByIdResult.data.outlet_months;
+            if (outletmonths) {
+                outletmonths.forEach(month => {
+                    month.outlet && currentOutlets.push(month.outlet);
                 })
             }
+            // Ping
             setOutlets(currentOutlets);
         } else {
             setOutlets([]);
@@ -609,10 +608,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <LiveOutletCard Value={outlets.length} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP)} />
+                                <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP, 1)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP, 1)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP, 1)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP, 1)} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw)} MeasureExpense={numberWithCommas(summaryResults.measureExpense)} TariffExpense={numberWithCommas(summaryResults.tariffExpense)} TariffKw={numberWithCommas(summaryResults.tariffKWH)} />
+                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw, 1)} MeasureExpense={numberWithCommas(summaryResults.measureExpense, 1)} TariffExpense={numberWithCommas(summaryResults.tariffExpense, 1)} TariffKw={numberWithCommas(summaryResults.tariffKWH, 1)} />
                             </div>
                         </div>
                         {

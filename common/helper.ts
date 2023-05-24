@@ -10,9 +10,13 @@ export function bytesToSize(bytes: number) {
   return Math.round(bytes / Math.pow(1024, i)) + ' ' + sizes[i];
 }
 
-export function numberWithCommas(x?: number) {
+export function numberWithCommas(x?: number, fixed = 0) {
   if (x && x > 999) {
-    return Number(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    let numX = Number(x);
+    if(fixed > 0 ) {
+      numX.toFixed(fixed);
+    }
+    return numX.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   else {
     return x;

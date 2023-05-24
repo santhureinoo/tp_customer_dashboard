@@ -1181,8 +1181,8 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
     return (
         <div>
             <div className='flex flex-row gap-2 justify-between w-full h-full' >
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw?.toFixed(1)} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Saving @ Tariff' FirstValue={TariffKw?.toFixed(1)} FirstPostfix="kWh" SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Saving @ Tariff' FirstValue={TariffKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
             </div>
         </div>
     )
