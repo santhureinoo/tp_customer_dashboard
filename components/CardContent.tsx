@@ -227,10 +227,10 @@ interface Props {
 export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     const [firstIntermediaryData, setFirstIntermediaryData] = React.useState<first_intermediary_table[]>([]);
     const [selectedSavingPerformanceIndex, setSelectedSavingPerformanceIndex] = React.useState(1);
+    const currentMoment = moment(latestLiveDate, 'MM/YYYY');
     const [selectedTab, setSelectedTab] = React.useState<'kwh' | 'saving'>('kwh');
-
-    const [selectedMonth, setSelectedMonth] = React.useState(moment().format('MM'));
-    const [selectedYear, setSelectedYear] = React.useState("2023");
+    const [selectedMonth, setSelectedMonth] = React.useState(currentMoment.format('MM'));
+    const [selectedYear, setSelectedYear] = React.useState(currentMoment.format('YYYY'));
     const getFirstIntermediaryQuery = gql`
     query First_intermediary_tables($where: First_intermediary_tableWhereInput) {
         first_intermediary_tables(where: $where) {
@@ -270,7 +270,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
 
     const getFirstIntermediaryVariable = React.useMemo(() => {
         let variable = {};
-        const currentMoment = moment(latestLiveDate, 'DD/MM/YYYY');
+        const currentMoment = moment(latestLiveDate, 'MM/YYYY');
         if (currentOutletID) {
 
             variable = {

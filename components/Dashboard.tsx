@@ -332,7 +332,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             // Per month calculation
             const currentTotalKWHs = currData.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
-                const currentDate = moment(lastestLiveDate, 'DD/MM/YYYY');
+                const currentDate = moment(lastestLiveDate, 'MM/YYYY');
                 return resultDate.diff(currentDate) <= 0;
             }).map(dat => {
                 return {
@@ -362,7 +362,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             // Per year calculation
             const currentTotalYearly = currData.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
-                const currentDate = moment(lastestLiveDate, 'DD/MM/YYYY');
+                const currentDate = moment(lastestLiveDate, 'MM/YYYY');
                 return resultDate.diff(currentDate, "years") === 0;
             }).map(dat => {
                 return {
