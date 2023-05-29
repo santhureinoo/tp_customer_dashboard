@@ -581,7 +581,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                     <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
                                                 </div>
                                                 <div>
-                                                    <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(currentInvoice?.last_available_tariff || '0'))}`} valueColor={'custom-blue-card-font'} />
+                                                    <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(currentInvoice?.last_available_tariff || '0'),2)}`} valueColor={'custom-blue-card-font'} />
                                                 </div>
                                                 <div>
                                                     <ValueFirstCard title={'Savings @ Tariff'} subTitle={`$${Number(currentInvoice?.last_available_tariff || '0')}`} value={`$${numberWithCommas(totalKWHs.SavingTariff)}`} valueColor={'custom-green-card-font'} />

@@ -126,13 +126,13 @@ const SustainPerformance = ({ total }: any): JSX.Element => {
     return (
         <div className="flex flex-col gap-4 h-full">
             <div className="flex justify-between items-baseline">
-                <CardHeader Titles={['Sustainability Performance']} SubTitle={'Accummulative'} />
+                <CardHeader Titles={['Sustainability Performance']} SubTitle={'Year to Date'} />
             </div>
             <div className="lg:grid lg:grid-cols-4 grid grid-cols-2 gap-2">
-                <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings/Year'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
-                <StatusCard Title={'CO2 Saved/Year'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
-                <StatusCard Title={'Planted Tree/Year'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 22))} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
-                <StatusCard Title={'Meals to be sold/Year'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(total.energy * 2)} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
+                <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
+                <StatusCard Title={'CO2 Saved'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
+                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 22))} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
+                <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(total.energy * 2)} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
                 {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
             </div>
@@ -431,42 +431,58 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
         } else {
             return [
                 {
-                    type: 'line' as const,
+                    type: 'bar' as const,
                     label: 'KE Saving Expenses',
-                    lineTension: 0,
-                    borderColor: 'rgb(255, 99, 132)',
-                    borderWidth: 2,
-                    // fill: true,
-                    // backgroundColor: (context: ScriptableContext<"line">) => {
-                    //     const ctx = context.chart.ctx;
-                    //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                    //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
-                    //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
-                    //     return gradient;
-                    // },
-                    backgroundColor: 'transparent',
+                    backgroundColor: 'rgb(96 165 250)',
                     data: firstIntermediaryData.map(data => Math.round(parseInt(data.ke_savings_expenses || "0"))),
+                    barThickness: 15,
+                    order: 1,
                 },
                 {
-                    type: 'line' as const,
+                    type: 'bar' as const,
                     label: 'AC Saving Expenses',
-                    lineTension: 0,
-                    borderColor: 'rgb(96 165 250)',
-                    borderWidth: 2,
-                    // fill: true,
-                    backgroundColor: 'transparent',
+                    backgroundColor: 'rgb(191 219 254)',
                     data: firstIntermediaryData.map(data => Math.round(parseInt(data.ac_savings_expenses || "0"))),
+                    barThickness: 15,
+                    order: 2,
                 },
-                {
-                    type: 'line' as const,
-                    label: 'Total Saving Expenses',
-                    lineTension: 0,
-                    borderColor: 'rgb(191 219 254)',
-                    borderWidth: 2,
-                    // fill: true,
-                    backgroundColor: 'transparent',
-                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.total_savings_expenses || "0"))),
-                }
+                // {
+                //     type: 'line' as const,
+                //     label: 'KE Saving Expenses',
+                //     lineTension: 0,
+                //     borderColor: 'rgb(255, 99, 132)',
+                //     borderWidth: 2,
+                //     // fill: true,
+                //     // backgroundColor: (context: ScriptableContext<"line">) => {
+                //     //     const ctx = context.chart.ctx;
+                //     //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                //     //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
+                //     //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
+                //     //     return gradient;
+                //     // },
+                //     backgroundColor: 'transparent',
+                //     data: firstIntermediaryData.map(data => Math.round(parseInt(data.ke_savings_expenses || "0"))),
+                // },
+                // {
+                //     type: 'line' as const,
+                //     label: 'AC Saving Expenses',
+                //     lineTension: 0,
+                //     borderColor: 'rgb(96 165 250)',
+                //     borderWidth: 2,
+                //     // fill: true,
+                //     backgroundColor: 'transparent',
+                //     data: firstIntermediaryData.map(data => Math.round(parseInt(data.ac_savings_expenses || "0"))),
+                // },
+                // {
+                //     type: 'line' as const,
+                //     label: 'Total Saving Expenses',
+                //     lineTension: 0,
+                //     borderColor: 'rgb(191 219 254)',
+                //     borderWidth: 2,
+                //     // fill: true,
+                //     backgroundColor: 'transparent',
+                //     data: firstIntermediaryData.map(data => Math.round(parseInt(data.total_savings_expenses || "0"))),
+                // }
             ]
         }
     }, [selectedTab, firstIntermediaryData]);
@@ -954,7 +970,7 @@ const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, cl
                                 <span className={`text-sm ${textClassName}`}>
                                     {Prefix}
                                 </span>
-                                <span className={`text-[35px]`}>
+                                <span className={`text-3xl`}>
                                     {Value}
                                 </span>
 
@@ -1097,7 +1113,7 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                 </select>
             </div>
             <div className="2xl:grid grid gap-y-2">
-                <StatusHorizontalCard Title={'Baseline'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={Math.round(renderedData.baseline * Math.pow(10, 3)) / Math.pow(10, 3)} Postfix={'kW'} />
+                <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={Math.round(renderedData.baseline * Math.pow(10, 3)) / Math.pow(10, 3)} Postfix={'kW'} />
                 {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
                 <StatusCard Title={'Savings @ Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} /> */}
 
@@ -1231,7 +1247,7 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
                             {SecondPostfix && <span className={`text-sm ${TextColor}`}>{SecondPostfix}</span>}
                         </div>
                     </div> :
-                    <div className='flex flex-row justify-between mt-6'>
+                    <div className='flex flex-row justify-between mt-4'>
                         <div>
                             {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
                             <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
