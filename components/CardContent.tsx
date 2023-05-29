@@ -436,7 +436,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     lineTension: 0,
                     borderColor: 'rgb(255, 99, 132)',
                     borderWidth: 2,
-                    fill: true,
+                    // fill: true,
                     // backgroundColor: (context: ScriptableContext<"line">) => {
                     //     const ctx = context.chart.ctx;
                     //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
@@ -453,7 +453,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     lineTension: 0,
                     borderColor: 'rgb(96 165 250)',
                     borderWidth: 2,
-                    fill: true,
+                    // fill: true,
                     backgroundColor: 'transparent',
                     data: firstIntermediaryData.map(data => Math.round(parseInt(data.ac_savings_expenses || "0"))),
                 },
@@ -463,7 +463,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     lineTension: 0,
                     borderColor: 'rgb(191 219 254)',
                     borderWidth: 2,
-                    fill: true,
+                    // fill: true,
                     backgroundColor: 'transparent',
                     data: firstIntermediaryData.map(data => Math.round(parseInt(data.total_savings_expenses || "0"))),
                 }
@@ -516,14 +516,16 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
         responsive: true,
         aspectRatio: 1.5,
         // maintainAspectRatio: false,
-        scales: {
-            x: {
-                stacked: true,
-            },
-            y: {
-                stacked: true,
-            },
+        ...(selectedTab === 'kwh') && {
+            scales: {
+                x: {
+                    stacked: true,
+                },
+                y: {
+                    stacked: true,
+                },
 
+            }
         }
     }
 
@@ -556,7 +558,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                 </div>
                 <div className='flex flex-row gap-x-2 text-xs'>
                     <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                        <option value="All">Month</option>
+                        {/* <option value="All">Month</option> */}
                         <option value="01">January</option>
                         <option value="02">February</option>
                         <option value="03">March</option>
@@ -571,7 +573,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                         <option value="12">December</option>
                     </select>
                     <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        <option value="All">Year</option>
+                        {/* <option value="All">Year</option> */}
                         <option value="2020">2020</option>
                         <option value="2021">2021</option>
                         <option value="2022">2022</option>
@@ -588,7 +590,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                 </div>
 
             </div>
-            <Chart className='h-full' type='bar' data={data()} options={option} />
+            <Chart className='h-full' type={selectedTab === 'kwh' ? 'bar' : 'line'} data={data()} options={option} />
         </div>
     )
 }
@@ -808,7 +810,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     </div> */}
                 <div className='flex flex-row gap-x-2 text-xs'>
                     <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                        <option value="All">Month</option>
+                        {/* <option value="All">Month</option> */}
                         <option value="01">January</option>
                         <option value="02">February</option>
                         <option value="03">March</option>
@@ -823,7 +825,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                         <option value="12">December</option>
                     </select>
                     <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        <option value="All">Year</option>
+                        {/* <option value="All">Year</option> */}
                         <option value="2020">2020</option>
                         <option value="2021">2021</option>
                         <option value="2022">2022</option>
@@ -1065,6 +1067,9 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                     renderedData.energySaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_eqpt_energy_baseline_avg_hourly_kW || "") }, 0);
                     renderedData.costSaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "") }, 0);
                 }
+                if (outlet.first_intermediary_table && outlet.first_intermediary_table.length > 0) {
+                    renderedData.baseline = Number(outlet.first_intermediary_table[0].ke_baseline_kW);
+                }
             }
 
         } else {
@@ -1092,7 +1097,7 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                 </select>
             </div>
             <div className="2xl:grid grid gap-y-2">
-                <StatusHorizontalCard Title={'Baseline'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} />
+                <StatusHorizontalCard Title={'Baseline'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={Math.round(renderedData.baseline * Math.pow(10, 3)) / Math.pow(10, 3)} Postfix={'kW'} />
                 {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
                 <StatusCard Title={'Savings @ Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} /> */}
 
@@ -1182,7 +1187,7 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
         <div>
             <div className='flex flex-row gap-2 justify-between w-full h-full' >
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Saving @ Tariff' FirstValue={TariffKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff' FirstValue={TariffKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
             </div>
         </div>
     )
@@ -1198,7 +1203,7 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
                 {
                     (Icon == true) ?
                         <div className="flex">
-                            <h2 className="font-bold text-sm text">{Title} </h2> <FontAwesomeIcon className="px-2 text-2xl" icon={faSortUp} />
+                            <h2 className="font-bold text-sm text">{Title} </h2> <FontAwesomeIcon className="px-2 text-xl" icon={faSortUp} />
                         </div> :
                         <h2 className="font-bold text-sm">
                             {Title}
@@ -1213,29 +1218,29 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
                 (Position == 'vertical') ?
                     <div className='flex flex-col gap-5 relative'>
                         <div className="text-left">
-                            <span className={`font-bold text-2xl ${TextColor}`}>{FirstPrefix}</span>
-                            <span className={`font-bold text-2xl ${TextColor}`}>{FirstValue}</span>
-                            <span className={`text-sm ${TextColor}`}>{FirstPostfix}</span>
+                            {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
+                            <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
+                            {FirstPostfix && <span className={`text-sm ${TextColor}`}>{FirstPostfix}</span>}
                         </div>
                         <svg className="absolute left-0 right-0 mx-auto" width="44" height="80" viewBox="0 0 44 112" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <line y1="-0.25" x2="118.955" y2="-0.25" transform="matrix(0.359554 -0.933124 0.860639 0.509216 0.714844 112)" stroke="#999999" strokeWidth="0.5" />
                         </svg>
                         <div className="text-right">
-                            <span className={`font-bold text-2xl ${TextColor}`}>{SecondPrefix}</span>
-                            <span className={`font-bold text-2xl ${TextColor}`}>{SecondValue}</span>
-                            <span className={`text-sm ${TextColor}`}>{SecondPostfix}</span>
+                            {SecondPrefix && <span className={`font-bold text-xl ${TextColor}`}>{SecondPrefix}</span>}
+                            <span className={`font-bold text-xl ${TextColor}`}>{SecondValue}</span>
+                            {SecondPostfix && <span className={`text-sm ${TextColor}`}>{SecondPostfix}</span>}
                         </div>
                     </div> :
                     <div className='flex flex-row justify-between mt-6'>
                         <div>
-                            <span className={`font-bold text-2xl ${TextColor}`}>{FirstPrefix}</span>
-                            <span className={`font-bold text-2xl ${TextColor}`}>{FirstValue}</span>
-                            <span className={`text-sm ${TextColor}`}>{FirstPostfix}</span>
+                            {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
+                            <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
+                            {FirstPostfix && <span className={`text-sm ${TextColor}`}>{FirstPostfix}</span>}
                         </div>
                         <div>
-                            <span className={`font-bold text-2xl ${TextColor}`}>{SecondPrefix}</span>
-                            <span className={`font-bold text-2xl ${TextColor}`}>{SecondValue}</span>
-                            <span className={`text-sm ${TextColor}`}>{SecondPostfix}</span>
+                            {SecondPrefix && <span className={`font-bold text-xl ${TextColor}`}>{SecondPrefix}</span>}
+                            <span className={`font-bold text-xl ${TextColor}`}>{SecondValue}</span>
+                            {SecondPostfix && <span className={`text-sm ${TextColor}`}>{SecondPostfix}</span>}
                         </div>
                     </div>
             }

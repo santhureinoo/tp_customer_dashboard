@@ -3,7 +3,7 @@ import { dateValueForQuery, numberWithCommas, zeroPad } from '../common/helper';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
-import { customer, group, invoice, outlet, outlet_month, results } from "../common/types";
+import { customer, global_input, group, invoice, outlet, outlet_month, results } from "../common/types";
 import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, EquipmentEnergyCard, LiveOutletCard, RankAndOutletCard, RemarksCard, SavingEnergyCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard, ValueFirstCard, YearlyEnergyCard } from "./CardContent";
 import ClientOnly from "./ClientOnly";
 import { v4 as uuidv4 } from 'uuid';
@@ -18,6 +18,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
     const [currentOutletID, setCurrentOutletID] = React.useState("");
     const [currentInvoice, setCurrentInvoice] = React.useState<invoice>();
+    const [globalSetting, setGlobalSetting] = React.useState<global_input>();
     const [title, setTitle] = React.useState(["Outlet", ""]);
     const [group, setGroup] = React.useState("");
     //summary result
@@ -34,8 +35,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         tariffKWH: 0,
     })
 
-    const [selectedMonth, setSelectedMonth] = React.useState('All');
-    const [selectedYear, setSelectedYear] = React.useState('All');
+    const [selectedMonth, setSelectedMonth] = React.useState('01');
+    const [selectedYear, setSelectedYear] = React.useState('2022');
     const [totalKWHs, setTotalKWHs] = React.useState<{
         MinKWH: number,
         MaxKWH: number,
@@ -58,6 +59,14 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         co2: 0
     });
 
+    const getGlobalInputQuery = gql`
+    query Global_input($where: Global_inputWhereUniqueInput!) {
+        global_input(where: $where) {
+          poss_tariff_increase
+        }
+      }`;
+
+
     const getFindFirstLastestReportDateQuery = gql`
     query FindFirstLastest_report_date {
         findFirstLastest_report_date {
@@ -68,7 +77,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     `;
 
     const getOutletsByLatestDateQuery = gql`
-    query Outlet_months($where: Outlet_monthWhereInput) {
+    query Outlet_months($where: Outlet_monthWhereInput, $where2: ResultsWhereInput, $where3: First_intermediary_tableWhereInput) {
         outlet_months(where: $where) {
             outlet {
                 outlet_id
@@ -80,7 +89,11 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                   outlet_device_ex_fa_input {
                     device_num
                   }
-                  results {
+                  first_intermediary_table(where: $where3) {
+                    ke_baseline_kW
+                    ac_baseline_kWh
+                  }
+                  results(where: $where2) {
                     outlet_id
                     outlet_date
                     ke_measured_savings_kWh
@@ -125,15 +138,36 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
       }`;
 
+    const getGlobalInputVariable = {
+        "variables": {
+            "where": {
+                "global_input_id": 1
+            }
+        }
+    }
+
     const getOutletsByLatestDateVariable = {
         "variables": {
             "where": {
                 "outlet_date": {
                     "contains": lastestLiveDate
                 }
+            },
+            "where2": {
+                "outlet_date": {
+                    "contains": lastestLiveDate
+                }
+            },
+            "where3": {
+                "outlet_month_year": {
+                    "equals": lastestLiveDate
+                },
+                "day_of_month": {
+                    "equals": '1'
+                }
             }
         }
-    }
+    };
     //summary results query and variable
     const findFirstGroupSummaryVariable = {
         "variables": {
@@ -186,12 +220,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
       }`
 
-    const getSummaryResult = useQuery(findFirstGroupSummaryQuery, findFirstGroupSummaryVariable)
+    const getSummaryResult = useQuery(findFirstGroupSummaryQuery, findFirstGroupSummaryVariable);
+    const getGlobalInputResult = useQuery(getGlobalInputQuery, getGlobalInputVariable);
 
     //useEffect hook for summary result 
     React.useEffect(() => {
         if (getSummaryResult.data) {
-            const outletList = getSummaryResult.data.findFirstGroup.customers[0].outlet;
 
             //temp value for results
             let tempUsageKwWithTP = 0
@@ -205,27 +239,38 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             let tempCo2Saving = 0
             let tempSavingTariff = 0
 
-            //Sum up all the values from results of outlets
-            outletList.forEach((outlet: any) => {
-                if (outlet.results.length > 0) {
-                    tempUsageKwWithTP += (outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_kW as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_kW) : 0)
-                    tempUsageExpenseWithTP += (outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
-                    tempUsageKwWOTP += (outlet.results[0].outlet_eqpt_energy_usage_without_TP_month_kW as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_without_TP_month_kW) : 0)
-                    tempUsageExpenseWOTP += (outlet.results[0].outlet_eqpt_energy_usage_without_TP_month_expenses as String ? parseInt(outlet.results[0].outlet_eqpt_energy_usage_without_TP_month_expenses) : 0)
-                    tempMeasureKw += (outlet.results[0].outlet_measured_savings_kWh as String ? parseInt(outlet.results[0].outlet_measured_savings_kWh) : 0)
-                    tempMeasureExpense += (outlet.results[0].outlet_measured_savings_expenses as String ? parseInt(outlet.results[0].outlet_measured_savings_expenses) : 0)
-                    tempTariffExpense += (outlet.results[0].savings_tariff_expenses as String ? parseInt(outlet.results[0].savings_tariff_expenses) : 0)
-                    tempEnergySaving += (outlet.results[0].tp_sales_expenses as String ? parseInt(outlet.results[0].tp_sales_expenses) : 0)
-                    tempCo2Saving += (outlet.results[0].co2_savings_kg as String ? parseInt(outlet.results[0].co2_savings_kg) : 0)
-                }
 
-                if (outlet.outlet_month.length > 0) {
-                    outlet.outlet_month.forEach((month: any) => {
-                        tempSavingTariff += Number(month.last_avail_tariff);
-                    })
+            getSummaryResult.data.findFirstGroup.customers.forEach((customer: any) => {
 
-                }
-            })
+                const outletList = customer.outlet;
+                //Sum up all the values from results of outlets
+                outletList.forEach((outlet: any) => {
+                    if (outlet.results.length > 0) {
+                        outlet.results.forEach((result: any) => {
+                            if (result) {
+                                tempUsageKwWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_kW as String ? parseInt(result.outlet_eqpt_energy_usage_with_TP_month_kW) : 0)
+                                tempUsageExpenseWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseInt(result.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
+                                tempUsageKwWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_kW as String ? parseInt(result.outlet_eqpt_energy_usage_without_TP_month_kW) : 0)
+                                tempUsageExpenseWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_expenses as String ? parseInt(result.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0)
+                                tempMeasureKw += (result.outlet_measured_savings_kWh as String ? parseInt(result.outlet_measured_savings_kWh) : 0)
+                                tempMeasureExpense += (result.outlet_measured_savings_expenses as String ? parseInt(result.outlet_measured_savings_expenses) : 0)
+                                tempTariffExpense += (result.savings_tariff_expenses as String ? parseInt(result.savings_tariff_expenses) : 0)
+                                tempEnergySaving += (result.tp_sales_expenses as String ? parseInt(result.tp_sales_expenses) : 0)
+                                tempCo2Saving += (result.co2_savings_kg as String ? parseInt(result.co2_savings_kg) : 0)
+                            }
+
+                        })
+
+                    }
+
+                    if (outlet.outlet_month.length > 0) {
+                        outlet.outlet_month.forEach((month: any) => {
+                            tempSavingTariff += Number(month.last_avail_tariff);
+                        })
+
+                    }
+                })
+            });
 
             let tempResult = {
                 usageKwWithTP: tempUsageKwWithTP,
@@ -247,6 +292,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [selectedMonth, selectedYear, getSummaryResult]);
 
+    React.useEffect(() => {
+        if (getGlobalInputResult.data) {
+            setGlobalSetting(getGlobalInputResult.data.global_input);
+        }
+    }, [getGlobalInputResult]);
+
     const getInvoiceQuery = gql`
     query FindFirstInvoice($where: InvoiceWhereInput) {
         findFirstInvoice(where: $where) {
@@ -264,6 +315,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
           outlet_date
           acmv_25percent_benchmark_comparison_kWh
           acmv_10percent_benchmark_comparison_kWh
+          ke_and_ac_10percent_benchmark_comparison_kWh
+          ke_and_ac_25percent_benchmark_comparison_kWh
           acmv_measured_savings_kWh
           outlet_measured_savings_kWh
           outlet_measured_savings_expenses
@@ -333,11 +386,11 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             const currentTotalKWHs = currData.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
                 const currentDate = moment(lastestLiveDate, 'MM/YYYY');
-                return resultDate.diff(currentDate) <= 0;
+                return resultDate.diff(currentDate) === 0;
             }).map(dat => {
                 return {
-                    MinKWH: parseInt(dat.acmv_10percent_benchmark_comparison_kWh || "0"),
-                    MaxKWH: parseInt(dat.acmv_25percent_benchmark_comparison_kWh || "0"),
+                    MinKWH: parseInt(dat.ke_and_ac_10percent_benchmark_comparison_kWh || "0"),
+                    MaxKWH: parseInt(dat.ke_and_ac_25percent_benchmark_comparison_kWh || "0"),
                     CurrentKHW: parseInt(dat.acmv_measured_savings_kWh || "0"),
                     OutletSavingKHW: parseInt(dat.outlet_measured_savings_kWh || "0"),
                     SavingTariff: parseInt(dat.savings_tariff_expenses || "0"),
@@ -565,7 +618,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             </div>
                             <div className="flex justify-between h-full gap-4">
                                 <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                    <option value="All">Month</option>
+                                    {/* <option value="All">Month</option> */}
                                     <option value="01">January</option>
                                     <option value="02">February</option>
                                     <option value="03">March</option>
@@ -580,7 +633,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     <option value="12">December</option>
                                 </select>
                                 <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                    <option value="All">Year</option>
+                                    {/* <option value="All">Year</option> */}
                                     <option value="2020">2020</option>
                                     <option value="2021">2021</option>
                                     <option value="2022">2022</option>
@@ -611,7 +664,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP, 1)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP, 1)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP, 1)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP, 1)} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw, 1)} MeasureExpense={numberWithCommas(summaryResults.measureExpense, 1)} TariffExpense={numberWithCommas(summaryResults.tariffExpense, 1)} TariffKw={numberWithCommas(summaryResults.tariffKWH, 1)} />
+                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw, 1)} MeasureExpense={numberWithCommas(summaryResults.measureExpense, 1)} TariffExpense={numberWithCommas(summaryResults.tariffExpense, 1)} TariffKw={numberWithCommas(Number(globalSetting ? globalSetting.poss_tariff_increase : 0), 1)} />
                             </div>
                         </div>
                         {

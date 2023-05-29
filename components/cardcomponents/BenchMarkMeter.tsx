@@ -76,20 +76,20 @@ const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
                 </div>
     </div>`);
 
-        progressRectGroup.append("foreignObject")
-            .attr("width", '100%')
-            .attr("height", '100%')
-            .attr('y', (orgHeight - (yScale(props.MaxKWH.Percentage) || 0)) / 1.5)
-            .append("xhtml:div")
-            .html(`<div class="absolute pl-2 right-0 z-10 flex flex-col  justify-center">
-                <div class="flex flex-col items-center">
-                    <span class="text-extraSmall">Last Month</span>
-                    <span class="text-xl text-blue-600 font-bold">
-                        17%
-                    </span>
-                <span class="text-extraSmall">(${props.CurrentKHW.ActualKHW} kWh)</span>
-            </div>
-</div>`);
+//         progressRectGroup.append("foreignObject")
+//             .attr("width", '100%')
+//             .attr("height", '100%')
+//             .attr('y', (orgHeight - (yScale(props.MaxKWH.Percentage) || 0)) / 1.5)
+//             .append("xhtml:div")
+//             .html(`<div class="absolute pl-2 right-0 z-10 flex flex-col  justify-center">
+//                 <div class="flex flex-col items-center">
+//                     <span class="text-extraSmall">Last Month</span>
+//                     <span class="text-xl text-blue-600 font-bold">
+//                         17%
+//                     </span>
+//                 <span class="text-extraSmall">(${props.CurrentKHW.ActualKHW} kWh)</span>
+//             </div>
+// </div>`);
     }, [props, progressDivRef, yScale]);
 
     return (

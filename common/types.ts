@@ -340,7 +340,7 @@ export interface outlet {
     results?: results[];
     reports?: reports[];
     outlet_month?: outlet_month[];
-
+    first_intermediary_table?: first_intermediary_table[];
 }
 
 export namespace outlet_device_ac_inputFields {
