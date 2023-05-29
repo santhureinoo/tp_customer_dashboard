@@ -590,8 +590,8 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     </select>
                     <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         {/* <option value="All">Year</option> */}
-                        <option value="2020">2020</option>
-                        <option value="2021">2021</option>
+                        {/* <option value="2020">2020</option>
+                        <option value="2021">2021</option> */}
                         <option value="2022">2022</option>
                         <option value="2023">2023</option>
                     </select>
@@ -842,8 +842,8 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                     </select>
                     <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         {/* <option value="All">Year</option> */}
-                        <option value="2020">2020</option>
-                        <option value="2021">2021</option>
+                        {/* <option value="2020">2020</option>
+                        <option value="2021">2021</option> */}
                         <option value="2022">2022</option>
                         <option value="2023">2023</option>
                     </select>
