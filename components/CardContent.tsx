@@ -1066,6 +1066,7 @@ interface EqptProps {
 const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
     const [selectedType, setSelectedType] = React.useState("ke");
     const renderedData = React.useMemo(() => {
+
         const renderedData = {
             quantity: 0,
             baseline: 0,
@@ -1073,15 +1074,15 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
             costSaved: 0,
         }
         if (selectedType === 'ke') {
-
             if (outlet) {
+
                 if (outlet.outlet_device_ex_fa_input) {
                     renderedData.quantity = outlet.outlet_device_ex_fa_input.length;
                 }
                 if (outlet.results && outlet.results.length > 0) {
-                    renderedData.baseline = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_measured_savings_kWh || "") }, 0);
-                    renderedData.energySaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_eqpt_energy_baseline_avg_hourly_kW || "") }, 0);
-                    renderedData.costSaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "") }, 0);
+                    renderedData.baseline = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_measured_savings_kWh || "0") }, 0);
+                    renderedData.energySaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_eqpt_energy_baseline_avg_hourly_kW || "0") }, 0);
+                    renderedData.costSaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "0") }, 0);
                 }
                 if (outlet.first_intermediary_table && outlet.first_intermediary_table.length > 0) {
                     renderedData.baseline = Number(outlet.first_intermediary_table[0].ke_baseline_kW);
@@ -1098,8 +1099,13 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                     renderedData.energySaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_eqpt_energy_baseline_avg_hourly_kW || "") }, 0);
                     renderedData.costSaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "") }, 0);
                 }
+                if (outlet.first_intermediary_table && outlet.first_intermediary_table.length > 0) {
+                    renderedData.baseline = Number(outlet.first_intermediary_table[0].ac_baseline_kWh);
+                }
             }
         }
+
+        console.log('final Result', renderedData);
         return renderedData;
     }, [selectedType, outlet]);
 
@@ -1203,7 +1209,7 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
         <div>
             <div className='flex flex-row gap-2 justify-between w-full h-full' >
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff' FirstValue={TariffKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff' FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
             </div>
         </div>
     )
