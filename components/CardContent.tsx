@@ -222,15 +222,17 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
 interface Props {
     currentOutletID: string;
     latestLiveDate?: string;
+    selectedMonth: string;
+    selectedYear: string;
 }
 
-export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
+export const SavingPerformance = ({ currentOutletID, latestLiveDate, selectedMonth, selectedYear }: Props): JSX.Element => {
     const [firstIntermediaryData, setFirstIntermediaryData] = React.useState<first_intermediary_table[]>([]);
     const [selectedSavingPerformanceIndex, setSelectedSavingPerformanceIndex] = React.useState(1);
     const currentMoment = moment(latestLiveDate, 'MM/YYYY');
     const [selectedTab, setSelectedTab] = React.useState<'kwh' | 'saving'>('kwh');
-    const [selectedMonth, setSelectedMonth] = React.useState(currentMoment.format('MM'));
-    const [selectedYear, setSelectedYear] = React.useState(currentMoment.format('YYYY'));
+    const [currentSelectedMonth, setSelectedMonth] = React.useState(selectedMonth);
+    const [currentSelectedYear, setSelectedYear] = React.useState(selectedYear);
     const getFirstIntermediaryQuery = gql`
     query First_intermediary_tables($where: First_intermediary_tableWhereInput) {
         first_intermediary_tables(where: $where) {
@@ -373,7 +375,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                         "AND": [
                             {
                                 "outlet_month_year": {
-                                    "contains": dateValueForQuery(selectedMonth, selectedYear, true)
+                                    "contains": dateValueForQuery(currentSelectedMonth, currentSelectedYear, true)
                                 },
                                 "outlet_id": {
                                     "equals": parseInt(currentOutletID)
@@ -395,7 +397,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
             setFirstIntermediaryData([]);
         }
 
-    }, [currentOutletID, selectedSavingPerformanceIndex, selectedMonth, selectedYear]);
+    }, [currentOutletID, selectedSavingPerformanceIndex, currentSelectedMonth, currentSelectedYear]);
 
     const getChartData = React.useMemo(() => {
         if (selectedTab === 'kwh') {
@@ -573,7 +575,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     </div>
                 </div>
                 <div className='flex flex-row gap-x-2 text-xs'>
-                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                    <select id="months" value={currentSelectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                         {/* <option value="All">Month</option> */}
                         <option value="01">January</option>
                         <option value="02">February</option>
@@ -588,7 +590,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                         <option value="11">November</option>
                         <option value="12">December</option>
                     </select>
-                    <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <select id="years" value={currentSelectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         {/* <option value="All">Year</option> */}
                         {/* <option value="2020">2020</option>
                         <option value="2021">2021</option> */}
@@ -611,12 +613,12 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
     )
 }
 
-export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
+export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate, selectedMonth, selectedYear }: Props): JSX.Element => {
     // const labels = ['10', '10.5', '11', '11.5', '12', '12.5', '13', '13.5', '14','14.5','15','15.5','16','16.5','17','17.5','18','18.5','19','19.5','20','20.5','21','21.5','22'];
     const [secondaryIntermediary, setSecondIntermediary] = React.useState<secondary_intermediary_table[]>([]);
     const [selectedEqptEnergyIndex, setSelectedEqptEnergyIndex] = React.useState(1);
-    const [selectedMonth, setSelectedMonth] = React.useState(moment().format('MM'));
-    const [selectedYear, setSelectedYear] = React.useState("2023");
+    const [currentSelectedMonth, setSelectedMonth] = React.useState(selectedMonth);
+    const [currentSelectedYear, setSelectedYear] = React.useState(selectedYear);
     const currentMoment = moment(selectedMonth, 'DD/MM/YYYY');
     const getSecondIntermediaryQuery = gql`
     query Secondary_intermediary_tables($where: Secondary_intermediary_tableWhereInput) {
@@ -688,7 +690,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                         "AND": [
                             {
                                 "outlet_month_year": {
-                                    "contains": dateValueForQuery(selectedMonth, selectedYear, true)
+                                    "contains": dateValueForQuery(currentSelectedMonth, currentSelectedYear, true)
                                 },
                                 "outlet_id": {
                                     "equals": parseInt(currentOutletID)
@@ -707,7 +709,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
         } else {
             setSecondIntermediary([]);
         }
-    }, [currentOutletID, selectedMonth, selectedYear, selectedEqptEnergyIndex])
+    }, [currentOutletID, currentSelectedMonth, currentSelectedYear, selectedEqptEnergyIndex])
 
     const labels = React.useMemo(() => {
         return secondaryIntermediary.map(data => {
@@ -804,17 +806,17 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     }
 
     const getValidDate = React.useMemo(() => {
-        if (selectedMonth === 'All' && selectedYear === 'All') {
+        if (currentSelectedMonth === 'All' && currentSelectedYear === 'All') {
             return 'All';
-        } else if (selectedMonth === 'All') {
-            return moment(`01/${selectedYear}`, 'DD/YYYY').format('YYYY');
-        } else if (selectedYear === 'All') {
-            return moment(`01/${selectedMonth}`, 'DD/MM').format('Mo');
+        } else if (currentSelectedMonth === 'All') {
+            return moment(`01/${currentSelectedYear}`, 'DD/YYYY').format('YYYY');
+        } else if (currentSelectedYear === 'All') {
+            return moment(`01/${currentSelectedMonth}`, 'DD/MM').format('Mo');
         } else {
-            return moment(`01/${selectedMonth}/${selectedYear}`, 'DD/MM/YYYY').format('Mo YYYY');
+            return moment(`01/${currentSelectedMonth}/${currentSelectedYear}`, 'DD/MM/YYYY').format('Mo YYYY');
         }
 
-    }, [selectedMonth, selectedYear])
+    }, [currentSelectedMonth, currentSelectedYear])
 
     return (
         <div className="flex flex-col gap-4">
@@ -825,7 +827,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                     <button onClick={e => { setSelectedEqptEnergyIndex(2) }} className={selectedEqptEnergyIndex === 2 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last Month</button>
     </div> */}
                 <div className='flex flex-row gap-x-2 text-xs'>
-                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                    <select id="months" value={currentSelectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                         {/* <option value="All">Month</option> */}
                         <option value="01">January</option>
                         <option value="02">February</option>
@@ -840,7 +842,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                         <option value="11">November</option>
                         <option value="12">December</option>
                     </select>
-                    <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <select id="years" value={currentSelectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         {/* <option value="All">Year</option> */}
                         {/* <option value="2020">2020</option>
                         <option value="2021">2021</option> */}
@@ -859,7 +861,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     )
 }
 
-const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
+const CardSwitcher = ({ currentOutletID, latestLiveDate, selectedMonth, selectedYear }: Props): JSX.Element => {
     const [selectedCard, setSelectedCard] = React.useState<DropdownProps>({
         display: <CardHeader className={'text-base'} Titles={['Savings Performance']} />,
         value: 'savingPerformance',
@@ -877,9 +879,9 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element =
     ]
 
     const selectedContent = React.useMemo(() => {
-        if (selectedCard.value === "savingPerformance") return <SavingPerformance latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />;
-        else return <EqptEnergyBaseline latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />
-    }, [selectedCard, latestLiveDate, currentOutletID])
+        if (selectedCard.value === "savingPerformance") return <SavingPerformance selectedYear={selectedYear} selectedMonth={selectedMonth} latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />;
+        else return <EqptEnergyBaseline selectedYear={selectedYear} selectedMonth={selectedMonth} latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />
+    }, [selectedCard, latestLiveDate, currentOutletID, selectedMonth, selectedYear])
 
     return (
         <div className="flex flex-col gap-4">
@@ -1203,7 +1205,7 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
         <div>
             <div className='flex flex-row gap-2 justify-between w-full h-full' >
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff' FirstValue={TariffKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff' FirstValue={'$' + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
             </div>
         </div>
     )

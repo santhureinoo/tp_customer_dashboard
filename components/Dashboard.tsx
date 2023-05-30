@@ -332,17 +332,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             "where": {
                 "outlet_id": {
                     "equals": Number(currentOutletID)
-                }
-                // "AND": [
-                //     {
-                //         "outlet_date": {
-                //             "equals": lastestLiveDate
-                //         },
-                //         "outlet_id": {
-                //             "equals": Number(currentOutletID)
-                //         }
-                //     }
-                // ],
+                },
+                // "outlet_date": {
+                //     "equals": lastestLiveDate, //dateValueForQuery(selectedMonth, selectedYear)
+                // },
 
             }
         }
@@ -386,7 +379,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             const currentTotalKWHs = currData.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
                 const currentDate = moment(lastestLiveDate, 'MM/YYYY');
-                return resultDate.diff(currentDate) === 0;
+                return resultDate.diff(currentDate) <= 0;
             }).map(dat => {
                 return {
                     MinKWH: parseInt(dat.ke_and_ac_10percent_benchmark_comparison_kWh || "0"),
@@ -581,7 +574,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                     <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
                                                 </div>
                                                 <div>
-                                                    <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(currentInvoice?.last_available_tariff || '0'),2)}`} valueColor={'custom-blue-card-font'} />
+                                                    <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(currentInvoice?.last_available_tariff || '0'), 2)}`} valueColor={'custom-blue-card-font'} />
                                                 </div>
                                                 <div>
                                                     <ValueFirstCard title={'Savings @ Tariff'} subTitle={`$${Number(currentInvoice?.last_available_tariff || '0')}`} value={`$${numberWithCommas(totalKWHs.SavingTariff)}`} valueColor={'custom-green-card-font'} />
@@ -591,7 +584,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                             <ExpectedSavingsCard totalKWHs={totalKWHs} />
                                         </div> */}
                                             <div className="col-span-5">
-                                                <ChartCard latestLiveDate={lastestLiveDate} currentOutletID={currentOutletID} />
+                                                <ChartCard selectedMonth={selectedMonth} selectedYear={selectedYear} latestLiveDate={lastestLiveDate} currentOutletID={currentOutletID} />
                                             </div>
                                         </div>
                                     </ClientOnly>
