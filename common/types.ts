@@ -341,6 +341,7 @@ export interface outlet {
     reports?: reports[];
     outlet_month?: outlet_month[];
     first_intermediary_table?: first_intermediary_table[];
+    outlet_device_live_date?: outlet_device_live_date[];
 }
 
 export namespace outlet_device_ac_inputFields {

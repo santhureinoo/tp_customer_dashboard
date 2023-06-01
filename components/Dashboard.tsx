@@ -84,6 +84,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 outlet_id
                   name
                   customer_id
+                  outlet_device_live_date {
+                    outlet_id
+                    outlet_date
+                  }
                   outlet_device_ac_input {
                     device_num
                   }
@@ -362,6 +366,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     query FindFirstOutlet($where: Outlet_monthWhereInput, $resultsWhere2: ResultsWhereInput, $findFirstOutletWhere2: OutletWhereInput) {
         findFirstOutlet(where: $findFirstOutletWhere2) {
           name
+          outlet_device_live_date {
+            outlet_id
+            outlet_date
+          }
           results(where: $resultsWhere2) {
             outlet_id
             outlet_date
@@ -630,6 +638,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             if (currentOutletID === "") {
                 setCurrentOutletID(latestOutlets[0].outlet_id.toString());
             }
+            console.log(latestOutlets[0]);
             setCurrentOutlet(latestOutlets[0]);
         }
     }, [latestOutlets])
@@ -691,7 +700,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     <ClientOnly>
                                         <div className="grid grid-cols-6 gap-2">
                                             <div className="col-span-2">
-                                                <SavingMeterCard date={lastestLiveDate} kiloWatHour={totalKWHs.OutletSavingKHW.toString()} outletId={currentOutlet?.outlet_id} />
+                                                <SavingMeterCard date={currentOutlet?.outlet_device_live_date && currentOutlet?.outlet_device_live_date.length > 0 ? currentOutlet?.outlet_device_live_date[0].outlet_date : 'Invalid date'} kiloWatHour={totalKWHs.OutletSavingKHW.toString()} outletId={currentOutlet?.outlet_id} />
                                             </div>
                                             <div className="col-span-4">
                                                 <SustainPerformanceCard total={totalPerYear} />
