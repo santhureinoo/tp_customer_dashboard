@@ -588,7 +588,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                         <option value="11">November</option>
                         <option value="12">December</option> */}
                         {getMonths(latestLiveDate || '', selectedYear).map(mon => {
-                            return <option value={mon.value}>{mon.display}</option>
+                            return <option key={mon.value} value={mon.value}>{mon.display}</option>
                         })}
                     </select>
                     <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
@@ -830,7 +830,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                 <div className='flex flex-row gap-x-2 text-xs'>
                     <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                         {getMonths(latestLiveDate || '', selectedYear).map(mon => {
-                            return <option value={mon.value}>{mon.display}</option>
+                            return <option key={mon.value} value={mon.value}>{mon.display}</option>
                         })}
                     </select>
                     <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
