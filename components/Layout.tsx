@@ -1,14 +1,38 @@
 import Sidebar from "./Sidebar"
 import React from 'react';
 import Head from "next/head";
+import { gql, useQuery } from "@apollo/client";
 
 interface Props {
     title: string[];
+    groupId: string;
     children: any;
 }
 
-const Layout = ({ title, children }: Props) => {
+const Layout = ({ title, groupId, children }: Props) => {
     const [sidebarOpen, setSidebarOpen] = React.useState(true);
+    const [group, setGroup] = React.useState("");
+    //Group Query by Id
+    const getGroupQuery = gql`query Fetchgroup($GroupWhereUniqueInput: GroupWhereUniqueInput!) {
+        group (where: $GroupWhereUniqueInput){
+            group_id,
+            group_name
+        }
+         
+     }`
+
+    const getGroupVariable = {
+        "variables":
+        {
+            "GroupWhereUniqueInput": { "group_id": groupId }
+        }
+    }
+    const getGroupByIdResult = useQuery(getGroupQuery, getGroupVariable)
+    React.useEffect(() => {
+        if (getGroupByIdResult.data) {
+            setGroup(getGroupByIdResult.data.group.group_name)
+        }
+    }, [getGroupByIdResult.data]);
     return (
         <React.Fragment>
             <Head>
@@ -16,7 +40,7 @@ const Layout = ({ title, children }: Props) => {
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <main className="flex h-screen bg-custom-lightgray">
-                <Sidebar setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
+                <Sidebar groupName={group} setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
                 <div className="flex-1 flex flex-col overflow-scroll ">
                     <div className="flex-1 overflow-x-hidden overflow-y-auto bg-custom-lightgray">
                         <div className="container mx-auto px-6 py-8">

@@ -45,7 +45,7 @@ import { DropdownProps, first_intermediary_table, outlet, results, secondary_int
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
 import { cloneDeep } from '@apollo/client/utilities';
-import { dateValueForQuery, numberWithCommas } from '../common/helper';
+import { dateValueForQuery, getMonths, numberWithCommas } from '../common/helper';
 
 // ChartJS.register(...registerablesJS);
 
@@ -92,7 +92,7 @@ const SavingMeter = ({ date, outletId, kiloWatHour }: any): JSX.Element => {
 
     return (
         <div className="grid grid-cols-3 gap-4 place-content-between h-full">
-            <CardHeader Titles={['Saving Meter']} SubTitle={dateComp()} />
+            <CardHeader Titles={['Savings Meter']} SubTitle={dateComp()} />
             <div className="col-span-2 flex flex-row-reverse">
                 <SavingMeterDigits numberString={kiloWatHour} description={"Kilo Watt Hour"} />
             </div>
@@ -104,7 +104,7 @@ const SavingMeter = ({ date, outletId, kiloWatHour }: any): JSX.Element => {
         </div>
     )
 }
-const SustainPerformance = ({ total }: any): JSX.Element => {
+const SustainPerformance = ({ total, year }: any): JSX.Element => {
 
     const outlet_category_iconisation = () => {
         return (
@@ -126,12 +126,12 @@ const SustainPerformance = ({ total }: any): JSX.Element => {
     return (
         <div className="flex flex-col gap-4 h-full">
             <div className="flex justify-between items-baseline">
-                <CardHeader Titles={['Sustainability Performance']} SubTitle={'Year to Date'} />
+                <CardHeader Titles={['Sustainability Performance']} SubTitle={`Year to Date (${year})`} />
             </div>
             <div className="lg:grid lg:grid-cols-4 grid grid-cols-2 gap-2">
                 <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
-                <StatusCard Title={'CO2 Saved'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
-                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 22))} Postfix={'trees/year'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
+                <StatusCard Title={'CO2 Saved'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
+                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 22))} Postfix={'trees'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
                 <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(total.energy * 2)} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
                 {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
@@ -573,9 +573,9 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     </div>
                 </div>
                 <div className='flex flex-row gap-x-2 text-xs'>
-                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[115px] p-2.5 ">
                         {/* <option value="All">Month</option> */}
-                        <option value="01">January</option>
+                        {/* <option value="01">January</option>
                         <option value="02">February</option>
                         <option value="03">March</option>
                         <option value="04">April</option>
@@ -586,7 +586,10 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                         <option value="09">September</option>
                         <option value="10">October</option>
                         <option value="11">November</option>
-                        <option value="12">December</option>
+                        <option value="12">December</option> */}
+                        {getMonths(latestLiveDate || '', selectedYear).map(mon => {
+                            return <option value={mon.value}>{mon.display}</option>
+                        })}
                     </select>
                     <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         {/* <option value="All">Year</option> */}
@@ -826,19 +829,9 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     </div> */}
                 <div className='flex flex-row gap-x-2 text-xs'>
                     <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                        {/* <option value="All">Month</option> */}
-                        <option value="01">January</option>
-                        <option value="02">February</option>
-                        <option value="03">March</option>
-                        <option value="04">April</option>
-                        <option value="05">May</option>
-                        <option value="06">June</option>
-                        <option value="07">July</option>
-                        <option value="08">August</option>
-                        <option value="09">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
+                        {getMonths(latestLiveDate || '', selectedYear).map(mon => {
+                            return <option value={mon.value}>{mon.display}</option>
+                        })}
                     </select>
                     <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                         {/* <option value="All">Year</option> */}
@@ -1104,8 +1097,6 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                 }
             }
         }
-
-        console.log('final Result', renderedData);
         return renderedData;
     }, [selectedType, outlet]);
 

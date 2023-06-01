@@ -1,5 +1,5 @@
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { dateValueForQuery, numberWithCommas, zeroPad } from '../common/helper';
+import { dateValueForQuery, getMonths, numberWithCommas, zeroPad } from '../common/helper';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
@@ -638,7 +638,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             if (currentOutletID === "") {
                 setCurrentOutletID(latestOutlets[0].outlet_id.toString());
             }
-            console.log(latestOutlets[0]);
             setCurrentOutlet(latestOutlets[0]);
         }
     }, [latestOutlets])
@@ -703,7 +702,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                 <SavingMeterCard date={currentOutlet?.outlet_device_live_date && currentOutlet?.outlet_device_live_date.length > 0 ? currentOutlet?.outlet_device_live_date[0].outlet_date : 'Invalid date'} kiloWatHour={totalKWHs.OutletSavingKHW.toString()} outletId={currentOutlet?.outlet_id} />
                                             </div>
                                             <div className="col-span-4">
-                                                <SustainPerformanceCard total={totalPerYear} />
+                                                <SustainPerformanceCard total={totalPerYear} year={moment(lastestLiveDate, 'MM/YYYY').year()} />
                                             </div>
                                             <div className="flex flex-col gap-y-2">
                                                 <div>
@@ -749,9 +748,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <span className='text-custom-gray text-sm font-bold'>{group}</span>
                             </div>
                             <div className="flex justify-between h-full gap-4">
-                                <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[115px] p-2.5 ">
+                                    {getMonths(lastestLiveDate, selectedYear).map(mon => {
+                                        return <option value={mon.value}>{mon.display}</option>
+                                    })}
                                     {/* <option value="All">Month</option> */}
-                                    <option value="01">January</option>
+                                    {/* <option value="01">January</option>
                                     <option value="02">February</option>
                                     <option value="03">March</option>
                                     <option value="04">April</option>
@@ -762,7 +764,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     <option value="09">September</option>
                                     <option value="10">October</option>
                                     <option value="11">November</option>
-                                    <option value="12">December</option>
+                                    <option value="12">December</option> */}
                                 </select>
                                 <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                                     {/* <option value="All">Year</option> */}

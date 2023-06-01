@@ -6,10 +6,11 @@ import { faChartPie, faSignOut } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
     sidebarOpen: boolean;
+    groupName: string;
     setSidebarOpen(sidebarOpen: boolean): void;
 }
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen }: Props) => {
+const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
     const router = useRouter();
     return (
         <>
@@ -34,7 +35,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: Props) => {
                         </svg>
 
                         <div className="flex">
-                            <h2 className="text-[18px] mx-2 font-bold">Welcome,<br />Customer</h2>
+                            <h2 className="text-[18px] mx-2 font-bold">Welcome,<br />{groupName}</h2>
                         </div>
                     </div>
                     <nav className="mt-10 space-y-3 px-2">

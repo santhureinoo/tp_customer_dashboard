@@ -1,6 +1,72 @@
+import moment from "moment";
+
 export function truncateFileName(str: string, max: number) {
   const splitStr = str.split('.');
   return str.length > max ? str.substring(0, max - 1) + '…' : str;
+}
+
+export function getMonths(lastestLiveDate: string, year: string) {
+  const currentDate = moment(lastestLiveDate, 'MM/YYYY');
+  const months = [
+    {
+      value: '01',
+      display: 'January',
+    },
+    {
+      value: '02',
+      display: 'February',
+    },
+    {
+      value: '03',
+      display: 'March',
+    },
+    {
+      value: '04',
+      display: 'April',
+    },
+    {
+      value: '05',
+      display: 'May',
+    },
+    {
+      value: '06',
+      display: 'June',
+    },
+    {
+      value: '07',
+      display: 'July',
+    },
+    {
+      value: '08',
+      display: 'August',
+    },
+    {
+      value: '09',
+      display: 'September',
+    },
+    {
+      value: '10',
+      display: 'October',
+    },
+    {
+      value: '11',
+      display: 'November',
+    },
+    {
+      value: '12',
+      display: 'December',
+    },
+  ];
+
+  if (currentDate.year().toString() !== year) {
+    return months;
+  } else {
+    return months.filter((month, index) => {
+      if (index <= currentDate.month()) {
+        return month;
+      }
+    });
+  }
 }
 
 export function bytesToSize(bytes: number) {
@@ -25,7 +91,7 @@ export function numberWithCommas(x?: number, fixed = 0) {
   }
 }
 
-export function zeroPad(num: number, places: number) {
+export function zeroPad(num: number | string, places: number) {
   return String(num).padStart(places, '0');
 }
 

@@ -7,7 +7,7 @@ import Layout from '../components/Layout';
 const Dashboards: NextPage = ({ id, title }: any) => {
 
   return (
-    <Layout title={title}>
+    <Layout title={title} groupId={id}>
       <Dashboard groupId={id} />
     </Layout>
   )
