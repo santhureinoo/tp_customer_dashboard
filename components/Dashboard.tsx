@@ -750,7 +750,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             <div className="flex justify-between h-full gap-4">
                                 <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[115px] p-2.5 ">
                                     {getMonths(lastestLiveDate, selectedYear).map(mon => {
-                                        return <option value={mon.value}>{mon.display}</option>
+                                        return <option key={mon.value} value={mon.value}>{mon.display}</option>
                                     })}
                                     {/* <option value="All">Month</option> */}
                                     {/* <option value="01">January</option>
