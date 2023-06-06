@@ -1,4 +1,5 @@
 import moment from "moment";
+import { getCookieParser } from "next/dist/server/api-utils";
 
 export function truncateFileName(str: string, max: number) {
   const splitStr = str.split('.');
@@ -111,4 +112,15 @@ export function dateValueForQuery(month: string, year: string, noDay = false) {
 
   return finalStr;
 
+}
+
+export function getIronSessionCookieSetting() {
+  return {
+    cookieName: process.env.IRON_SESSION_COOKIE || '',
+    password: process.env.IRON_SESSION_SECRET || '',
+    // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+    cookieOptions: {
+      secure: false
+    },
+  };
 }

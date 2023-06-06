@@ -1,6 +1,7 @@
 import { withIronSessionSsr } from "iron-session/next";
 import type { NextPage } from 'next'
 import React, { useCallback } from 'react';
+import { getIronSessionCookieSetting } from "../common/helper";
 import Dashboard from '../components/Dashboard';
 import Layout from '../components/Layout';
 
@@ -32,14 +33,7 @@ export const getServerSideProps = withIronSessionSsr(
       },
     };
   },
-  {
-    cookieName: process.env.IRON_SESSION_COOKIE || '',
-    password:  process.env.IRON_SESSION_SECRET || '',
-    // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
-    cookieOptions: {
-      secure: process.env.NODE_ENV === "production",
-    },
-  },
+  getIronSessionCookieSetting()
 );
 
 // Dashboards.getInitialProps = async () => {

@@ -2,7 +2,8 @@ import React, { FormEvent } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { withIronSessionSsr } from "iron-session/next";
 import { gql, useLazyQuery } from '@apollo/client';
-const GroupLogin = () => {
+import { getIronSessionCookieSetting } from '../common/helper';
+const GroupLogin = (props : any) => {
     const formRef = React.useRef<HTMLFormElement | null>(null);
     const [groupId, setGroupId] = React.useState('');
     const [groupIdError, setGroupIdError] = React.useState('');
@@ -16,6 +17,8 @@ const GroupLogin = () => {
 
 
     const getFirstGroupPassword = useLazyQuery(getFirstGroupPasswordQuery);
+
+    console.log(props);
 
     const onSubmit = async (e: FormEvent<HTMLButtonElement>) => {
         setGroupIdError('');
@@ -104,14 +107,7 @@ export const getServerSideProps = withIronSessionSsr(
             props: {}, // will be passed to the page component as props
         }
     },
-    {
-        cookieName: process.env.IRON_SESSION_COOKIE || '',
-        password:  process.env.IRON_SESSION_SECRET || '',
-        // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
-        cookieOptions: {
-            secure: process.env.NODE_ENV === "production",
-        },
-    },
+    getIronSessionCookieSetting()
 );
 
 

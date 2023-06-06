@@ -12,9 +12,6 @@ function MyApp({ Component, pageProps, router }: AppProps) {
   return <ApolloProvider client={client}>
     <Component {...pageProps} />
   </ApolloProvider >
-
-
-
 }
 
 export default MyApp

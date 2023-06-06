@@ -3,6 +3,7 @@
 import { withIronSessionApiRoute } from "iron-session/next";
 import { ApolloClient, gql, HttpLink, InMemoryCache } from "@apollo/client";
 import fetch from "cross-fetch";
+import { getIronSessionCookieSetting } from "../../common/helper";
 type Data = {
     name: string
 }
@@ -71,14 +72,6 @@ export default withIronSessionApiRoute(
             res.redirect(`/`)
         }
     },
-    {
-        cookieName: process.env.IRON_SESSION_COOKIE || '',
-        password: process.env.IRON_SESSION_SECRET || '',
-        // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
-        cookieOptions: {
-            secure: process.env.NODE_ENV === "production",
-        },
-        ttl: 7260,
-    },
+    getIronSessionCookieSetting(),
 );
 

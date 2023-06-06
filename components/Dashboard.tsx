@@ -642,6 +642,17 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [latestOutlets])
 
+    const getSavingMeterFirstDate = React.useMemo(()=>{
+        if(currentOutlet && currentOutlet.outlet_device_live_date) {
+            const arrayForSort = [...currentOutlet.outlet_device_live_date];
+            const sortedArr =  arrayForSort.sort((a,b) => (moment(a.outlet_date, "DD/MM/YYYY") > moment(b.outlet_date, "DD/MM/YYYY")) ? 1 : ((moment(a.outlet_date, "DD/MM/YYYY") < moment(b.outlet_date, "DD/MM/YYYY")) ? -1 : 0));
+            return sortedArr.length > 0 ? sortedArr[0].outlet_date : '-';
+        } else {
+            return '-';
+        }
+        
+    },[currentOutlet]);
+
     const getHeaderBreadCrumb = React.useMemo(() => {
         return (<h3 className="text-gray-700 text-sm font-bold">
             <div className="flex items-center">
@@ -699,7 +710,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     <ClientOnly>
                                         <div className="grid grid-cols-6 gap-2">
                                             <div className="col-span-2">
-                                                <SavingMeterCard date={currentOutlet?.outlet_device_live_date && currentOutlet?.outlet_device_live_date.length > 0 ? currentOutlet?.outlet_device_live_date[0].outlet_date : 'Invalid date'} kiloWatHour={totalKWHs.OutletSavingKHW.toString()} outletId={currentOutlet?.outlet_id} />
+                                                <SavingMeterCard date={getSavingMeterFirstDate} kiloWatHour={totalKWHs.OutletSavingKHW.toString()} outletId={currentOutlet?.outlet_id} />
                                             </div>
                                             <div className="col-span-4">
                                                 <SustainPerformanceCard total={totalPerYear} year={moment(lastestLiveDate, 'MM/YYYY').year()} />
