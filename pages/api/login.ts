@@ -67,7 +67,7 @@ export default withIronSessionApiRoute(
                 id: result.data.findFirstGroup_password.group_id,
             };
             await req.session.save();
-            res.redirect(`/dashboard`)
+            res.redirect(`/customer`)
         } else {
             res.redirect(`/`)
         }

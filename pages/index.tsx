@@ -98,7 +98,7 @@ export const getServerSideProps = withIronSessionSsr(
         if (req.session && req.session.group && req.session.group.id) {
             return {
                 redirect: {
-                    destination: '/dashboard',
+                    destination: '/customer',
                     permanent: false,
                 }
             }
