@@ -81,14 +81,13 @@ export function numberWithCommas(x?: number, fixed = 0) {
   if (x && x > 999) {
     let numX = Number(x);
     if (fixed > 0) {
-      // numX.toFixed(fixed);
-      // Math.pow(x,10);
-      numX = Math.round(numX * Math.pow(10, fixed)) / Math.pow(10, fixed);
+      return (Math.round(numX * Math.pow(10, fixed + 1)) / Math.pow(10, fixed + 1)).toFixed(fixed);
+      // numX = Math.round(numX * Math.pow(10, fixed)) / Math.pow(10, fixed);
     }
     return numX.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   else {
-    return x && !isNaN(x) ? Math.round(x * Math.pow(10, fixed)) / Math.pow(10, fixed) : x;
+    return x && !isNaN(x) ? (Math.round(x * Math.pow(10, fixed + 1)) / Math.pow(10, fixed + 1)).toFixed(fixed) : x;
   }
 }
 

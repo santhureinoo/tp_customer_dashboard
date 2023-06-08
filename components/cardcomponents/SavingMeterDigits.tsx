@@ -17,7 +17,7 @@ const SavingMeterDigits = ({ numberString, description }: Props): JSX.Element =>
     })
     return (
         <div className="flex flex-col">
-            <span className="text-sm  text-custom-gray">{description}</span>
+            <span className="text-sm  text-custom-gray text-right">{description}</span>
             <div className="flex gap-x-1 flex-row">
                 {numberStringElem}
             </div>

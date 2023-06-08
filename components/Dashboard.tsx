@@ -44,12 +44,14 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         CurrentKHW: number,
         OutletSavingKHW: number,
         SavingTariff: number,
+        LastAvailTariff: number,
     }>({
         MinKWH: 0,
         MaxKWH: 0,
         CurrentKHW: 0,
         OutletSavingKHW: 0,
         SavingTariff: 0,
+        LastAvailTariff: 0,
     });
 
     const [totalPerYear, setTotalPerYear] = React.useState<{
@@ -80,6 +82,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     const getOutletsBySelectedDateQuery = gql`
     query Outlet_months($where: Outlet_monthWhereInput, $where2: ResultsWhereInput, $where3: First_intermediary_tableWhereInput) {
         outlet_months(where: $where) {
+            last_avail_tariff
             outlet {
                 outlet_id
                   name
@@ -437,7 +440,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         "variables": {
             "where": {
                 "outlet_date": {
-                    "contains": lastestLiveDate
+                    "contains": moment().year().toString()
                 },
                 "outlet_outlet_id": {
                     "equals": Number(currentOutletID)
@@ -445,7 +448,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             },
             "resultsWhere2": {
                 "outlet_date": {
-                    "contains": lastestLiveDate
+                    "contains": moment().year().toString()
                 },
                 "outlet_id": {
                     "equals": Number(currentOutletID)
@@ -492,6 +495,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         if (getOutletResult.data && getOutletResult.data.findFirstOutlet) {
 
             const currData = getOutletResult.data.findFirstOutlet.results as results[];
+            const currOutletMonth = getOutletResult.data.findFirstOutlet.outlet_month as outlet_month[];
 
             // Per month calculation
             const currentTotalKWHs = currData.filter(dat => {
@@ -503,11 +507,11 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 const currentDate = moment(lastestLiveDate, 'MM/YYYY');
                 const diff = resultDate.diff(currentDate);
                 return {
-                    MinKWH: diff === 0 ? parseInt(dat.ke_and_ac_10percent_benchmark_comparison_kWh || "0") : 0,
-                    MaxKWH: diff === 0 ? parseInt(dat.ke_and_ac_25percent_benchmark_comparison_kWh || "0") : 0,
+                    MinKWH: diff === 0 ? parseFloat(dat.acmv_10percent_benchmark_comparison_kWh || "0") : 0,
+                    MaxKWH: diff === 0 ? parseFloat(dat.acmv_25percent_benchmark_comparison_kWh || "0") : 0,
                     CurrentKHW: diff === 0 ? parseInt(dat.acmv_measured_savings_kWh || "0") : 0,
-                    OutletSavingKHW: diff <= 0 ? parseInt(dat.outlet_measured_savings_kWh || "0") : 0,
-                    SavingTariff: diff === 0 ? parseInt(dat.savings_tariff_expenses || "0") : 0,
+                    OutletSavingKHW: diff <= 0 ? parseFloat(dat.outlet_measured_savings_kWh || "0") : 0,
+                    SavingTariff: diff === 0 ? parseFloat(dat.savings_tariff_expenses || "0") : 0
                 }
             }).reduce((prev, curr) => {
                 return {
@@ -524,7 +528,27 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 OutletSavingKHW: 0,
                 SavingTariff: 0,
             });
-            setTotalKWHs(currentTotalKWHs);
+
+            const currentTotalKWHsWithOM = currOutletMonth.filter(dat => {
+                const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
+                const currentDate = moment(lastestLiveDate, 'MM/YYYY');
+                return resultDate.diff(currentDate) == 0;
+            }).map(dat => {
+                return {
+                    LastAvailTariff: Number(dat.last_avail_tariff || "0") || 0
+                }
+            }).reduce((prev, curr) => {
+                return {
+                    LastAvailTariff: prev.LastAvailTariff + curr.LastAvailTariff
+                }
+            }, {
+                LastAvailTariff: 0,
+            });
+
+            setTotalKWHs({
+                ...currentTotalKWHs,
+                ...currentTotalKWHsWithOM
+            });
 
             // Per year calculation
             const currentTotalYearly = currData.filter(dat => {
@@ -533,8 +557,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 return resultDate.diff(currentDate, "years") === 0;
             }).map(dat => {
                 return {
-                    energy: parseInt(dat.tp_sales_expenses || "0"),
-                    co2: parseInt(dat.co2_savings_kg || "0"),
+                    energy: parseFloat(dat.outlet_measured_savings_expenses || "0"),
+                    co2: parseFloat(dat.co2_savings_kg || "0"),
                 }
             }).reduce((prev, curr) => {
                 return {
@@ -642,16 +666,16 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [latestOutlets])
 
-    const getSavingMeterFirstDate = React.useMemo(()=>{
-        if(currentOutlet && currentOutlet.outlet_device_live_date) {
+    const getSavingMeterFirstDate = React.useMemo(() => {
+        if (currentOutlet && currentOutlet.outlet_device_live_date) {
             const arrayForSort = [...currentOutlet.outlet_device_live_date];
-            const sortedArr =  arrayForSort.sort((a,b) => (moment(a.outlet_date, "DD/MM/YYYY") > moment(b.outlet_date, "DD/MM/YYYY")) ? 1 : ((moment(a.outlet_date, "DD/MM/YYYY") < moment(b.outlet_date, "DD/MM/YYYY")) ? -1 : 0));
+            const sortedArr = arrayForSort.sort((a, b) => (moment(a.outlet_date, "DD/MM/YYYY") > moment(b.outlet_date, "DD/MM/YYYY")) ? 1 : ((moment(a.outlet_date, "DD/MM/YYYY") < moment(b.outlet_date, "DD/MM/YYYY")) ? -1 : 0));
             return sortedArr.length > 0 ? sortedArr[0].outlet_date : '-';
         } else {
             return '-';
         }
-        
-    },[currentOutlet]);
+
+    }, [currentOutlet]);
 
     const getHeaderBreadCrumb = React.useMemo(() => {
         return (<h3 className="text-gray-700 text-sm font-bold">
@@ -710,7 +734,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     <ClientOnly>
                                         <div className="grid grid-cols-6 gap-2">
                                             <div className="col-span-2">
-                                                <SavingMeterCard date={getSavingMeterFirstDate} kiloWatHour={totalKWHs.OutletSavingKHW.toString()} outletId={currentOutlet?.outlet_id} />
+                                                <SavingMeterCard date={getSavingMeterFirstDate} kiloWatHour={totalKWHs.OutletSavingKHW.toFixed(2)} outletId={currentOutlet?.outlet_id} />
                                             </div>
                                             <div className="col-span-4">
                                                 <SustainPerformanceCard total={totalPerYear} year={moment(lastestLiveDate, 'MM/YYYY').year()} />
@@ -723,10 +747,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                     <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
                                                 </div>
                                                 <div>
-                                                    <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(currentInvoice?.last_available_tariff || '0'), 2)}`} valueColor={'custom-blue-card-font'} />
+                                                    <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(totalKWHs.LastAvailTariff || '0'), 2)}`} valueColor={'custom-blue-card-font'} />
                                                 </div>
                                                 <div>
-                                                    <ValueFirstCard title={'Savings @ Tariff'} subTitle={`$${Number(currentInvoice?.last_available_tariff || '0')}`} value={`$${numberWithCommas(totalKWHs.SavingTariff)}`} valueColor={'custom-green-card-font'} />
+                                                    <ValueFirstCard title={'Savings @ Tariff'} subTitle={`$${numberWithCommas(parseFloat(globalSetting?.poss_tariff_increase || '0.00'), 2)}`} value={`$${numberWithCommas(totalKWHs.SavingTariff, 2)}`} valueColor={'custom-green-card-font'} />
                                                 </div>
                                             </div>
                                             {/* <div>

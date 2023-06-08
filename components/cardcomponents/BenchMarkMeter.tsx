@@ -63,7 +63,7 @@ const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
                         25%
                     </span>
                     <span class="text-extraSmall align-top text-right">
-                        ${props.MaxKWH.ActualKHW} kWh
+                        ${props.MaxKWH.ActualKHW.valueOf().toFixed(2)} kWh
                     </span>
                 </div>
                 <div class="mr-4">
@@ -71,7 +71,7 @@ const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
                         10%
                     </span>
                     <span class="text-extraSmall align-top text-right">
-                        ${props.MinKWH.ActualKHW} kWh
+                        ${props.MinKWH.ActualKHW.valueOf().toFixed(2)} kWh
                     </span>
                 </div>
     </div>`);
