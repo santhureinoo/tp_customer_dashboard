@@ -835,10 +835,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <LiveOutletCard Value={outlets.length} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP,2)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP,2)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP,2)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP,2)} />
+                                <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP)} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw,2)} MeasureExpense={numberWithCommas(summaryResults.measureExpense,2)} TariffExpense={numberWithCommas(summaryResults.tariffExpense,2)} TariffKw={numberWithCommas(Number(globalSetting ? globalSetting.poss_tariff_increase : 0), 4)} />
+                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw)} MeasureExpense={numberWithCommas(summaryResults.measureExpense)} TariffExpense={numberWithCommas(summaryResults.tariffExpense)} TariffKw={numberWithCommas(Number(globalSetting ? globalSetting.poss_tariff_increase : 0), 4)} />
                             </div>
                         </div>
                         {
