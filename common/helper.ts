@@ -77,17 +77,21 @@ export function bytesToSize(bytes: number) {
   return Math.round(bytes / Math.pow(1024, i)) + ' ' + sizes[i];
 }
 
+export function getInDecimal(x: number, fixed = 0) {
+  return x % 1 === 0 ? x : (Math.round(x * Math.pow(10, fixed + 1)) / Math.pow(10, fixed + 1)).toFixed(fixed);
+}
+
 export function numberWithCommas(x?: number, fixed = 0) {
   if (x && x > 999) {
     let numX = Number(x);
     if (fixed > 0) {
-      return (Math.round(numX * Math.pow(10, fixed + 1)) / Math.pow(10, fixed + 1)).toFixed(fixed);
+      return getInDecimal(x, fixed);
       // numX = Math.round(numX * Math.pow(10, fixed)) / Math.pow(10, fixed);
     }
     return numX.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   else {
-    return x && !isNaN(x) ? (Math.round(x * Math.pow(10, fixed + 1)) / Math.pow(10, fixed + 1)).toFixed(fixed) : x;
+    return x && !isNaN(x) ? getInDecimal(x, fixed) : x;
   }
 }
 

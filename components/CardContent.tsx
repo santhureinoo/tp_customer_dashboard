@@ -45,7 +45,7 @@ import { DropdownProps, first_intermediary_table, outlet, results, secondary_int
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
 import { cloneDeep } from '@apollo/client/utilities';
-import { dateValueForQuery, getMonths, numberWithCommas } from '../common/helper';
+import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas } from '../common/helper';
 
 // ChartJS.register(...registerablesJS);
 
@@ -85,7 +85,7 @@ const SavingMeter = ({ date, outletId, kiloWatHour }: any): JSX.Element => {
 
     const dateComp = () => {
         return (<div className="flex flex-row self-end">
-            <span className="text-custom-gray text-sm"> Live as of  <span className="text-sky-600"> {date}</span></span>
+            <span className="text-custom-gray text-sm"> Year to Date ({date})</span>
 
         </div>)
     }
@@ -434,7 +434,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     type: 'bar' as const,
                     label: 'KE Saving Expenses',
                     backgroundColor: 'rgb(96 165 250)',
-                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.ke_savings_expenses || "0"))),
+                    data: firstIntermediaryData.map(data => getInDecimal(parseFloat(data.ke_savings_expenses || "0"),2)),
                     barThickness: 15,
                     order: 1,
                 },
@@ -442,7 +442,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     type: 'bar' as const,
                     label: 'AC Saving Expenses',
                     backgroundColor: 'rgb(191 219 254)',
-                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.ac_savings_expenses || "0"))),
+                    data: firstIntermediaryData.map(data => getInDecimal(parseFloat(data.ac_savings_expenses || "0"),2)),
                     barThickness: 15,
                     order: 2,
                 },
@@ -963,7 +963,7 @@ const StatusCard = ({ Title, SubTitle, Value, textClassName, Prefix, Postfix, cl
                                 <span className={`text-sm ${textClassName}`}>
                                     {Prefix}
                                 </span>
-                                <span className={`text-3xl`}>
+                                <span className={`text-xl`}>
                                     {Value}
                                 </span>
 
@@ -1131,7 +1131,7 @@ const ValueFirst = ({ title, subTitle, value, valueColor }: any): JSX.Element =>
                 <span className="text-sm text-custom-gray font-thin self-start">{subTitle}</span>
                 {/* <span className='text-custom-gray'>As of <span className="text-custom-darkblue">{subTitle}</span></span> */}
             </div>
-            <span className={`text-custom-4xl text-end text-${valueColor}`}>
+            <span className={`text-2xl text-end text-${valueColor}`}>
                 {value}
             </span>
             {/* <StatusCard className='bg-custom-green-card text-custom-green-card-font' Value={"$12.5"} Postfix={"cent/kWh"} /> */}
