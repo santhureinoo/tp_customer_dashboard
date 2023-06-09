@@ -88,7 +88,8 @@ export function numberWithCommas(x?: number, fixed = 0) {
       return getInDecimal(x, fixed);
       // numX = Math.round(numX * Math.pow(10, fixed)) / Math.pow(10, fixed);
     }
-    return numX.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    
+    return getInDecimal(numX, fixed).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   else {
     return x && !isNaN(x) ? getInDecimal(x, fixed) : x;

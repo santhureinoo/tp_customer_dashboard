@@ -264,6 +264,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 acmv_10percent_benchmark_comparison_expenses
                 ke_and_ac_25percent_benchmark_comparison_kWh
                 ke_and_ac_25percent_benchmark_comparison_expenses
+                outlet_id
+                outlet_date
               }
               outlet_month(where: $outletMonthWhere2) {
                 last_avail_tariff
@@ -303,18 +305,21 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 ]
                 outletList.forEach((outlet: any) => {
                     if (outlet.results.length > 0) {
+                        //
                         outlet.results.forEach((result: any) => {
                             if (result) {
-                                tempUsageKwWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_kW as String ? parseInt(result.outlet_eqpt_energy_usage_with_TP_month_kW) : 0)
-                                tempUsageExpenseWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseInt(result.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
-                                tempUsageKwWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_kW as String ? parseInt(result.outlet_eqpt_energy_usage_without_TP_month_kW) : 0)
-                                tempUsageExpenseWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_expenses as String ? parseInt(result.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0)
-                                tempMeasureKw += (result.outlet_measured_savings_kWh as String ? parseInt(result.outlet_measured_savings_kWh) : 0)
-                                tempMeasureExpense += (result.outlet_measured_savings_expenses as String ? parseInt(result.outlet_measured_savings_expenses) : 0)
-                                tempTariffExpense += (result.savings_tariff_expenses as String ? parseInt(result.savings_tariff_expenses) : 0)
-                                tempEnergySaving += (result.tp_sales_expenses as String ? parseInt(result.tp_sales_expenses) : 0)
-                                tempCo2Saving += (result.co2_savings_kg as String ? parseInt(result.co2_savings_kg) : 0)
+                                tempUsageKwWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_kW as String ? parseFloat(result.outlet_eqpt_energy_usage_with_TP_month_kW) : 0)
+                                tempUsageExpenseWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseFloat(result.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
+                                tempUsageKwWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_kW as String ? parseFloat(result.outlet_eqpt_energy_usage_without_TP_month_kW) : 0)
+                                tempUsageExpenseWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_expenses as String ? parseFloat(result.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0)
+                                tempMeasureKw += (result.outlet_measured_savings_kWh as String ? parseFloat(result.outlet_measured_savings_kWh) : 0)
+                                tempMeasureExpense += (result.outlet_measured_savings_expenses as String ? parseFloat(result.outlet_measured_savings_expenses) : 0)
+                                tempTariffExpense += (result.savings_tariff_expenses as String ? parseFloat(result.savings_tariff_expenses) : 0)
+                                tempEnergySaving += (result.tp_sales_expenses as String ? parseFloat(result.tp_sales_expenses) : 0)
+                                tempCo2Saving += (result.co2_savings_kg as String ? parseFloat(result.co2_savings_kg) : 0)
                             }
+
+                            console.log(tempUsageKwWithTP, result.outlet_eqpt_energy_usage_with_TP_month_kW, result.outlet_id, result.outlet_date);
 
                         })
 
@@ -750,7 +755,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                     <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(totalKWHs.LastAvailTariff || '0'), 2)}`} valueColor={'custom-blue-card-font'} />
                                                 </div>
                                                 <div>
-                                                    <ValueFirstCard title={'Savings @ Tariff'} subTitle={`$${numberWithCommas(parseFloat(globalSetting?.poss_tariff_increase || '0.00'), 4)}`} value={`$${numberWithCommas(totalKWHs.SavingTariff, 2)}`} valueColor={'custom-green-card-font'} />
+                                                    <ValueFirstCard title={'Savings @ Tariff'} subTitle={`$${numberWithCommas(parseFloat(globalSetting?.poss_tariff_increase || '0.00'), 2)}`} value={`$${numberWithCommas(totalKWHs.SavingTariff, 4)}`} valueColor={'custom-green-card-font'} />
                                                 </div>
                                             </div>
                                             {/* <div>
@@ -830,10 +835,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <LiveOutletCard Value={outlets.length} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP)} />
+                                <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP,2)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP,2)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP,2)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP,2)} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw)} MeasureExpense={numberWithCommas(summaryResults.measureExpense)} TariffExpense={numberWithCommas(summaryResults.tariffExpense)} TariffKw={numberWithCommas(Number(globalSetting ? globalSetting.poss_tariff_increase : 0), 4)} />
+                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw,2)} MeasureExpense={numberWithCommas(summaryResults.measureExpense,2)} TariffExpense={numberWithCommas(summaryResults.tariffExpense,2)} TariffKw={numberWithCommas(Number(globalSetting ? globalSetting.poss_tariff_increase : 0), 4)} />
                             </div>
                         </div>
                         {
@@ -842,10 +847,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                              */
                         }
                         <div className="flex gap-5 justify-between">
-                            <YearlyEnergyCard Svg="/asserts/3.png" Value={`$` + numberWithCommas(summaryResults.energySaving)} Postfix="Energy" Year="Saved / Year" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="250" Width="250" />
-                            <YearlyEnergyCard Svg="/asserts/2.png" Value={numberWithCommas(summaryResults.co2Saving)} Postfix="Kg CO" SmallPostfix="2" Year="Saved / Year" BgColor="bg-gray-200" TextColor="text-custom-gray" Height="250" Width="250" />
-                            <YearlyEnergyCard Svg="/asserts/1.png" Value={numberWithCommas(Math.round(summaryResults.co2Saving / 22))} Postfix="Trees" Year="to be planted / Year" BgColor="bg-green-200" TextColor="text-custom-green-card-font" Height="250" Width="250" />
-                            <YearlyEnergyCard Svg="/asserts/4.png" Value={numberWithCommas(summaryResults.co2Saving * 2)} Postfix="Meals" Year="to be sold / Year" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/3.png" Value={`$` + numberWithCommas(summaryResults.energySaving)} Postfix="Energy" Year="Saved" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/2.png" Value={numberWithCommas(summaryResults.co2Saving)} Postfix="Kg CO" SmallPostfix="2" Year="Saved" BgColor="bg-gray-200" TextColor="text-custom-gray" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/1.png" Value={numberWithCommas(Math.round(summaryResults.co2Saving / 22))} Postfix="Trees" Year="to be planted" BgColor="bg-green-200" TextColor="text-custom-green-card-font" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/4.png" Value={numberWithCommas(summaryResults.co2Saving * 2)} Postfix="Meals" Year="to be sold" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="250" Width="250" />
                         </div>
                     </div>
             }

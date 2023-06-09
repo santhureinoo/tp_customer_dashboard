@@ -132,7 +132,7 @@ const SustainPerformance = ({ total, year }: any): JSX.Element => {
                 <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.energy, 2)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings.png" width='50' height='50' />} />
                 <StatusCard Title={'CO2 Saved'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.co2, 2)} Postfix={'kg'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.svg" width='50' height='50' />} />
                 <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 22))} Postfix={'trees'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
-                <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(total.energy * 2)} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
+                <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(Math.round(total.energy * 2))} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
                 {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
             </div>
@@ -1106,7 +1106,7 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                 <CardHeader Titles={['Equipment']} className='text-sm' />
                 <select value={selectedType} onChange={((event) => { setSelectedType(event.currentTarget.value) })} className={`outline-none px-2 py-1 border-2 rounded-lg text-xs w-1/2`}>
                     <option value="ke">Kitchen Exhaust</option>
-                    <option value="ac">Air Con</option>
+                    {/* <option value="ac">Air Con</option> */}
                 </select>
             </div>
             <div className="2xl:grid grid gap-y-2">
