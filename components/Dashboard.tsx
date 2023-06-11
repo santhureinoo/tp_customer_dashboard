@@ -319,7 +319,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 tempCo2Saving += (result.co2_savings_kg as String ? parseFloat(result.co2_savings_kg) : 0)
                             }
 
-                            console.log(tempUsageKwWithTP, result.outlet_eqpt_energy_usage_with_TP_month_kW, result.outlet_id, result.outlet_date);
 
                         })
 
@@ -850,7 +849,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             <YearlyEnergyCard Svg="/asserts/3.png" Value={`$` + numberWithCommas(summaryResults.measureExpense)} Postfix="Energy" Year="Saved" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="250" Width="250" />
                             <YearlyEnergyCard Svg="/asserts/2.png" Value={numberWithCommas(summaryResults.co2Saving)} Postfix="Kg CO" SmallPostfix="2" Year="Saved" BgColor="bg-gray-200" TextColor="text-custom-gray" Height="250" Width="250" />
                             <YearlyEnergyCard Svg="/asserts/1.png" Value={numberWithCommas(Math.round(summaryResults.co2Saving / 22))} Postfix="Trees" Year="to be planted" BgColor="bg-green-200" TextColor="text-custom-green-card-font" Height="250" Width="250" />
-                            <YearlyEnergyCard Svg="/asserts/4.png" Value={numberWithCommas(summaryResults.co2Saving * 2)} Postfix="Meals" Year="to be sold" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/4.png" Value={numberWithCommas(summaryResults.measureExpense * 2)} Postfix="Meals" Year="to be sold" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="250" Width="250" />
                         </div>
                     </div>
             }

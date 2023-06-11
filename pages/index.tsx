@@ -18,7 +18,6 @@ const GroupLogin = (props : any) => {
 
     const getFirstGroupPassword = useLazyQuery(getFirstGroupPasswordQuery);
 
-    console.log(props);
 
     const onSubmit = async (e: FormEvent<HTMLButtonElement>) => {
         setGroupIdError('');

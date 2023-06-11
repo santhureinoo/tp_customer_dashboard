@@ -2,6 +2,7 @@ import React from "react";
 import * as d3 from 'd3';
 import { BenchMarkProps } from "../../common/types";
 import { off } from "process";
+import { getInDecimal } from "../../common/helper";
 
 const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
     const progressDivRef: React.RefObject<HTMLDivElement> = React.createRef();
@@ -63,7 +64,7 @@ const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
                         25%
                     </span>
                     <span class="text-extraSmall align-top text-right">
-                        ${props.MaxKWH.ActualKHW.valueOf().toFixed(2)} kWh
+                        ${getInDecimal(props.MaxKWH.ActualKHW.valueOf(), 0)} kWh
                     </span>
                 </div>
                 <div class="mr-4">
@@ -71,25 +72,25 @@ const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
                         10%
                     </span>
                     <span class="text-extraSmall align-top text-right">
-                        ${props.MinKWH.ActualKHW.valueOf().toFixed(2)} kWh
+                        ${getInDecimal(props.MinKWH.ActualKHW.valueOf(), 0)} kWh
                     </span>
                 </div>
     </div>`);
 
-//         progressRectGroup.append("foreignObject")
-//             .attr("width", '100%')
-//             .attr("height", '100%')
-//             .attr('y', (orgHeight - (yScale(props.MaxKWH.Percentage) || 0)) / 1.5)
-//             .append("xhtml:div")
-//             .html(`<div class="absolute pl-2 right-0 z-10 flex flex-col  justify-center">
-//                 <div class="flex flex-col items-center">
-//                     <span class="text-extraSmall">Last Month</span>
-//                     <span class="text-xl text-blue-600 font-bold">
-//                         17%
-//                     </span>
-//                 <span class="text-extraSmall">(${props.CurrentKHW.ActualKHW} kWh)</span>
-//             </div>
-// </div>`);
+        //         progressRectGroup.append("foreignObject")
+        //             .attr("width", '100%')
+        //             .attr("height", '100%')
+        //             .attr('y', (orgHeight - (yScale(props.MaxKWH.Percentage) || 0)) / 1.5)
+        //             .append("xhtml:div")
+        //             .html(`<div class="absolute pl-2 right-0 z-10 flex flex-col  justify-center">
+        //                 <div class="flex flex-col items-center">
+        //                     <span class="text-extraSmall">Last Month</span>
+        //                     <span class="text-xl text-blue-600 font-bold">
+        //                         17%
+        //                     </span>
+        //                 <span class="text-extraSmall">(${props.CurrentKHW.ActualKHW} kWh)</span>
+        //             </div>
+        // </div>`);
     }, [props, progressDivRef, yScale]);
 
     return (

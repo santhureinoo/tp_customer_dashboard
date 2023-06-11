@@ -408,13 +408,17 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     borderWidth: 2,
                     fill: true,
                     backgroundColor: 'transparent',
-                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.all_eqpt_without_TP_kWh || "0"))),
+                    data: firstIntermediaryData.map(data => {
+                        return getInDecimal(parseFloat(data.all_eqpt_without_TP_kWh || "0"));
+                    }),
                 },
                 {
                     type: 'bar' as const,
                     label: 'Measured Savings',
                     backgroundColor: 'rgb(191 219 254)',
-                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.all_eqpt_without_TP_kWh || "0")) - Math.round(parseInt(data.all_eqpt_with_TP_kWh || "0"))),
+                    data: firstIntermediaryData.map(data => {
+                        return getInDecimal(parseFloat(data.all_eqpt_without_TP_kWh || "0") - parseFloat(data.all_eqpt_with_TP_kWh || "0"));
+                    }),
                     barThickness: 15,
                     order: 3,
                 },
@@ -422,7 +426,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     type: 'bar' as const,
                     label: 'With TablePointer',
                     backgroundColor: 'rgb(96 165 250)',
-                    data: firstIntermediaryData.map(data => Math.round(parseInt(data.all_eqpt_with_TP_kWh || "0"))),
+                    data: firstIntermediaryData.map(data => getInDecimal(parseFloat(data.all_eqpt_with_TP_kWh || "0"))),
                     barThickness: 15,
                     order: 2,
                 }
@@ -434,7 +438,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     type: 'bar' as const,
                     label: 'KE Saving Expenses',
                     backgroundColor: 'rgb(96 165 250)',
-                    data: firstIntermediaryData.map(data => getInDecimal(parseFloat(data.ke_savings_expenses || "0"),2)),
+                    data: firstIntermediaryData.map(data => getInDecimal(parseFloat(data.ke_savings_expenses || "0"), 2)),
                     barThickness: 15,
                     order: 1,
                 },
@@ -442,7 +446,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     type: 'bar' as const,
                     label: 'AC Saving Expenses',
                     backgroundColor: 'rgb(191 219 254)',
-                    data: firstIntermediaryData.map(data => getInDecimal(parseFloat(data.ac_savings_expenses || "0"),2)),
+                    data: firstIntermediaryData.map(data => getInDecimal(parseFloat(data.ac_savings_expenses || "0"), 2)),
                     barThickness: 15,
                     order: 2,
                 },
@@ -515,7 +519,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                 callbacks: {
                     label: function (context: any) {
                         if (context.dataset.label === "Without TablePointer") {
-                            return Math.round(parseInt(firstIntermediaryData[context.dataIndex].all_eqpt_without_TP_kWh || '0'))
+                            return getInDecimal(parseFloat(firstIntermediaryData[context.dataIndex].all_eqpt_without_TP_kWh || '0'))
                         } else {
                             return context.formattedValue;
                         }
@@ -735,7 +739,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                     {
                         type: 'line' as const,
                         label: 'Line Dataset',
-                        data: secondaryIntermediary.map(data => data.acmv_baseline_kW),
+                        data: secondaryIntermediary.map(data => data.acmv_baseline_kW ? getInDecimal(parseFloat(data.acmv_baseline_kW), 2) : null),
                         backgroundColor: 'rgb(0, 0, 255)',
                         borderColor: 'rgb(0, 0, 255)',
                         pointRadius: 0,
@@ -747,7 +751,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                         borderColor: 'rgb(255, 0, 0)',
                         pointStyle: 'cross',
                         rotation: 45,
-                        data: secondaryIntermediary.map(data => data.acmv_without_TP_kWh)
+                        data: secondaryIntermediary.map(data => data.acmv_without_TP_kWh ? getInDecimal(parseFloat(data.acmv_without_TP_kWh), 2) : null)
                     }
                 ],
             }
@@ -1110,7 +1114,7 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                 </select>
             </div>
             <div className="2xl:grid grid gap-y-2">
-                <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={Math.round(renderedData.baseline * Math.pow(10, 3)) / Math.pow(10, 3)} Postfix={'kW'} />
+                <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={getInDecimal(renderedData.baseline,2)} Postfix={'kW'} />
                 {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
                 <StatusCard Title={'Savings @ Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} /> */}
 
