@@ -131,7 +131,7 @@ const SustainPerformance = ({ total, year }: any): JSX.Element => {
             <div className="lg:grid lg:grid-cols-4 grid grid-cols-2 gap-2">
                 <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings_blue.png" width='50' height='50' />} />
                 <StatusCard Title={'CO2 Saved'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.png" width='50' height='50' />} />
-                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 22))} Postfix={'trees'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
+                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 60.5))} Postfix={'trees'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
                 <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(Math.round(total.energy * 2))} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
                 {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
@@ -1204,7 +1204,7 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
         <div>
             <div className='flex flex-row gap-2 justify-between w-full h-full' >
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff' FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={true} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
             </div>
         </div>
     )
