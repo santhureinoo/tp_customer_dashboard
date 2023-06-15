@@ -98,7 +98,7 @@ const SavingMeter = ({ date, outletId, kiloWatHour }: any): JSX.Element => {
             </div>
 
             <div className="flex flex-col col-span-2">
-                <span className="text-left text-custom-gray">Outlet ID: {outletId}</span>
+                <span className="text-left text-custom-gray">Outlet ID: {Number(outletId) < 100 ? Number(outletId) + 99 : outletId}</span>
                 <Image alt="barcode not found" src="/barcode.png" width='500' height="100" />
             </div>
         </div>
