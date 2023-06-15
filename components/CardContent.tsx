@@ -1237,7 +1237,7 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
                         <div className="text-left">
                             {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
                             <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
-                            {FirstPostfix && <span className={`text-sm ${TextColor}`}>{FirstPostfix}</span>}
+                            {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
                         </div>
                         <svg className="absolute left-0 right-0 mx-auto" width="44" height="80" viewBox="0 0 44 112" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <line y1="-0.25" x2="118.955" y2="-0.25" transform="matrix(0.359554 -0.933124 0.860639 0.509216 0.714844 112)" stroke="#999999" strokeWidth="0.5" />
@@ -1245,19 +1245,19 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
                         <div className="text-right">
                             {SecondPrefix && <span className={`font-bold text-xl ${TextColor}`}>{SecondPrefix}</span>}
                             <span className={`font-bold text-xl ${TextColor}`}>{SecondValue}</span>
-                            {SecondPostfix && <span className={`text-sm ${TextColor}`}>{SecondPostfix}</span>}
+                            {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
                         </div>
                     </div> :
                     <div className='flex flex-row justify-between mt-4'>
                         <div>
                             {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
                             <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
-                            {FirstPostfix && <span className={`text-sm ${TextColor}`}>{FirstPostfix}</span>}
+                            {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
                         </div>
                         <div>
                             {SecondPrefix && <span className={`font-bold text-xl ${TextColor}`}>{SecondPrefix}</span>}
                             <span className={`font-bold text-xl ${TextColor}`}>{SecondValue}</span>
-                            {SecondPostfix && <span className={`text-sm ${TextColor}`}>{SecondPostfix}</span>}
+                            {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
                         </div>
                     </div>
             }

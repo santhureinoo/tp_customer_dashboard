@@ -35,7 +35,7 @@ const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
                         </svg>
 
                         <div className="flex">
-                            <h2 className="text-[18px] mx-2 font-bold">Welcome,<br />{groupName}</h2>
+                            <h2 className="text-[14px] mx-2 font-bold">Welcome,<br />{groupName}</h2>
                         </div>
                     </div>
                     <nav className="mt-10 space-y-3 px-2">

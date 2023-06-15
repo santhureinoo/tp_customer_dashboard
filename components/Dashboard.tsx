@@ -846,8 +846,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                              */
                         }
                         <div className="flex gap-5 justify-between">
-                            <YearlyEnergyCard Svg="/asserts/3.png" Value={`$` + numberWithCommas(summaryResults.measureExpense)} Postfix="Energy" Year="Saved" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="250" Width="250" />
-                            <YearlyEnergyCard Svg="/asserts/2.png" Value={numberWithCommas(summaryResults.co2Saving)} Postfix="Kg CO" SmallPostfix="2" Year="Saved" BgColor="bg-gray-200" TextColor="text-custom-gray" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/3.png" Value={`$` + numberWithCommas(summaryResults.measureExpense)} Postfix="Energy" Year="saved" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/2.png" Value={numberWithCommas(summaryResults.co2Saving)} Postfix="kg CO" SmallPostfix="2" Year="saved" BgColor="bg-gray-200" TextColor="text-custom-gray" Height="250" Width="250" />
                             <YearlyEnergyCard Svg="/asserts/1.png" Value={numberWithCommas(Math.round(summaryResults.co2Saving / 60.5))} Postfix="Trees" Year="to be planted" BgColor="bg-green-200" TextColor="text-custom-green-card-font" Height="250" Width="250" />
                             <YearlyEnergyCard Svg="/asserts/4.png" Value={numberWithCommas(summaryResults.measureExpense * 2)} Postfix="Meals" Year="to be sold" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="250" Width="250" />
                         </div>
