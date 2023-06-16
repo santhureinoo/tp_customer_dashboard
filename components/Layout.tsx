@@ -37,7 +37,7 @@ const Layout = ({ title, groupId, children }: Props) => {
         <React.Fragment>
             <Head>
                 <title>Dashboard</title>
-                <link rel="icon" href="/favicon.ico" />
+                <link rel="icon" href="asserts/TP Favicon-Circle.svg" />
             </Head>
             <main className="flex h-screen bg-custom-lightgray">
                 <Sidebar groupName={group} setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />

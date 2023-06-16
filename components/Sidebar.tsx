@@ -2,6 +2,7 @@ import Link from "next/link";
 import React from "react";
 import { useRouter } from 'next/router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Image from "next/image";
 import { faChartPie, faSignOut } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
@@ -20,7 +21,10 @@ const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
             <div className={`${sidebarOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'} flex flex-col justify-between fixed z-30 inset-y-0 left-0 w-48 transition duration-300 h-screen transform bg-white overflow-y-auto lg:translate-x-0 lg:static lg:inset-0`}>
 
                 <div>
-                    <div className="flex items-center pt-8 px-4">
+                    <div className="flex py-[20px] px-[10px]">
+                        <Image alt="barcode not found" src="/asserts/Tablepointer Logo-Colour.svg" width={189} height={50} />
+                    </div>
+                    <div className="flex items-center px-4">
                         <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="13" cy="13" r="13" fill="#E8F2FF" />
                             <g clipPath="url(#clip0_1293_87)">
@@ -33,7 +37,6 @@ const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
                                 </clipPath>
                             </defs>
                         </svg>
-
                         <div className="flex">
                             <h2 className="text-[14px] mx-2 font-bold">Welcome,<br />{groupName}</h2>
                         </div>
