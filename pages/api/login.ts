@@ -4,6 +4,9 @@ import { withIronSessionApiRoute } from "iron-session/next";
 import { ApolloClient, gql, HttpLink, InMemoryCache } from "@apollo/client";
 import fetch from "cross-fetch";
 import { getIronSessionCookieSetting } from "../../common/helper";
+import { useMixpanelContext } from "../../context/mixpanel-provider";
+import mixpanel from "mixpanel";
+import moment from "moment";
 type Data = {
     name: string
 }
@@ -67,7 +70,16 @@ export default withIronSessionApiRoute(
                 id: result.data.findFirstGroup_password.group_id,
             };
             await req.session.save();
-            res.redirect(`/customer`)
+            const mixpanelConfig = mixpanel.init(process.env.MIXPANEL_TOKEN || '3583f33e37fcb53346be88d215695dc4');
+            mixpanelConfig.track(
+                'Signed In',
+                {
+                    'Group ID': result.data.findFirstGroup_password.group_id,
+                    'Signin At': moment().format("MMM DD YYYY"),
+                    'Signin Type': 'Group Signin'
+                }
+            );
+            res.redirect(`/customer`);
         } else {
             res.redirect(`/`)
         }
