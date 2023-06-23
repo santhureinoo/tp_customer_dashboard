@@ -86,10 +86,7 @@ export default withIronSessionApiRoute(
 
             const groupInfoResult: any = await client.query({
                 query: getGroupQuery, variables: {
-                    "variables":
-                    {
-                        "GroupWhereUniqueInput": { "group_id": result.data.findFirstGroup_password.group_id }
-                    }
+                    "GroupWhereUniqueInput": { "group_id": result.data.findFirstGroup_password.group_id }
                 }
             });
 
