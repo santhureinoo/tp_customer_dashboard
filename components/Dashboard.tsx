@@ -9,10 +9,11 @@ import ClientOnly from "./ClientOnly";
 import { v4 as uuidv4 } from 'uuid';
 import CustomSelect from "./cardcomponents/CustomSelect";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
 
 const Dashboard = ({ groupId }: any): JSX.Element => {
     const [currentCustomerID, setCurrentCustomerID] = React.useState(1);
-    const [currentPage, setCurrentPage] = React.useState<String>('summary');
+    const [currentPage, setCurrentPage] = React.useState<'Summary' | 'Outlet'>('Summary');
     const [lastestLiveDate, setLastestLiveDate] = React.useState('');
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [latestOutlets, setLatestOutlets] = React.useState<outlet[]>([]);
@@ -706,20 +707,36 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [getGroupByIdResult.data])
 
+
+    React.useEffect(() => {
+
+        group && axios.post('api/mixpanel_track',
+            {
+                'distinct_id': groupId,
+                'name': group,
+                'event_name': currentPage + ' page',
+                'attributes': {
+                    'distinct_id': groupId,
+                    'name': group,
+                    ...(currentPage === 'Outlet' && { 'outlet ID': currentOutlet?.outlet_id, 'outlet name': currentOutlet?.name })
+                }
+            });
+    }, [currentPage, group, currentOutlet])
+
     return (
         <React.Fragment>
             {
                 /**
                  * Checking the dashboard page is outlet or summary
                  */
-                currentPage == 'outlet' ?
+                currentPage == 'Outlet' ?
                     /**
                      * outlet page
                      */
                     <div>
                         <div className="flex justify-between w-1/4 gap-2 mb-[50px]">
-                            <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${currentPage === 'summary' ? 'bg-custom-darkblue text-white' : 'text-custom-darkblue border-solid border-2'}`} onClick={() => setCurrentPage('summary')}>Summary</span>
-                            <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${currentPage == 'summary' ? 'text-custom-darkblue border-solid border-2' : 'bg-custom-darkblue text-white'}`} onClick={() => setCurrentPage('outlet')}>Outlet</span>
+                            <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${'text-custom-darkblue border-solid border-2'}`} onClick={() => setCurrentPage('Summary')}>Summary</span>
+                            <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${'bg-custom-darkblue text-white'}`} onClick={() => setCurrentPage('Outlet')}>Outlet</span>
                         </div>
                         <div className="flex justify-between h-full mb-[50px]">
                             {getHeaderBreadCrumb}
@@ -774,8 +791,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                      */
                     <div>
                         <div className="flex justify-between mb-4 w-1/4 gap-2">
-                            <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${currentPage == 'summary' ? 'bg-custom-darkblue text-white' : 'text-custom-darkblue border-solid border-2'}`} onClick={() => setCurrentPage('summary')}>Summary</span>
-                            <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${currentPage == 'summary' ? 'text-custom-darkblue border-solid border-2' : 'bg-custom-darkblue text-white'}`} onClick={() => setCurrentPage('outlet')}>Outlet</span>
+                            <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${currentPage == 'Summary' ? 'bg-custom-darkblue text-white' : 'text-custom-darkblue border-solid border-2'}`} onClick={() => setCurrentPage('Summary')}>Summary</span>
+                            <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${currentPage == 'Summary' ? 'text-custom-darkblue border-solid border-2' : 'bg-custom-darkblue text-white'}`} onClick={() => setCurrentPage('Outlet')}>Outlet</span>
                         </div>
                         {/**
                      * Group Div

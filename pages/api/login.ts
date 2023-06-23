@@ -7,6 +7,8 @@ import { getIronSessionCookieSetting } from "../../common/helper";
 import { useMixpanelContext } from "../../context/mixpanel-provider";
 import mixpanel from "mixpanel";
 import moment from "moment";
+import { UAParser } from "ua-parser-js";
+import { getClientIp } from "request-ip";
 type Data = {
     name: string
 }
@@ -38,6 +40,8 @@ export default withIronSessionApiRoute(
         if (!(await validateCaptcha(req.query['g-recaptcha-response']))) {
             return res.redirect(`/`)
         }
+
+        const clientIP = getClientIp(req);
         delete req.body['g-recaptcha-response'];
 
         const getFirstGroupPasswordVariable = {
@@ -55,6 +59,15 @@ export default withIronSessionApiRoute(
           }
         `;
 
+        //Group Query by Id
+        const getGroupQuery = gql`query Fetchgroup($GroupWhereUniqueInput: GroupWhereUniqueInput!) {
+            group (where: $GroupWhereUniqueInput){
+                group_id,
+                group_name
+            }
+        }`;
+
+
         const client = new ApolloClient({
             link: new HttpLink({ uri: 'http://127.0.0.1:4000', fetch }),
             cache: new InMemoryCache(),
@@ -65,20 +78,43 @@ export default withIronSessionApiRoute(
             variables: getFirstGroupPasswordVariable
         });
 
+
         if (result.data && result.data.findFirstGroup_password && result.data.findFirstGroup_password.group_id) {
             req.session.group = {
                 id: result.data.findFirstGroup_password.group_id,
             };
-            await req.session.save();
-            const mixpanelConfig = mixpanel.init(process.env.MIXPANEL_TOKEN || '3583f33e37fcb53346be88d215695dc4');
-            mixpanelConfig.track(
-                'Signed In',
-                {
-                    'Group ID': result.data.findFirstGroup_password.group_id,
-                    'Signin At': moment().format("MMM DD YYYY"),
-                    'Signin Type': 'Group Signin'
+
+            const groupInfoResult: any = await client.query({
+                query: getGroupQuery, variables: {
+                    "variables":
+                    {
+                        "GroupWhereUniqueInput": { "group_id": result.data.findFirstGroup_password.group_id }
+                    }
                 }
-            );
+            });
+
+            await req.session.save();
+
+            const mixpanelConfig = mixpanel.init(process.env.MIXPANEL_TOKEN || '3583f33e37fcb53346be88d215695dc4');
+            const uaParser = new UAParser(req.headers['user-agent']);
+            mixpanelConfig.people.set(result.data.findFirstGroup_password.group_id, {
+                name: groupInfoResult.data.group.name,
+                $last_seen: moment().format("MMM DD YYYY"),
+            }, () => {
+                mixpanelConfig.track(
+                    'Signed In',
+                    {
+                        'distinct_id': result.data.findFirstGroup_password.group_id,
+                        'name': groupInfoResult.data.group.name,
+                        'Signin At': moment().format("MMM DD YYYY"),
+                        '$os': uaParser.getOS().name + ' ' + uaParser.getOS().version,
+                        "$browser": uaParser.getBrowser().name + ' ' + uaParser.getBrowser().version,
+                        "$device": uaParser.getDevice().model + ' ' + uaParser.getDevice().type,
+                        'ip': clientIP,
+                    }
+                );
+            })
+
             res.redirect(`/customer`);
         } else {
             res.redirect(`/`)
