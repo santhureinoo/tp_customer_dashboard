@@ -588,6 +588,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                                 setSelectedYear(value.year().toString());
                             }
                         }}
+                        clearIcon={false}
                         disabledDate={(date) => {
                             const latestLiveDateInDayjs = dayjs(latestLiveDate, 'MM/YYYY');
                             if (date.year() < 2022 || date.year() > 2023) {

@@ -816,6 +816,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                             setSelectedYear(value.year().toString());
                                         }
                                     }}   
+                                    clearIcon={false}
                                     disabledDate={(date) => {
                                         const latestLiveDateInDayjs = dayjs(lastestLiveDate, 'MM/YYYY');
                                         if (date.year() < 2022 || date.year() > 2023) {
