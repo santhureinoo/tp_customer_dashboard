@@ -45,7 +45,9 @@ import { DropdownProps, first_intermediary_table, outlet, results, secondary_int
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
 import { cloneDeep } from '@apollo/client/utilities';
-import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas } from '../common/helper';
+import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas, zeroPad } from '../common/helper';
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
 
 // ChartJS.register(...registerablesJS);
 
@@ -577,31 +579,28 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     </div>
                 </div>
                 <div className='flex flex-row gap-x-2 text-xs'>
-                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[115px] p-2.5 ">
-                        {/* <option value="All">Month</option> */}
-                        {/* <option value="01">January</option>
-                        <option value="02">February</option>
-                        <option value="03">March</option>
-                        <option value="04">April</option>
-                        <option value="05">May</option>
-                        <option value="06">June</option>
-                        <option value="07">July</option>
-                        <option value="08">August</option>
-                        <option value="09">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option> */}
-                        {getMonths(latestLiveDate || '', selectedYear).map(mon => {
-                            return <option key={mon.value} value={mon.value}>{mon.display}</option>
-                        })}
-                    </select>
-                    <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        {/* <option value="All">Year</option> */}
-                        {/* <option value="2020">2020</option>
-                        <option value="2021">2021</option> */}
-                        <option value="2022">2022</option>
-                        <option value="2023">2023</option>
-                    </select>
+                    <DatePicker
+                        placeholder="Select date"
+                        value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
+                        onChange={(value) => {
+                            if (value) {
+                                setSelectedMonth(zeroPad(value.month() + 1, 2));
+                                setSelectedYear(value.year().toString());
+                            }
+                        }}
+                        disabledDate={(date) => {
+                            const latestLiveDateInDayjs = dayjs(latestLiveDate, 'MM/YYYY');
+                            if (date.year() < 2022 || date.year() > 2023) {
+                                return true;
+                            } else if (date.isAfter(latestLiveDateInDayjs)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }}
+                        format={'MM/YYYY'}
+                        picker={'month'}
+                    ></DatePicker>
                     {/* <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
                         <option>Start Date</option>
                         <option>Start Date</option>
@@ -1114,7 +1113,7 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                 </select>
             </div>
             <div className="2xl:grid grid gap-y-2">
-                <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={getInDecimal(renderedData.baseline,2)} Postfix={'kW'} />
+                <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={getInDecimal(renderedData.baseline, 2)} Postfix={'kW'} />
                 {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
                 <StatusCard Title={'Savings @ Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} /> */}
 

@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 import CustomSelect from "./cardcomponents/CustomSelect";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import dayjs from 'dayjs';
+import { DatePicker } from 'antd';
 
 const Dashboard = ({ groupId }: any): JSX.Element => {
     const [currentCustomerID, setCurrentCustomerID] = React.useState(1);
@@ -804,31 +806,30 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <span className='text-custom-gray text-sm font-bold'>{group}</span>
                             </div>
                             <div className="flex justify-between h-full gap-4">
-                                <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[115px] p-2.5 ">
-                                    {getMonths(lastestLiveDate, selectedYear).map(mon => {
-                                        return <option key={mon.value} value={mon.value}>{mon.display}</option>
-                                    })}
-                                    {/* <option value="All">Month</option> */}
-                                    {/* <option value="01">January</option>
-                                    <option value="02">February</option>
-                                    <option value="03">March</option>
-                                    <option value="04">April</option>
-                                    <option value="05">May</option>
-                                    <option value="06">June</option>
-                                    <option value="07">July</option>
-                                    <option value="08">August</option>
-                                    <option value="09">September</option>
-                                    <option value="10">October</option>
-                                    <option value="11">November</option>
-                                    <option value="12">December</option> */}
-                                </select>
-                                <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                    {/* <option value="All">Year</option> */}
-                                    {/* <option value="2020">2020</option>
-                                    <option value="2021">2021</option> */}
-                                    <option value="2022">2022</option>
-                                    <option value="2023">2023</option>
-                                </select>
+
+                                <DatePicker
+                                    placeholder="Select date"
+                                    value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
+                                    onChange={(value) => {
+                                        if (value) {
+                                            setSelectedMonth(zeroPad(value.month() + 1, 2));
+                                            setSelectedYear(value.year().toString());
+                                        }
+                                    }}   
+                                    disabledDate={(date) => {
+                                        const latestLiveDateInDayjs = dayjs(lastestLiveDate, 'MM/YYYY');
+                                        if (date.year() < 2022 || date.year() > 2023) {
+                                            return true;
+                                        } else if (date.isAfter(latestLiveDateInDayjs)) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }}
+                                    format={'MM/YYYY'}
+                                    picker={'month'}
+                                ></DatePicker>
+
                             </div>
                         </div>
                         {/**
