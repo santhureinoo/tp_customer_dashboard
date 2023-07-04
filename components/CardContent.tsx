@@ -5,7 +5,7 @@ import SavingMeterDigits from "./cardcomponents/SavingMeterDigits";
 import CardHeader from "./CardHeader";
 import Jumbotron from "./cardcomponents/Jumbotron";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSortUp } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle, faSortUp } from '@fortawesome/free-solid-svg-icons';
 import Image from "next/image";
 import ProgressiveMeter from "./cardcomponents/ProgressiveMeter";
 import BenchMarkMeter from "./cardcomponents/BenchMarkMeter";
@@ -1183,10 +1183,16 @@ interface EquipmentEnergyProps {
  */
 const EquipmentEnergy = ({ WithTableKw, WithTableExpense, WithoutTableKw, WithoutTableExpense }: EquipmentEnergyProps): JSX.Element => {
     return (
-        <div className='flex flex-row gap-2 justify-between w-full h-full' >
-            <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' PreSubTitle='W/O' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
-            <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
+        <div>
+            <h2 className="font-bold text-sm">
+                Equipment Energy Usage
+            </h2>
+            <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='W/O TablePointer' FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' Title='With TablePointer' FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
+            </div>
         </div>
+
     )
 }
 
@@ -1202,7 +1208,10 @@ interface SavingEnergyProps {
 const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: SavingEnergyProps): JSX.Element => {
     return (
         <div>
-            <div className='flex flex-row gap-2 justify-between w-full h-full' >
+            <h2 className="font-bold text-sm">
+                Savings
+            </h2>
+            <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
             </div>
@@ -1215,52 +1224,28 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
  */
 const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, TextColor, Icon = false, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
     return (
-        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray ${Position !== 'vertical' ? 'justify-between gap-8' : ''} h-auto 2xl:h-full w-2/3 ${BgColor}`}>
+        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray h-auto 2xl:h-full w-2/3 ${BgColor}`}>
             <div className={'flex flex-col'}>
-                {
-                    (Icon == true) ?
-                        <div className="flex">
-                            <h2 className="font-bold text-sm text">{Title} </h2> <FontAwesomeIcon className="px-2 text-xl" icon={faSortUp} />
-                        </div> :
-                        <h2 className="font-bold text-sm">
-                            {Title}
-                        </h2>
-                }
-                <div className={`text-custom-blue-card-font`}>
+                <div className="flex justify-between">
+                    <h2 className="font-bold text-sm text">{Title} </h2> <FontAwesomeIcon color='#43A4FD' className="px-2 text-xl" icon={faInfoCircle} />
+                </div>
+                {/* <div className={`text-custom-blue-card-font`}>
                     <span className={`font-bold text-sm mr-2`}>{PreSubTitle}</span>
                     <span className={`text-sm font-thin`}>{PostSubTitle}</span>
+                </div> */}
+            </div>
+            <div className='flex flex-col justify-between mt-2'>
+                <div>
+                    {FirstPrefix && <span className={`font-bold text-3xl ${TextColor}`}>{FirstPrefix}</span>}
+                    <span className={`font-bold text-3xl ${TextColor}`}>{FirstValue}</span>
+                    {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
+                </div>
+                <div>
+                    {SecondPrefix && <span className={`font-bold text-3xl ${TextColor}`}>{SecondPrefix}</span>}
+                    <span className={`font-bold text-3xl ${TextColor}`}>{SecondValue}</span>
+                    {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
                 </div>
             </div>
-            {
-                (Position == 'vertical') ?
-                    <div className='flex flex-col gap-5 relative'>
-                        <div className="text-left">
-                            {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
-                            <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
-                            {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
-                        </div>
-                        <svg className="absolute left-0 right-0 mx-auto" width="44" height="80" viewBox="0 0 44 112" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <line y1="-0.25" x2="118.955" y2="-0.25" transform="matrix(0.359554 -0.933124 0.860639 0.509216 0.714844 112)" stroke="#999999" strokeWidth="0.5" />
-                        </svg>
-                        <div className="text-right">
-                            {SecondPrefix && <span className={`font-bold text-xl ${TextColor}`}>{SecondPrefix}</span>}
-                            <span className={`font-bold text-xl ${TextColor}`}>{SecondValue}</span>
-                            {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
-                        </div>
-                    </div> :
-                    <div className='flex flex-row justify-between mt-4'>
-                        <div>
-                            {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
-                            <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
-                            {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
-                        </div>
-                        <div>
-                            {SecondPrefix && <span className={`font-bold text-xl ${TextColor}`}>{SecondPrefix}</span>}
-                            <span className={`font-bold text-xl ${TextColor}`}>{SecondValue}</span>
-                            {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
-                        </div>
-                    </div>
-            }
 
         </div>
     )

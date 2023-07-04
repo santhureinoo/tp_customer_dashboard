@@ -1,3 +1,9 @@
+import { SearchOutlined } from "@ant-design/icons";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { AutoComplete, Input } from "antd";
+import React from "react";
+import { unknown } from "superstruct";
 import { DropdownProps } from "../../common/types";
 
 interface Props {
@@ -6,32 +12,51 @@ interface Props {
     setSelectedValue: (val: string) => void;
 }
 const CustomSelect = ({ dropdownValue, selectedValue, setSelectedValue }: Props): JSX.Element => {
-    return (
-        <div className="flex justify-center items-baseline gap-x-2">
-            <label className="text-black text-custom-xs font-medium">Outlet</label>
-            <select value={selectedValue} onChange={(event) => { setSelectedValue(event.target.value) }} className="form-select appearance-none
-      block
-      mb-3 min-w-[104.68px] h-full
-      px-3
-      py-1.5
-      text-custom-xs
-      font-medium
-      text-custom-gray
-      bg-custom-lightgray bg-clip-padding bg-no-repeat
-      border border-solid border-gray-300
-      rounded
-      transition
-      ease-in-out
-      m-0
-      outline-none">
-                {
-                    dropdownValue.map((val, index) => {
-                        return <option key={index} value={val.value}>{val.display}</option>
-                    })
+    const [currentDropdownValue, setCurrentDropdownValue] = React.useState<{ value: any, display: any }[]>([]);
+    const findDisplayByValue = (selected: any) => dropdownValue.find(val => val.value === selected)?.display || '';
+    const [changedValue, setChangedValue] = React.useState('');
+
+    React.useEffect(() => {
+        setChangedValue(findDisplayByValue(selectedValue))
+    }, [selectedValue]);
+
+    React.useEffect(() => {
+        setCurrentDropdownValue(dropdownValue.sort((a, b) => {
+            return a.display.localeCompare(b.display);
+        }));
+    }, [dropdownValue])
+
+    const autoComp = React.useMemo(() => {
+        return <AutoComplete
+            options={currentDropdownValue.map(val => {
+                return {
+                    'value': val.value,
+                    'label': <span className="font-semibold">{val.display}</span>
                 }
-
-
-            </select>
+            })}
+            className="w-[300px] font-semibold"
+            value={changedValue}
+            onSelect={(val) => {
+                setSelectedValue(val);
+            }}
+            onSearch={(text) => {
+                setCurrentDropdownValue(dropdownValue.filter(val => {
+                    const str = val.display as string;
+                    return str.includes(text);
+                }).sort((a, b) => {
+                    return a.display.localeCompare(b.display);
+                }));
+                setChangedValue(text);
+            }}
+            notFoundContent={<span className="px-2 font-semibold">No outlet found</span>}
+        >
+            <Input suffix={<FontAwesomeIcon className="text-sm" icon={faSearch} />}></Input>
+        </AutoComplete>
+    }, [currentDropdownValue, changedValue])
+    return (
+        <div className="flex items-baseline gap-x-2">
+            <label className="text-black text-custom-xs font-medium">Outlet</label>
+            {autoComp}
         </div>
     )
 }
