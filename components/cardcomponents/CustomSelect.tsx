@@ -28,6 +28,7 @@ const CustomSelect = ({ dropdownValue, selectedValue, setSelectedValue }: Props)
 
     const autoComp = React.useMemo(() => {
         return <AutoComplete
+            disabled={dropdownValue.length < 1}
             options={currentDropdownValue.map(val => {
                 return {
                     'value': val.value,
@@ -39,12 +40,18 @@ const CustomSelect = ({ dropdownValue, selectedValue, setSelectedValue }: Props)
             onSelect={(val) => {
                 setSelectedValue(val);
             }}
+            onFocus={() => {
+                setChangedValue('');
+            }}
+            onBlur={() => {
+                setChangedValue(findDisplayByValue(selectedValue))
+            }}
             onSearch={(text) => {
                 setCurrentDropdownValue(dropdownValue.filter(val => {
                     const str = val.display as string;
-                    return str.includes(text);
+                    return str.toLowerCase().includes(text.toLowerCase());
                 }).sort((a, b) => {
-                    return a.display.localeCompare(b.display);
+                    return a.display.localeCompare(b.display, undefined, { sensitivity: 'base' });
                 }));
                 setChangedValue(text);
             }}
