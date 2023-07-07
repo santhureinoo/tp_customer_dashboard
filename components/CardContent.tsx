@@ -131,10 +131,10 @@ const SustainPerformance = ({ total, year }: any): JSX.Element => {
                 <CardHeader Titles={['Sustainability Performance']} SubTitle={`Year to Date (${year})`} />
             </div>
             <div className="lg:grid lg:grid-cols-4 grid grid-cols-2 gap-2">
-                <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings_blue.png" width='50' height='50' />} />
-                <StatusCard Title={'CO2 Saved'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.png" width='50' height='50' />} />
-                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 60.5))} Postfix={'trees'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
-                <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(Math.round(total.energy * 2))} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
+                <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/Money_small.svg" width='50' height='50' />} />
+                <StatusCard Title={'CO2 Saved'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/CO2_small.svg" width='50' height='50' />} />
+                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 60.5))} Postfix={'trees'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/Trees_small.svg" width='50' height="50" />} />
+                <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(Math.round(total.energy * 2))} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/Meal_small.svg" width='50' height="50" />} />
                 {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
             </div>
@@ -832,18 +832,29 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                     <button onClick={e => { setSelectedEqptEnergyIndex(2) }} className={selectedEqptEnergyIndex === 2 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last Month</button>
     </div> */}
                 <div className='flex flex-row gap-x-2 text-xs'>
-                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                        {getMonths(latestLiveDate || '', selectedYear).map(mon => {
-                            return <option key={mon.value} value={mon.value}>{mon.display}</option>
-                        })}
-                    </select>
-                    <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        {/* <option value="All">Year</option> */}
-                        {/* <option value="2020">2020</option>
-                        <option value="2021">2021</option> */}
-                        <option value="2022">2022</option>
-                        <option value="2023">2023</option>
-                    </select>
+                    <DatePicker
+                        placeholder="Select date"
+                        value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
+                        onChange={(value) => {
+                            if (value) {
+                                setSelectedMonth(zeroPad(value.month() + 1, 2));
+                                setSelectedYear(value.year().toString());
+                            }
+                        }}
+                        clearIcon={false}
+                        disabledDate={(date) => {
+                            const latestLiveDateInDayjs = dayjs(latestLiveDate, 'MM/YYYY');
+                            if (date.year() < 2022 || date.year() > 2023) {
+                                return true;
+                            } else if (date.isAfter(latestLiveDateInDayjs)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }}
+                        format={'MM/YYYY'}
+                        picker={'month'}
+                    ></DatePicker>
                 </div>
 
             </div>
