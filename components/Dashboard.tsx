@@ -834,10 +834,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <LiveOutletCard Value={outlets.length} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP)} />
+                                <EquipmentEnergyCard WithTableExpense={numberWithCommas(Math.round(summaryResults.usageExpenseWithTP))} WithTableKw={numberWithCommas(Math.round(summaryResults.usageKwWithTP))} WithoutTableExpense={numberWithCommas(Math.round(summaryResults.usageExpenseWOTP))} WithoutTableKw={numberWithCommas(Math.round(summaryResults.usageKwWOTP))} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw)} MeasureExpense={numberWithCommas(summaryResults.measureExpense)} TariffExpense={numberWithCommas(summaryResults.tariffExpense)} TariffKw={numberWithCommas(Number(globalSetting ? globalSetting.poss_tariff_increase : 0), 1)} />
+                                <SavingEnergyCard MeasureKw={numberWithCommas(Math.round(summaryResults.measureKw))} MeasureExpense={numberWithCommas(Math.round(summaryResults.measureExpense))} TariffExpense={numberWithCommas(Math.round(summaryResults.tariffExpense))} TariffKw={numberWithCommas(Number(globalSetting ? globalSetting.poss_tariff_increase : 0), 1)} />
                             </div>
                         </div>
                         {
