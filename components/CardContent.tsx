@@ -622,8 +622,9 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     // const labels = ['10', '10.5', '11', '11.5', '12', '12.5', '13', '13.5', '14','14.5','15','15.5','16','16.5','17','17.5','18','18.5','19','19.5','20','20.5','21','21.5','22'];
     const [secondaryIntermediary, setSecondIntermediary] = React.useState<secondary_intermediary_table[]>([]);
     const [selectedEqptEnergyIndex, setSelectedEqptEnergyIndex] = React.useState(1);
-    const [selectedMonth, setSelectedMonth] = React.useState(moment().format('MM'));
-    const [selectedYear, setSelectedYear] = React.useState("2023");
+    const latestLiveDateMoment = moment(latestLiveDate, 'MM/YYYY');
+    const [selectedMonth, setSelectedMonth] = React.useState(latestLiveDateMoment.format('MM'));
+    const [selectedYear, setSelectedYear] = React.useState(latestLiveDateMoment.format('YYYY'));
     const currentMoment = moment(selectedMonth, 'DD/MM/YYYY');
     const getSecondIntermediaryQuery = gql`
     query Secondary_intermediary_tables($where: Secondary_intermediary_tableWhereInput) {
@@ -797,17 +798,6 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
             },
 
         }
-    }
-
-    //Select the month function
-
-    const handleMonthSelect = (event: any) => {
-        setSelectedMonth(event.target.value)
-    }
-
-    //Select the year function
-    const handleYearSelect = (event: any) => {
-        setSelectedYear(event.target.value)
     }
 
     const getValidDate = React.useMemo(() => {
