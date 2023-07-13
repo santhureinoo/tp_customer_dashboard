@@ -7,9 +7,9 @@ import Jumbotron from "./cardcomponents/Jumbotron";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle, faSortUp } from '@fortawesome/free-solid-svg-icons';
 import Image from "next/image";
-import ProgressiveMeter from "./cardcomponents/ProgressiveMeter";
 import BenchMarkMeter from "./cardcomponents/BenchMarkMeter";
 import Notification from "./cardcomponents/Notification";
+import { Radio } from 'antd';
 import {
     Chart as ChartJS,
     ArcElement,
@@ -45,9 +45,7 @@ import { DropdownProps, first_intermediary_table, outlet, results, secondary_int
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
 import { cloneDeep } from '@apollo/client/utilities';
-import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas, zeroPad } from '../common/helper';
-import { DatePicker } from 'antd';
-import dayjs from 'dayjs';
+import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas } from '../common/helper';
 
 // ChartJS.register(...registerablesJS);
 
@@ -131,10 +129,10 @@ const SustainPerformance = ({ total, year }: any): JSX.Element => {
                 <CardHeader Titles={['Sustainability Performance']} SubTitle={`Year to Date (${year})`} />
             </div>
             <div className="lg:grid lg:grid-cols-4 grid grid-cols-2 gap-2">
-                <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/Money_small.svg" width='50' height='50' />} />
-                <StatusCard Title={'CO2 Saved'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/CO2_small.svg" width='50' height='50' />} />
-                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 60.5))} Postfix={'trees'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/Trees_small.svg" width='50' height="50" />} />
-                <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(Math.round(total.energy * 2))} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/Meal_small.svg" width='50' height="50" />} />
+                <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings_blue.png" width='50' height='50' />} />
+                <StatusCard Title={'CO2 Saved'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.png" width='50' height='50' />} />
+                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 60.5))} Postfix={'trees'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
+                <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(Math.round(total.energy * 2))} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
                 {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
             </div>
@@ -579,29 +577,31 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     </div>
                 </div>
                 <div className='flex flex-row gap-x-2 text-xs'>
-                    <DatePicker
-                        placeholder="Select date"
-                        value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
-                        onChange={(value) => {
-                            if (value) {
-                                setSelectedMonth(zeroPad(value.month() + 1, 2));
-                                setSelectedYear(value.year().toString());
-                            }
-                        }}
-                        clearIcon={false}
-                        disabledDate={(date) => {
-                            const latestLiveDateInDayjs = dayjs(latestLiveDate, 'MM/YYYY');
-                            if (date.year() < 2022 || date.year() > 2023) {
-                                return true;
-                            } else if (date.isAfter(latestLiveDateInDayjs)) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        }}
-                        format={'MM/YYYY'}
-                        picker={'month'}
-                    ></DatePicker>
+                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[115px] p-2.5 ">
+                        {/* <option value="All">Month</option> */}
+                        {/* <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option> */}
+                        {getMonths(latestLiveDate || '', selectedYear).map(mon => {
+                            return <option key={mon.value} value={mon.value}>{mon.display}</option>
+                        })}
+                    </select>
+                    <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        {/* <option value="All">Year</option> */}
+                        {/* <option value="2020">2020</option>
+                        <option value="2021">2021</option> */}
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                    </select>
                     {/* <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
                         <option>Start Date</option>
                         <option>Start Date</option>
@@ -622,9 +622,8 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     // const labels = ['10', '10.5', '11', '11.5', '12', '12.5', '13', '13.5', '14','14.5','15','15.5','16','16.5','17','17.5','18','18.5','19','19.5','20','20.5','21','21.5','22'];
     const [secondaryIntermediary, setSecondIntermediary] = React.useState<secondary_intermediary_table[]>([]);
     const [selectedEqptEnergyIndex, setSelectedEqptEnergyIndex] = React.useState(1);
-    const latestLiveDateMoment = moment(latestLiveDate, 'MM/YYYY');
-    const [selectedMonth, setSelectedMonth] = React.useState(latestLiveDateMoment.format('MM'));
-    const [selectedYear, setSelectedYear] = React.useState(latestLiveDateMoment.format('YYYY'));
+    const [selectedMonth, setSelectedMonth] = React.useState(moment().format('MM'));
+    const [selectedYear, setSelectedYear] = React.useState("2023");
     const currentMoment = moment(selectedMonth, 'DD/MM/YYYY');
     const getSecondIntermediaryQuery = gql`
     query Secondary_intermediary_tables($where: Secondary_intermediary_tableWhereInput) {
@@ -800,6 +799,17 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
         }
     }
 
+    //Select the month function
+
+    const handleMonthSelect = (event: any) => {
+        setSelectedMonth(event.target.value)
+    }
+
+    //Select the year function
+    const handleYearSelect = (event: any) => {
+        setSelectedYear(event.target.value)
+    }
+
     const getValidDate = React.useMemo(() => {
         if (selectedMonth === 'All' && selectedYear === 'All') {
             return 'All';
@@ -822,29 +832,18 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                     <button onClick={e => { setSelectedEqptEnergyIndex(2) }} className={selectedEqptEnergyIndex === 2 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last Month</button>
     </div> */}
                 <div className='flex flex-row gap-x-2 text-xs'>
-                    <DatePicker
-                        placeholder="Select date"
-                        value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
-                        onChange={(value) => {
-                            if (value) {
-                                setSelectedMonth(zeroPad(value.month() + 1, 2));
-                                setSelectedYear(value.year().toString());
-                            }
-                        }}
-                        clearIcon={false}
-                        disabledDate={(date) => {
-                            const latestLiveDateInDayjs = dayjs(latestLiveDate, 'MM/YYYY');
-                            if (date.year() < 2022 || date.year() > 2023) {
-                                return true;
-                            } else if (date.isAfter(latestLiveDateInDayjs)) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        }}
-                        format={'MM/YYYY'}
-                        picker={'month'}
-                    ></DatePicker>
+                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                        {getMonths(latestLiveDate || '', selectedYear).map(mon => {
+                            return <option key={mon.value} value={mon.value}>{mon.display}</option>
+                        })}
+                    </select>
+                    <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        {/* <option value="All">Year</option> */}
+                        {/* <option value="2020">2020</option>
+                        <option value="2021">2021</option> */}
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                    </select>
                 </div>
 
             </div>
@@ -858,30 +857,16 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
 }
 
 const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
-    const [selectedCard, setSelectedCard] = React.useState<DropdownProps>({
-        display: <CardHeader className={'text-base'} Titles={['Savings Performance']} />,
-        value: 'savingPerformance',
-    });
-
-    const titleDropdowns: DropdownProps[] = [
-        {
-            display: <CardHeader Titles={['Savings Performance']} className={'text-base'} />,
-            value: 'savingPerformance',
-        },
-        {
-            display: <CardHeader Titles={['Eqpt. Energy Baseline']} className={'text-base'} SubTitleAlign="end" SubTitle={<span className='text-custom-subtitle'>Avg. Hourly</span>} />,
-            value: 'energyBaseline',
-        }
-    ]
+    const [selectedCard, setSelectedCard] = React.useState<string>("savingPerformance");
 
     const selectedContent = React.useMemo(() => {
-        if (selectedCard.value === "savingPerformance") return <SavingPerformance latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />;
+        if (selectedCard === "savingPerformance") return <SavingPerformance latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />;
         else return <EqptEnergyBaseline latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />
     }, [selectedCard, latestLiveDate, currentOutletID])
 
     return (
         <div className="flex flex-col gap-4">
-            <CustomizedDropDown
+            {/* <CustomizedDropDown
                 data={titleDropdowns}
                 selected={selectedCard}
                 inputType={'dropdown'}
@@ -889,7 +874,15 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element =
                 name={"titleSelection"}
                 setSelected={setSelectedCard}
                 hideBorder={true}
-            />
+            /> */}
+
+            <div className='flex flex-row gap-x-2 items-center'>
+                <Radio.Group size="large" buttonStyle="solid" onChange={((event) => { setSelectedCard(event.target.value) })} value={selectedCard}>
+                    <Radio.Button value="savingPerformance">Savings Performance</Radio.Button>
+                    <Radio.Button value="energyBaseline">Eqpt. Energy Baseline</Radio.Button>
+                </Radio.Group>
+                <FontAwesomeIcon size="2x" color='#43A4FD' className="px-2 text-xl" icon={faInfoCircle} />
+            </div>
 
             {selectedContent}
 
@@ -1109,11 +1102,11 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
         <div className="flex flex-col gap-4 h-3/6">
             <div className="flex justify-between items-baseline">
                 <CardHeader Titles={['Equipment']} className='text-sm' />
-                <select value={selectedType} onChange={((event) => { setSelectedType(event.currentTarget.value) })} className={`outline-none px-2 py-1 border-2 rounded-lg text-xs w-1/2`}>
-                    <option value="ke">Kitchen Exhaust</option>
-                    {/* <option value="ac">Air Con</option> */}
-                </select>
             </div>
+            <Radio.Group className='w-full text-extraSmall' size="small" buttonStyle="solid" onChange={((event) => { setSelectedType(event.target.value) })} value={selectedType} style={{ marginBottom: 8 }}>
+                <Radio.Button value="ke">Kitchen Exhaust</Radio.Button>
+                <Radio.Button value="ac">Air Con</Radio.Button>
+            </Radio.Group>
             <div className="2xl:grid grid gap-y-2">
                 <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={getInDecimal(renderedData.baseline, 2)} Postfix={'kW'} />
                 {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
@@ -1184,16 +1177,10 @@ interface EquipmentEnergyProps {
  */
 const EquipmentEnergy = ({ WithTableKw, WithTableExpense, WithoutTableKw, WithoutTableExpense }: EquipmentEnergyProps): JSX.Element => {
     return (
-        <div>
-            <h2 className="font-bold text-sm">
-                Equipment Energy Usage
-            </h2>
-            <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='W/O TablePointer' FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' Title='With TablePointer' FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
-            </div>
+        <div className='flex flex-row gap-2 justify-between w-full h-full' >
+            <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' PreSubTitle='W/O' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
+            <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
         </div>
-
     )
 }
 
@@ -1209,10 +1196,7 @@ interface SavingEnergyProps {
 const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: SavingEnergyProps): JSX.Element => {
     return (
         <div>
-            <h2 className="font-bold text-sm">
-                Savings
-            </h2>
-            <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
+            <div className='flex flex-row gap-2 justify-between w-full h-full' >
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
             </div>
@@ -1225,28 +1209,52 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
  */
 const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, TextColor, Icon = false, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
     return (
-        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray h-auto 2xl:h-full w-2/3 ${BgColor}`}>
+        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray ${Position !== 'vertical' ? 'justify-between gap-8' : ''} h-auto 2xl:h-full w-2/3 ${BgColor}`}>
             <div className={'flex flex-col'}>
-                <div className="flex justify-between">
-                    <h2 className="font-bold text-sm text">{Title} </h2> <FontAwesomeIcon color='#43A4FD' className="px-2 text-xl" icon={faInfoCircle} />
-                </div>
-                {/* <div className={`text-custom-blue-card-font`}>
+                {
+                    (Icon == true) ?
+                        <div className="flex">
+                            <h2 className="font-bold text-sm text">{Title} </h2> <FontAwesomeIcon className="px-2 text-xl" icon={faSortUp} />
+                        </div> :
+                        <h2 className="font-bold text-sm">
+                            {Title}
+                        </h2>
+                }
+                <div className={`text-custom-blue-card-font`}>
                     <span className={`font-bold text-sm mr-2`}>{PreSubTitle}</span>
                     <span className={`text-sm font-thin`}>{PostSubTitle}</span>
-                </div> */}
-            </div>
-            <div className='flex flex-col justify-between mt-2'>
-                <div>
-                    {FirstPrefix && <span className={`font-bold text-3xl ${TextColor}`}>{FirstPrefix}</span>}
-                    <span className={`font-bold text-3xl ${TextColor}`}>{FirstValue}</span>
-                    {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
-                </div>
-                <div>
-                    {SecondPrefix && <span className={`font-bold text-3xl ${TextColor}`}>{SecondPrefix}</span>}
-                    <span className={`font-bold text-3xl ${TextColor}`}>{SecondValue}</span>
-                    {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
                 </div>
             </div>
+            {
+                (Position == 'vertical') ?
+                    <div className='flex flex-col gap-5 relative'>
+                        <div className="text-left">
+                            {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
+                            <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
+                            {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
+                        </div>
+                        <svg className="absolute left-0 right-0 mx-auto" width="44" height="80" viewBox="0 0 44 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <line y1="-0.25" x2="118.955" y2="-0.25" transform="matrix(0.359554 -0.933124 0.860639 0.509216 0.714844 112)" stroke="#999999" strokeWidth="0.5" />
+                        </svg>
+                        <div className="text-right">
+                            {SecondPrefix && <span className={`font-bold text-xl ${TextColor}`}>{SecondPrefix}</span>}
+                            <span className={`font-bold text-xl ${TextColor}`}>{SecondValue}</span>
+                            {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
+                        </div>
+                    </div> :
+                    <div className='flex flex-row justify-between mt-4'>
+                        <div>
+                            {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
+                            <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
+                            {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
+                        </div>
+                        <div>
+                            {SecondPrefix && <span className={`font-bold text-xl ${TextColor}`}>{SecondPrefix}</span>}
+                            <span className={`font-bold text-xl ${TextColor}`}>{SecondValue}</span>
+                            {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
+                        </div>
+                    </div>
+            }
 
         </div>
     )
