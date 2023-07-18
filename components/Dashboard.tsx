@@ -684,6 +684,17 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
     }, [currentOutlet]);
 
+    const getEqptCard = React.useMemo(() => {
+        if (currentOutlet && currentOutlet.outlet_device_ac_input && currentOutlet.outlet_device_ac_input.length > 0
+            && currentOutlet.outlet_device_ex_fa_input && currentOutlet.outlet_device_ex_fa_input.length > 0) {
+            return <div>
+                <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
+            </div>
+        } else {
+            return <></>
+        }
+    }, [currentOutlet])
+
     const getHeaderBreadCrumb = React.useMemo(() => {
         return (<h3 className="text-gray-700 text-sm font-bold">
             <div className="flex items-center">
@@ -766,9 +777,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                 <div>
                                                     <BenchMarkComparisonCard totalKWHs={totalKWHs} />
                                                 </div>
-                                                <div>
-                                                    <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
-                                                </div>
+                                                {getEqptCard}
                                                 <div>
                                                     <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(totalKWHs.LastAvailTariff || '0'), 4)}`} valueColor={'custom-blue-card-font'} />
                                                 </div>
@@ -815,7 +824,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                             setSelectedMonth(zeroPad(value.month() + 1, 2));
                                             setSelectedYear(value.year().toString());
                                         }
-                                    }}   
+                                    }}
                                     clearIcon={false}
                                     disabledDate={(date) => {
                                         const latestLiveDateInDayjs = dayjs(lastestLiveDate, 'MM/YYYY');

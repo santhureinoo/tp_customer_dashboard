@@ -873,7 +873,7 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element =
                     <Radio.Button value="savingPerformance">Savings Performance</Radio.Button>
                     <Radio.Button value="energyBaseline">Eqpt. Energy Baseline</Radio.Button>
                 </Radio.Group>
-                <FontAwesomeIcon size="2x" color='#43A4FD' className="px-2 text-xl" icon={faInfoCircle} />
+                <FontAwesomeIcon  color='#43A4FD' className="px-2 text-[25px]" icon={faInfoCircle} />
             </div>
 
             {selectedContent}
