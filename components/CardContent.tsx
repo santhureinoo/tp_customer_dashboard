@@ -47,6 +47,7 @@ import moment from 'moment';
 import { cloneDeep } from '@apollo/client/utilities';
 import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas, zeroPad } from '../common/helper';
 import dayjs from 'dayjs';
+import { number } from 'superstruct';
 
 // ChartJS.register(...registerablesJS);
 
@@ -228,10 +229,17 @@ interface Props {
 export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     const [firstIntermediaryData, setFirstIntermediaryData] = React.useState<first_intermediary_table[]>([]);
     const [selectedSavingPerformanceIndex, setSelectedSavingPerformanceIndex] = React.useState(1);
-    const currentMoment = moment(latestLiveDate, 'MM/YYYY');
     const [selectedTab, setSelectedTab] = React.useState<'kwh' | 'saving'>('kwh');
+    const currentMoment = moment(latestLiveDate, 'MM/YYYY');
     const [selectedMonth, setSelectedMonth] = React.useState(currentMoment.format('MM'));
     const [selectedYear, setSelectedYear] = React.useState(currentMoment.format('YYYY'));
+    const [measuredSavings, setMeasuredSavings] = React.useState<{
+        measuredSavingsExpense: number,
+        measuredSavingsKwh: number,
+    }>({
+        measuredSavingsExpense: 0,
+        measuredSavingsKwh: 0,
+    });
     const getFirstIntermediaryQuery = gql`
     query First_intermediary_tables($where: First_intermediary_tableWhereInput) {
         first_intermediary_tables(where: $where) {
@@ -258,7 +266,16 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
       }
     `;
 
+    const getFindManyResultsQuery = gql`
+        query FindManyResults($where: ResultsWhereInput) {
+            findManyResults(where: $where) {
+            outlet_measured_savings_kWh
+            outlet_measured_savings_expenses
+        }
+    }`;
+
     const getFirstIntermediaryResult = useLazyQuery(getFirstIntermediaryQuery);
+    const getFindManyresultsResult = useLazyQuery(getFindManyResultsQuery);
 
     const getLastSevenDays = (currentMoment: moment.Moment): moment.Moment[] => {
         const momentDaysArray: moment.Moment[] = [];
@@ -295,76 +312,15 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     }
                 }
             };
-            // switch (selectedSavingPerformanceIndex) {
-            //     case 0: variable = {
-            //         "variables": {
-            //             "where": {
-            //                 "AND": [
-            //                     {
-            //                         "outlet_month_year": {
-            //                             "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
-            //                         },
-            //                         "outlet_id": {
-            //                             "equals": parseInt(currentOutletID)
-            //                         }
-            //                     }
-            //                 ],
-
-            //                 // "outlet_id": {
-            //                 //     "equals": parseInt(currentOutletID)
-            //                 // }
-
-            //             }
-            //         }
-            //     }; break;
-            //     case 1: variable = {
-            //         "variables": {
-            //             "where": {
-            //                 "AND": [
-            //                     {
-            //                         "outlet_month_year": {
-            //                             "equals": currentMoment.format("MM/YYYY")
-            //                         },
-            //                         "outlet_id": {
-            //                             "equals": parseInt(currentOutletID)
-            //                         }
-            //                     }
-            //                 ],
-
-            //                 // "outlet_id": {
-            //                 //     "equals": parseInt(currentOutletID)
-            //                 // }
-
-            //             }
-            //         }
-            //     }; break;
-            //     default: variable = {
-            //         "variables": {
-            //             "where": {
-            //                 "AND": [
-            //                     {
-            //                         "OR": getLastSevenDays(currentMoment).map(mom => {
-            //                             return {
-            //                                 "outlet_month_year": {
-            //                                     "equals": mom.format("MM/YYYY")
-            //                                 },
-            //                                 "day_of_month": {
-            //                                     "equals": mom.format("D")
-            //                                 }
-            //                             }
-            //                         }),
-            //                         "outlet_id": {
-            //                             "equals": parseInt(currentOutletID)
-            //                         }
-            //                     }
-            //                 ]
-            //             }
-            //         }
-            //     }; break;
-            // }
         }
         return variable;
     }, [currentOutletID, latestLiveDate, selectedSavingPerformanceIndex]);
+
+    React.useEffect(() => {
+        const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+        setSelectedMonth(currentMoment.format('MM'));
+        setSelectedYear(currentMoment.format('YYYY'));
+    }, [latestLiveDate]);
 
     React.useEffect(() => {
         if (currentOutletID) {
@@ -392,8 +348,47 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     setFirstIntermediaryData(sortDat);
                 }
             });
+
+            getFindManyresultsResult[0]({
+                "variables": {
+                    "where": {
+                        "AND": [
+                            {
+                                "outlet_date": {
+                                    "contains": dateValueForQuery(selectedMonth, selectedYear)
+                                },
+                                "outlet_id": {
+                                    "equals": parseInt(currentOutletID)
+                                }
+                            }
+                        ],
+                    }
+                }
+            }).then(
+                result => {
+                    if (result.data && result.data.findManyResults) {
+                        const cloned_results: any[] = cloneDeep(result.data.findManyResults);
+                        const totalMeasuredSaving = cloned_results.reduce((pv, cv) => {
+                            console.log(cv);
+                            pv.measuredSavingsKwh = getInDecimal(Number(cv.outlet_measured_savings_kWh) + Number(pv.measuredSavingsKwh));
+                            pv.measuredSavingsExpense = getInDecimal(Number(cv.outlet_measured_savings_expenses) + Number(pv.measuredSavingsExpense));
+
+                            return pv;
+                        }, {
+                            measuredSavingsExpense: 0,
+                            measuredSavingsKwh: 0,
+                        });
+                        console.log(totalMeasuredSaving);
+                        setMeasuredSavings(totalMeasuredSaving);
+                    }
+                }
+            )
         } else {
             setFirstIntermediaryData([]);
+            setMeasuredSavings({
+                measuredSavingsExpense: 0,
+                measuredSavingsKwh: 0,
+            })
         }
 
     }, [currentOutletID, selectedSavingPerformanceIndex, selectedMonth, selectedYear]);
@@ -451,43 +446,6 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     barThickness: 15,
                     order: 2,
                 },
-                // {
-                //     type: 'line' as const,
-                //     label: 'KE Saving Expenses',
-                //     lineTension: 0,
-                //     borderColor: 'rgb(255, 99, 132)',
-                //     borderWidth: 2,
-                //     // fill: true,
-                //     // backgroundColor: (context: ScriptableContext<"line">) => {
-                //     //     const ctx = context.chart.ctx;
-                //     //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                //     //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
-                //     //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
-                //     //     return gradient;
-                //     // },
-                //     backgroundColor: 'transparent',
-                //     data: firstIntermediaryData.map(data => Math.round(parseInt(data.ke_savings_expenses || "0"))),
-                // },
-                // {
-                //     type: 'line' as const,
-                //     label: 'AC Saving Expenses',
-                //     lineTension: 0,
-                //     borderColor: 'rgb(96 165 250)',
-                //     borderWidth: 2,
-                //     // fill: true,
-                //     backgroundColor: 'transparent',
-                //     data: firstIntermediaryData.map(data => Math.round(parseInt(data.ac_savings_expenses || "0"))),
-                // },
-                // {
-                //     type: 'line' as const,
-                //     label: 'Total Saving Expenses',
-                //     lineTension: 0,
-                //     borderColor: 'rgb(191 219 254)',
-                //     borderWidth: 2,
-                //     // fill: true,
-                //     backgroundColor: 'transparent',
-                //     data: firstIntermediaryData.map(data => Math.round(parseInt(data.total_savings_expenses || "0"))),
-                // }
             ]
         }
     }, [selectedTab, firstIntermediaryData]);
@@ -550,24 +508,26 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
         }
     }
 
-    //Select the month function
-
-    const handleMonthSelect = (event: any) => {
-        setSelectedMonth(event.target.value)
-    }
-
-    //Select the year function
-    const handleYearSelect = (event: any) => {
-        setSelectedYear(event.target.value)
-    }
-
     return (
         <div className="flex flex-col gap-4 px-4">
             <div className="flex justify-between items-baseline">
-                <div className='flex flex-row gap-x-2 text-xs font-extrabold text-custom-gray my-4'>
-                    {/* <button onClick={e => { setSelectedSavingPerformanceIndex(0) }} className={`${selectedSavingPerformanceIndex === 0 ? 'active-sp ' : ''}p-2`}>Last 3 Months</button>
-                    <button onClick={e => { setSelectedSavingPerformanceIndex(1) }} className={`${selectedSavingPerformanceIndex === 1 ? 'active-sp ' : ''}p-2`}>Last Month</button>
-                    <button onClick={e => { setSelectedSavingPerformanceIndex(2) }} className={`${selectedSavingPerformanceIndex === 2 ? 'active-sp ' : ''}p-2`}>Last Week</button> */}
+                <div className='flex flex-row gap-x-2 my-4'>
+                    <div className='flex flex-col'>
+                        <CardHeader Titles={['Savings Meter']} />
+                        <div className='flex flex-row items-baseline'>
+                            <div className='mr-4'>
+                                <span className="font-bold text-3xl text-custom-blue-card-font">{measuredSavings?.measuredSavingsKwh}</span>
+                                <sub className="text-extra-small text-custom-blue-card-font font-thin mr-1">kWh</sub>
+                            </div>
+
+                            <span className="font-bold text-3xl text-custom-blue-card-font">${measuredSavings?.measuredSavingsExpense}</span>
+                        </div>
+                    </div>
+
+                    {/* <h2>{measuredSavings?.measuredSavingsExpense}</h2>
+                    <h2>{measuredSavings?.measuredSavingsKwh}</h2> */}
+                </div>
+                <div className='flex flex-row gap-x-2 text-xs'>
                     <div className="grid grid-cols-2">
                         <button onClick={(e) => { setSelectedTab('kwh'); }} className={selectedTab === 'kwh' ? "bg-custom-lightblue text-custom-darkblue rounded-r-none rounded-l-lg px-4 py-4" : "bg-gray-100 rounded-r-none rounded-lg px-4 py-4"}>
                             kWh
@@ -576,9 +536,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                             $
                         </button>
                     </div>
-                </div>
-                <div className='flex flex-row gap-x-2 text-xs'>
-                    <DatePicker
+                    {/* <DatePicker
                         placeholder="Select date"
                         value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
                         onChange={(value) => {
@@ -600,7 +558,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                         }}
                         format={'MM/YYYY'}
                         picker={'month'}
-                    ></DatePicker>
+                    ></DatePicker> */}
                 </div>
 
             </div>
@@ -708,6 +666,12 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
         }
     }, [currentOutletID, selectedMonth, selectedYear, selectedEqptEnergyIndex])
 
+    React.useEffect(() => {
+        const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+        setSelectedMonth(currentMoment.format('MM'));
+        setSelectedYear(currentMoment.format('YYYY'));
+    }, [latestLiveDate]);
+
     const labels = React.useMemo(() => {
         return secondaryIntermediary.map(data => {
             if (data.time) {
@@ -812,7 +776,74 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                     <button onClick={e => { setSelectedEqptEnergyIndex(1) }} className={selectedEqptEnergyIndex === 1 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last 3 Months</button>
                     <button onClick={e => { setSelectedEqptEnergyIndex(2) }} className={selectedEqptEnergyIndex === 2 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last Month</button>
     </div> */}
-                <div className='flex flex-row gap-x-2 text-xs'>
+                {/* <div className='flex flex-row gap-x-2 text-xs'>
+                    <DatePicker
+                        placeholder="Select date"
+                        value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
+                        onChange={(value) => {
+                            if (value) {
+                                setSelectedMonth(zeroPad(value.month() + 1, 2));
+                                setSelectedYear(value.year().toString());
+                            }
+                        }}
+                        clearIcon={false}
+                        disabledDate={(date) => {
+                            const latestLiveDateInDayjs = dayjs(latestLiveDate, 'MM/YYYY');
+                            if (date.year() < 2022 || date.year() > 2023) {
+                                return true;
+                            } else if (date.isAfter(latestLiveDateInDayjs)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }}
+                        format={'MM/YYYY'}
+                        picker={'month'}
+                    ></DatePicker>
+                </div> */}
+
+            </div>
+            <div className='flex flex-col'>
+                <Chart type='scatter' data={data()} options={option} />
+                <span className='text-custom-gray self-end'>Valid as of {getValidDate}</span>
+                <span className='text-custom-gray text-custom-subtitle w-2/3  px-4'>Eqpt. Energy Baseline represents the equipment energy usage over a typical hour without TablePointer, and is continuously and dynamically sampled for statistical best-averaging to ensure validity of time</span>
+            </div>
+        </div>
+    )
+}
+
+const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
+    const [selectedCard, setSelectedCard] = React.useState<string>("savingPerformance");
+    const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+    const [selectedMonth, setSelectedMonth] = React.useState(currentMoment.format('MM'));
+    const [selectedYear, setSelectedYear] = React.useState(currentMoment.format('YYYY'));
+
+    const selectedContent = React.useMemo(() => {
+        if (selectedCard === "savingPerformance") return <SavingPerformance latestLiveDate={moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY')} currentOutletID={currentOutletID} />;
+        else return <EqptEnergyBaseline latestLiveDate={moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY')} currentOutletID={currentOutletID} />
+    }, [selectedCard, latestLiveDate, currentOutletID, selectedMonth, selectedYear])
+
+    return (
+        <div className="flex flex-col gap-4">
+            {/* <CustomizedDropDown
+                data={titleDropdowns}
+                selected={selectedCard}
+                inputType={'dropdown'}
+                hidePrefixIcons={true}
+                name={"titleSelection"}
+                setSelected={setSelectedCard}
+                hideBorder={true}
+            /> */}
+
+            <div className='flex flex-row gap-x-2 items-center justify-between'>
+                <div>
+                    <Radio.Group size="large" buttonStyle="solid" onChange={((event) => { setSelectedCard(event.target.value) })} value={selectedCard}>
+                        <Radio.Button value="savingPerformance">Savings Performance</Radio.Button>
+                        <Radio.Button value="energyBaseline">Eqpt. Energy Baseline</Radio.Button>
+                    </Radio.Group>
+                    <FontAwesomeIcon color='#43A4FD' className="px-2 text-[25px]" icon={faInfoCircle} />
+                </div>
+                <div>
                     <DatePicker
                         placeholder="Select date"
                         value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
@@ -838,42 +869,6 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                     ></DatePicker>
                 </div>
 
-            </div>
-            <div className='flex flex-col'>
-                <Chart type='scatter' data={data()} options={option} />
-                <span className='text-custom-gray self-end'>Valid as of {getValidDate}</span>
-                <span className='text-custom-gray text-custom-subtitle w-2/3  px-4'>Eqpt. Energy Baseline represents the equipment energy usage over a typical hour without TablePointer, and is continuously and dynamically sampled for statistical best-averaging to ensure validity of time</span>
-            </div>
-        </div>
-    )
-}
-
-const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
-    const [selectedCard, setSelectedCard] = React.useState<string>("savingPerformance");
-
-    const selectedContent = React.useMemo(() => {
-        if (selectedCard === "savingPerformance") return <SavingPerformance latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />;
-        else return <EqptEnergyBaseline latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />
-    }, [selectedCard, latestLiveDate, currentOutletID])
-
-    return (
-        <div className="flex flex-col gap-4">
-            {/* <CustomizedDropDown
-                data={titleDropdowns}
-                selected={selectedCard}
-                inputType={'dropdown'}
-                hidePrefixIcons={true}
-                name={"titleSelection"}
-                setSelected={setSelectedCard}
-                hideBorder={true}
-            /> */}
-
-            <div className='flex flex-row gap-x-2 items-center'>
-                <Radio.Group size="large" buttonStyle="solid" onChange={((event) => { setSelectedCard(event.target.value) })} value={selectedCard}>
-                    <Radio.Button value="savingPerformance">Savings Performance</Radio.Button>
-                    <Radio.Button value="energyBaseline">Eqpt. Energy Baseline</Radio.Button>
-                </Radio.Group>
-                <FontAwesomeIcon  color='#43A4FD' className="px-2 text-[25px]" icon={faInfoCircle} />
             </div>
 
             {selectedContent}
