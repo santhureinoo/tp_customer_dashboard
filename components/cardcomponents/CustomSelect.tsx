@@ -3,7 +3,6 @@ import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AutoComplete, Input } from "antd";
 import React from "react";
-import { unknown } from "superstruct";
 import { DropdownProps } from "../../common/types";
 
 interface Props {

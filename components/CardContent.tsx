@@ -48,6 +48,7 @@ import { cloneDeep } from '@apollo/client/utilities';
 import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas, zeroPad } from '../common/helper';
 import dayjs from 'dayjs';
 import { number } from 'superstruct';
+import TooltipIcon from './cardcomponents/TooltipIcon';
 
 // ChartJS.register(...registerablesJS);
 
@@ -127,8 +128,9 @@ const SustainPerformance = ({ total, year }: any): JSX.Element => {
 
     return (
         <div className="flex flex-col gap-4 h-full">
-            <div className="flex justify-between items-baseline">
+            <div className="flex items-center">
                 <CardHeader Titles={['Sustainability Performance']} SubTitle={`Year to Date (${year})`} />
+                <TooltipIcon text={`Total Savings Performance this year`}></TooltipIcon>
             </div>
             <div className="lg:grid lg:grid-cols-4 grid grid-cols-2 gap-2">
                 <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/Money_small.svg" width='50' height='50' />} />
@@ -202,7 +204,11 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
 
     return (
         <div className="flex flex-col gap-4">
-            <CardHeader Titles={['Benchmark Comparison']} SubTitle={"vs. Industry Peer"} />
+            <div className='flex flex-row px-2 items-center'>
+                <CardHeader Titles={['Benchmark Comparison']} SubTitle={"vs. Industry Peer"} />
+                <TooltipIcon text={`Comparison of the highest/lowestand previous month’s consumption`}></TooltipIcon>
+            </div>
+
             <div className="h-full">
                 {getBMM}
             </div>
@@ -228,7 +234,6 @@ interface Props {
 
 export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     const [firstIntermediaryData, setFirstIntermediaryData] = React.useState<first_intermediary_table[]>([]);
-    const [selectedSavingPerformanceIndex, setSelectedSavingPerformanceIndex] = React.useState(1);
     const [selectedTab, setSelectedTab] = React.useState<'kwh' | 'saving'>('kwh');
     const currentMoment = moment(latestLiveDate, 'MM/YYYY');
     const [selectedMonth, setSelectedMonth] = React.useState(currentMoment.format('MM'));
@@ -314,7 +319,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
             };
         }
         return variable;
-    }, [currentOutletID, latestLiveDate, selectedSavingPerformanceIndex]);
+    }, [currentOutletID, latestLiveDate]);
 
     React.useEffect(() => {
         const currentMoment = moment(latestLiveDate, 'MM/YYYY');
@@ -345,6 +350,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     const sortDat = cloned_first_intermediary_tables.sort(function (left: any, right: any) {
                         return moment(left.day_of_month + "/" + left.outlet_month_year, "DD/MM/YYYY").diff(moment(right.day_of_month + "/" + right.outlet_month_year, "DD/MM/YYYY"));
                     });
+                    console.log(sortDat);
                     setFirstIntermediaryData(sortDat);
                 }
             });
@@ -391,7 +397,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
             })
         }
 
-    }, [currentOutletID, selectedSavingPerformanceIndex, selectedMonth, selectedYear]);
+    }, [currentOutletID, selectedMonth, selectedYear]);
 
     const getChartData = React.useMemo(() => {
         if (selectedTab === 'kwh') {
@@ -413,7 +419,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     label: 'Measured Savings',
                     backgroundColor: 'rgb(191 219 254)',
                     data: firstIntermediaryData.map(data => {
-                        return getInDecimal(parseFloat(data.all_eqpt_without_TP_kWh || "0") - parseFloat(data.all_eqpt_with_TP_kWh || "0"));
+                        return (getInDecimal(parseFloat(data.all_eqpt_without_TP_kWh || "0")) - getInDecimal(parseFloat(data.all_eqpt_with_TP_kWh || "0")));
                     }),
                     barThickness: 15,
                     order: 3,
@@ -823,6 +829,11 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element =
         else return <EqptEnergyBaseline latestLiveDate={moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY')} currentOutletID={currentOutletID} />
     }, [selectedCard, latestLiveDate, currentOutletID, selectedMonth, selectedYear])
 
+    const getTooltip = React.useMemo(() => {
+        if (selectedCard === 'savingPerformance') return <TooltipIcon text='Energy consumption with and without Tablepointer'></TooltipIcon>
+        else return <TooltipIcon text={`Represents the individual equipment's energy usagewithout TablePointer over a typical hour for statistical best-fit averaging,and is continuously and dynamically sampled to ensure its validity over time`}></TooltipIcon>
+    }, [selectedCard])
+
     return (
         <div className="flex flex-col gap-4">
             {/* <CustomizedDropDown
@@ -836,12 +847,12 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element =
             /> */}
 
             <div className='flex flex-row gap-x-2 items-center justify-between'>
-                <div>
+                <div className='flex items-center'>
                     <Radio.Group size="large" buttonStyle="solid" onChange={((event) => { setSelectedCard(event.target.value) })} value={selectedCard}>
                         <Radio.Button value="savingPerformance">Savings Performance</Radio.Button>
                         <Radio.Button value="energyBaseline">Eqpt. Energy Baseline</Radio.Button>
                     </Radio.Group>
-                    <FontAwesomeIcon color='#43A4FD' className="px-2 text-[25px]" icon={faInfoCircle} />
+                    {getTooltip}
                 </div>
                 <div>
                     <DatePicker
@@ -1108,11 +1119,14 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
     )
 }
 
-const ValueFirst = ({ title, subTitle, value, valueColor }: any): JSX.Element => {
+const ValueFirst = ({ title, tooltip, subTitle, value, valueColor }: any): JSX.Element => {
     return (
         <div className="flex flex-col gap-y-2">
             <div>
-                <CardHeader Titles={[title]} />
+                <div className='flex flex-row'>
+                    <CardHeader Titles={[title]} />
+                    {tooltip && <TooltipIcon text={tooltip}></TooltipIcon>}
+                </div>
                 <span className="text-sm text-custom-gray font-thin self-start">{subTitle}</span>
                 {/* <span className='text-custom-gray'>As of <span className="text-custom-darkblue">{subTitle}</span></span> */}
             </div>
@@ -1138,9 +1152,8 @@ const LiveOutlet = ({ Value }: any): JSX.Element => {
     )
 }
 interface UsageCardProps {
-    Title?: String,
-    PreSubTitle?: String,
-    PostSubTitle?: any,
+    Title?: string,
+    TooltipText?: string,
     FirstPrefix?: any,
     FirstValue?: any,
     FirstPostfix?: any,
@@ -1169,8 +1182,8 @@ const EquipmentEnergy = ({ WithTableKw, WithTableExpense, WithoutTableKw, Withou
                 Equipment Energy Usage
             </h2>
             <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='W/O TablePointer' FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' Title='With TablePointer' FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='W/O TablePointer' TooltipText={`Amount of energy your equipment will consumewithout TablePointer's solution`} FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' Title='With TablePointer' TooltipText={`Amount of energy your equipment consumedwith TablePointer's solution`} FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
             </div>
         </div>
     )
@@ -1193,8 +1206,8 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
                 Savings
             </h2>
             <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' TooltipText={`Σ (Equipment Energy Usage Without TablePointer - Equipment Energy Usage With TablePointer) timeAutomatically measured when the individualequipment is in use by the outlet andenergy saving happensSavings Co-share Invoicing is based on MeasuredEnergy Savings and the Last Available Tariff`} FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' TooltipText={`The amount of savings generated assumingat the regulated tariff rate as provided by the Energy Market Authority`} FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
             </div>
         </div>
     )
@@ -1203,7 +1216,7 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
 /**
  * Usage Card
  */
-const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, TextColor, Icon = false, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
+const UsageCard = ({ Title, TooltipText, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, TextColor, Icon = false, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
     return (
         <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray h-auto 2xl:h-full w-2/3 ${BgColor}`}>
             {/* <div className={'flex flex-col'}>
@@ -1222,7 +1235,7 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
                 </div>
             </div> */}
             <div className="flex justify-between">
-                <h2 className="font-bold text-sm text">{Title} </h2> <FontAwesomeIcon color='#43A4FD' className="px-2 text-xl" icon={faInfoCircle} />
+                <h2 className="font-bold text-sm text">{Title} </h2> {TooltipText && <TooltipIcon text={TooltipText}></TooltipIcon>}
             </div>
             <div className='flex flex-col justify-between mt-2'>
                 <div>

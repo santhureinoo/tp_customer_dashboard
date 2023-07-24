@@ -72,6 +72,14 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
       }`;
 
+    const getOutletsBelongToCustomerQuery = gql`
+    query Outlets($where: OutletWhereInput) {
+        outlets(where: $where) {
+            outlet_id
+        }
+      }`;
+
+
 
     const getFindFirstLastestReportDateQuery = gql`
     query FindFirstLastest_report_date {
@@ -157,51 +165,17 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }
 
-    const getOutletsBySelectedDateVariable = {
+    const getOutletsBelongToCustomerVariable = {
         "variables": {
             "where": {
-                "outlet_date": {
-                    "contains": `${selectedMonth}/${selectedYear}`
-                }
-            },
-            "where2": {
-                "outlet_date": {
-                    "contains": `${selectedMonth}/${selectedYear}`
-                }
-            },
-            "where3": {
-                "outlet_month_year": {
-                    "equals": `${selectedMonth}/${selectedYear}`
-                },
-                "day_of_month": {
-                    "equals": '1'
+                "customer_id": {
+                    "equals": groupId
                 }
             }
         }
-    };
+    }
 
-    const getOutletsByLatestDateVariable = {
-        "variables": {
-            "where": {
-                "outlet_date": {
-                    "contains": lastestLiveDate
-                }
-            },
-            "where2": {
-                "outlet_date": {
-                    "contains": lastestLiveDate
-                }
-            },
-            "where3": {
-                "outlet_month_year": {
-                    "equals": lastestLiveDate
-                },
-                "day_of_month": {
-                    "equals": '1'
-                }
-            }
-        }
-    };
+
     //summary results query and variable
     const findFirstGroupSummaryVariable = {
         "variables": {
@@ -279,6 +253,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
       }`
 
     const getSummaryResult = useQuery(findFirstGroupSummaryQuery, findFirstGroupSummaryVariable);
+    const getOutletsBelongToCustomerResult = useQuery(getOutletsBelongToCustomerQuery, getOutletsBelongToCustomerVariable);
     const getGlobalInputResult = useQuery(getGlobalInputQuery, getGlobalInputVariable);
 
     //useEffect hook for summary result 
@@ -581,8 +556,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [getOutletResult.data]);
 
-    const getOutletsByIdResult = useQuery(getOutletsBySelectedDateQuery, getOutletsBySelectedDateVariable);
-    const getLatestOutletsResult = useQuery(getOutletsBySelectedDateQuery, getOutletsByLatestDateVariable);
+    const getOutletsByIdResult = useLazyQuery(getOutletsBySelectedDateQuery);
+    const getLatestOutletsResult = useLazyQuery(getOutletsBySelectedDateQuery);
     const getFindFirstLastestReportDateResult = useQuery(getFindFirstLastestReportDateQuery);
 
     React.useEffect(() => {
@@ -619,37 +594,96 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [lastestLiveDate])
 
-    React.useEffect(() => {
-        if (getOutletsByIdResult.data && getOutletsByIdResult.data.outlet_months) {
-            const currentOutlets: outlet[] = [];
-            const outletmonths: outlet_month[] | undefined = getOutletsByIdResult.data.outlet_months;
-            if (outletmonths) {
-                outletmonths.forEach(month => {
-                    month.outlet && currentOutlets.push(month.outlet);
-                })
-            }
-            // Ping
-            setOutlets(currentOutlets);
-        } else {
-            setOutlets([]);
-        }
-    }, [getOutletsByIdResult.data])
+    // React.useEffect(() => {
+
+    // }, [getOutletsByIdResult.data])
 
     React.useEffect(() => {
-        if (getLatestOutletsResult.data && getLatestOutletsResult.data.outlet_months) {
+        if (getOutletsBelongToCustomerResult.data && getOutletsBelongToCustomerResult.data.outlets) {
             const currentOutlets: outlet[] = [];
-            const outletmonths: outlet_month[] | undefined = getLatestOutletsResult.data.outlet_months;
-            if (outletmonths) {
-                outletmonths.forEach(month => {
-                    month.outlet && currentOutlets.push(month.outlet);
-                })
-            }
-            // Ping
-            setLatestOutlets(currentOutlets);
+            const associatedOutlets: outlet[] = getOutletsBelongToCustomerResult.data.outlets;
+            getOutletsByIdResult[0]({
+                "variables": {
+                    "where": {
+                        "outlet_date": {
+                            "contains": `${selectedMonth}/${selectedYear}`
+                        },
+                        "outlet_outlet_id": {
+                            "in": associatedOutlets.map(out => out.outlet_id)
+                        }
+                    },
+                    "where2": {
+                        "outlet_date": {
+                            "contains": `${selectedMonth}/${selectedYear}`
+                        }
+                    },
+                    "where3": {
+                        "outlet_month_year": {
+                            "equals": `${selectedMonth}/${selectedYear}`
+                        },
+                        "day_of_month": {
+                            "equals": '1'
+                        }
+                    }
+                }
+            }).then(res => {
+                if (res.data && res.data.outlet_months) {
+                    const currentOutlets: outlet[] = [];
+                    const outletmonths: outlet_month[] | undefined = res.data.outlet_months;
+                    if (outletmonths) {
+                        outletmonths.forEach(month => {
+                            month.outlet && currentOutlets.push(month.outlet);
+                        })
+                    }
+                    // Ping
+                    setOutlets(currentOutlets);
+                } else {
+                    setOutlets([]);
+                }
+            })
+            getLatestOutletsResult[0]({
+                "variables": {
+                    "where": {
+                        "outlet_date": {
+                            "contains": lastestLiveDate
+                        },
+                        "outlet_outlet_id": {
+                            "in": associatedOutlets.map(out => out.outlet_id)
+                        }
+                    },
+                    "where2": {
+                        "outlet_date": {
+                            "contains": lastestLiveDate
+                        }
+                    },
+                    "where3": {
+                        "outlet_month_year": {
+                            "equals": lastestLiveDate
+                        },
+                        "day_of_month": {
+                            "equals": '1'
+                        }
+                    }
+                }
+            }).then(getLatestOutletsResult => {
+                if (getLatestOutletsResult.data && getLatestOutletsResult.data.outlet_months) {
+                    const outletmonths: outlet_month[] | undefined = getLatestOutletsResult.data.outlet_months;
+                    if (outletmonths) {
+                        outletmonths.forEach(month => {
+                            month.outlet && currentOutlets.push(month.outlet);
+                        })
+                    }
+                    // Ping
+                    setLatestOutlets(currentOutlets);
+                }
+                else {
+                    setLatestOutlets([]);
+                }
+            })
         } else {
             setLatestOutlets([]);
         }
-    }, [getLatestOutletsResult.data])
+    }, [getOutletsBelongToCustomerResult.data])
 
     React.useEffect(() => {
         const customerstring = localStorage.getItem('customer');
@@ -779,10 +813,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                 </div>
                                                 {getEqptCard}
                                                 <div>
-                                                    <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(totalKWHs.LastAvailTariff || '0'), 4)}`} valueColor={'custom-blue-card-font'} />
+                                                    <ValueFirstCard tooltip={`Last Tariff rate from Energy Market Authority`} title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(totalKWHs.LastAvailTariff || '0'), 4)}`} valueColor={'custom-blue-card-font'} />
                                                 </div>
                                                 <div>
-                                                    <ValueFirstCard title={'Savings @ Tariff Increase'} subTitle={`$${numberWithCommas(parseFloat(globalSetting?.poss_tariff_increase || '0.00'), 4)}`} value={`$${numberWithCommas(totalKWHs.SavingTariff, 2)}`} valueColor={'custom-green-card-font'} />
+                                                    <ValueFirstCard tooltip={`The amount of savings generated assumingat the regulated tariff rate as provided by the Energy Market Authority`} title={'Savings @ Tariff Increase'} subTitle={`$${numberWithCommas(parseFloat(globalSetting?.poss_tariff_increase || '0.00'), 4)}`} value={`$${numberWithCommas(totalKWHs.SavingTariff, 2)}`} valueColor={'custom-green-card-font'} />
                                                 </div>
                                             </div>
                                             {/* <div>
