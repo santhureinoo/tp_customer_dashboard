@@ -3,7 +3,7 @@ import { dateValueForQuery, getMonths, numberWithCommas, zeroPad } from '../comm
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
-import { customer, global_input, group, invoice, outlet, outlet_month, results } from "../common/types";
+import { customer, global_input, group, invoice, outlet, outlet_month, reports, results } from "../common/types";
 import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, EquipmentEnergyCard, LiveOutletCard, RankAndOutletCard, RemarksCard, SavingEnergyCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard, ValueFirstCard, YearlyEnergyCard } from "./CardContent";
 import ClientOnly from "./ClientOnly";
 import { v4 as uuidv4 } from 'uuid';
@@ -73,9 +73,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
       }`;
 
     const getOutletsBelongToCustomerQuery = gql`
-    query Outlets($where: OutletWhereInput) {
-        outlets(where: $where) {
-            outlet_id
+    query FindFirstReports($where: ReportsWhereInput) {
+        findFirstReports(where: $where) {
+          outlet_ids
+          group_id
         }
       }`;
 
@@ -165,15 +166,28 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }
 
-    const getOutletsBelongToCustomerVariable = {
-        "variables": {
-            "where": {
-                "customer_id": {
-                    "equals": groupId
+    const getOutletsBelongToCustomerVariable =React.useMemo(()=>{
+        if(lastestLiveDate) {
+            return {
+                "variables": {
+                    "where": {
+                        "group_id": {
+                            "equals": groupId
+                        },
+                        "year": {
+                            "equals": lastestLiveDate.split('/')[1]
+                        },
+                        "month": {
+                            "equals": lastestLiveDate.split('/')[0]
+                        }
+                    }
                 }
             }
+        } else {
+            return undefined;
         }
-    }
+      
+    },[lastestLiveDate, groupId]) 
 
 
     //summary results query and variable
@@ -599,9 +613,9 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     // }, [getOutletsByIdResult.data])
 
     React.useEffect(() => {
-        if (getOutletsBelongToCustomerResult.data && getOutletsBelongToCustomerResult.data.outlets) {
+        if (getOutletsBelongToCustomerResult.data && getOutletsBelongToCustomerResult.data.findFirstReports) {
             const currentOutlets: outlet[] = [];
-            const associatedOutlets: outlet[] = getOutletsBelongToCustomerResult.data.outlets;
+            const report: reports = getOutletsBelongToCustomerResult.data.findFirstReports;
             getOutletsByIdResult[0]({
                 "variables": {
                     "where": {
@@ -609,7 +623,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             "contains": `${selectedMonth}/${selectedYear}`
                         },
                         "outlet_outlet_id": {
-                            "in": associatedOutlets.map(out => out.outlet_id)
+                            "in": JSON.parse(report.outlet_ids)
                         }
                     },
                     "where2": {
@@ -648,7 +662,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             "contains": lastestLiveDate
                         },
                         "outlet_outlet_id": {
-                            "in": associatedOutlets.map(out => out.outlet_id)
+                            "in": JSON.parse(report.outlet_ids)
                         }
                     },
                     "where2": {
