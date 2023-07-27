@@ -166,8 +166,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }
 
-    const getOutletsBelongToCustomerVariable =React.useMemo(()=>{
-        if(lastestLiveDate) {
+    const getOutletsBelongToCustomerVariable = React.useMemo(() => {
+        if (lastestLiveDate) {
             return {
                 "variables": {
                     "where": {
@@ -186,8 +186,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         } else {
             return undefined;
         }
-      
-    },[lastestLiveDate, groupId]) 
+
+    }, [lastestLiveDate, groupId])
 
 
     //summary results query and variable
@@ -733,8 +733,9 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     }, [currentOutlet]);
 
     const getEqptCard = React.useMemo(() => {
-        if (currentOutlet && currentOutlet.outlet_device_ac_input && currentOutlet.outlet_device_ac_input.length > 0
-            && currentOutlet.outlet_device_ex_fa_input && currentOutlet.outlet_device_ex_fa_input.length > 0) {
+        console.log(currentOutlet);
+        if ((currentOutlet && currentOutlet.outlet_device_ac_input && currentOutlet.outlet_device_ac_input.length > 0) ||
+            (currentOutlet && currentOutlet.outlet_device_ex_fa_input && currentOutlet.outlet_device_ex_fa_input.length > 0)) {
             return <div>
                 <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
             </div>
