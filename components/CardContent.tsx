@@ -128,7 +128,7 @@ const SustainPerformance = ({ total, year }: any): JSX.Element => {
 
     return (
         <div className="flex flex-col gap-4 h-full">
-            <div className="flex items-center">
+            <div className="flex gap-x-2">
                 <CardHeader Titles={['Sustainability Performance']} SubTitle={`Year to Date (${year})`} />
                 <TooltipIcon text={`Total Savings Performance this year`}></TooltipIcon>
             </div>
@@ -204,7 +204,7 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
 
     return (
         <div className="flex flex-col gap-4">
-            <div className='flex flex-row px-2 items-center'>
+            <div className='flex flex-row px-2'>
                 <CardHeader Titles={['Benchmark Comparison']} SubTitle={"vs. Industry Peer"} />
                 <TooltipIcon text={`Comparison of the highest/lowestand previous month’s consumption`}></TooltipIcon>
             </div>
@@ -519,7 +519,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
             <div className="flex justify-between items-baseline">
                 <div className='flex flex-row gap-x-2 my-4'>
                     <div className='flex flex-col'>
-                        <CardHeader Titles={['Savings Meter']} />
+                        <CardHeader Titles={['Measured Savings']} />
                         <div className='flex flex-row items-baseline'>
                             <div className='mr-4'>
                                 <span className="font-bold text-3xl text-custom-blue-card-font">{measuredSavings?.measuredSavingsKwh}</span>
@@ -847,7 +847,7 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element =
             /> */}
 
             <div className='flex flex-row gap-x-2 items-center justify-between'>
-                <div className='flex items-center'>
+                <div className='flex items-center gap-x-2'>
                     <Radio.Group size="large" buttonStyle="solid" onChange={((event) => { setSelectedCard(event.target.value) })} value={selectedCard}>
                         <Radio.Button value="savingPerformance">Savings Performance</Radio.Button>
                         <Radio.Button value="energyBaseline">Eqpt. Energy Baseline</Radio.Button>
@@ -1123,7 +1123,7 @@ const ValueFirst = ({ title, tooltip, subTitle, value, valueColor }: any): JSX.E
     return (
         <div className="flex flex-col gap-y-2">
             <div>
-                <div className='flex flex-row'>
+                <div className='flex flex-row justify-between'>
                     <CardHeader Titles={[title]} />
                     {tooltip && <TooltipIcon text={tooltip}></TooltipIcon>}
                 </div>
@@ -1153,7 +1153,7 @@ const LiveOutlet = ({ Value }: any): JSX.Element => {
 }
 interface UsageCardProps {
     Title?: string,
-    TooltipText?: string,
+    TooltipText?: string | JSX.Element,
     FirstPrefix?: any,
     FirstValue?: any,
     FirstPostfix?: any,
@@ -1206,7 +1206,7 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
                 Savings
             </h2>
             <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' TooltipText={`Σ (Equipment Energy Usage Without TablePointer - Equipment Energy Usage With TablePointer) timeAutomatically measured when the individualequipment is in use by the outlet andenergy saving happensSavings Co-share Invoicing is based on MeasuredEnergy Savings and the Last Available Tariff`} FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' TooltipText={<p>Σ (Equipment Energy Usage Without TablePointer - Equipment Energy Usage With TablePointer) time<br/><br/>Automatically measured when the individualequipment is in use by the outlet andenergy saving happens<br/><br/>Savings Co-share Invoicing is based on MeasuredEnergy Savings and the Last Available Tariff </p>} FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' TooltipText={`The amount of savings generated assumingat the regulated tariff rate as provided by the Energy Market Authority`} FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
             </div>
         </div>
