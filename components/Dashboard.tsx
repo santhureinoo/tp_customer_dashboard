@@ -733,11 +733,46 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     }, [currentOutlet]);
 
     const getEqptCard = React.useMemo(() => {
-        console.log(currentOutlet);
-        if ((currentOutlet && currentOutlet.outlet_device_ac_input && currentOutlet.outlet_device_ac_input.length > 0) ||
-            (currentOutlet && currentOutlet.outlet_device_ex_fa_input && currentOutlet.outlet_device_ex_fa_input.length > 0)) {
+        const renderedData = {
+            quantityAC: 0,
+            baselineAC: 0,
+            energySavedAC: 0,
+            costSavedAC: 0,
+            quantityKE: 0,
+            baselineKE: 0,
+            energySavedKE: 0,
+            costSavedKE: 0,
+        }
+        if (currentOutlet) {
+
+            if (currentOutlet.outlet_device_ex_fa_input) {
+                renderedData.quantityKE = currentOutlet.outlet_device_ex_fa_input.length;
+            }
+            if (currentOutlet.results && currentOutlet.results.length > 0) {
+                renderedData.baselineKE = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_measured_savings_kWh || "0") }, 0);
+                renderedData.energySavedKE = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_eqpt_energy_baseline_avg_hourly_kW || "0") }, 0);
+                renderedData.costSavedKE = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "0") }, 0);
+            }
+            if (currentOutlet.first_intermediary_table && currentOutlet.first_intermediary_table.length > 0) {
+                renderedData.baselineKE = Number(currentOutlet.first_intermediary_table[0].ke_baseline_kW);
+            }
+
+            if (currentOutlet.outlet_device_ac_input) {
+                renderedData.quantityAC = currentOutlet.outlet_device_ac_input.length;
+            }
+            if (currentOutlet.results && currentOutlet.results.length > 0) {
+                renderedData.baselineAC = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_measured_savings_kWh || "") }, 0);
+                renderedData.energySavedAC = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_eqpt_energy_baseline_avg_hourly_kW || "") }, 0);
+                renderedData.costSavedAC = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "") }, 0);
+            }
+            if (currentOutlet.first_intermediary_table && currentOutlet.first_intermediary_table.length > 0) {
+                renderedData.baselineAC = Number(currentOutlet.first_intermediary_table[0].ac_baseline_kWh);
+            }
+        }
+
+        if (renderedData.baselineAC > 0 || renderedData.baselineKE > 0) {
             return <div>
-                <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
+                <EquipmentCard renderedData={renderedData} outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
             </div>
         } else {
             return <></>

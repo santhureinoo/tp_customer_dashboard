@@ -1050,54 +1050,14 @@ const StatusHorizontalCard = ({ Title, SubTitle, Value, textClassName, Prefix, P
 interface EqptProps {
     outlet?: outlet;
     latestLiveDate: string;
+    renderedData: any
 }
 
-const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
+const Equipment = ({ outlet, latestLiveDate, renderedData }: EqptProps): JSX.Element => {
     const [selectedType, setSelectedType] = React.useState("ke");
-    const renderedData = React.useMemo(() => {
-
-        const renderedData = {
-            quantity: 0,
-            baseline: 0,
-            energySaved: 0,
-            costSaved: 0,
-        }
-        if (selectedType === 'ke') {
-            if (outlet) {
-
-                if (outlet.outlet_device_ex_fa_input) {
-                    renderedData.quantity = outlet.outlet_device_ex_fa_input.length;
-                }
-                if (outlet.results && outlet.results.length > 0) {
-                    renderedData.baseline = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_measured_savings_kWh || "0") }, 0);
-                    renderedData.energySaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_eqpt_energy_baseline_avg_hourly_kW || "0") }, 0);
-                    renderedData.costSaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "0") }, 0);
-                }
-                if (outlet.first_intermediary_table && outlet.first_intermediary_table.length > 0) {
-                    renderedData.baseline = Number(outlet.first_intermediary_table[0].ke_baseline_kW);
-                }
-            }
-
-        } else {
-            if (outlet) {
-                if (outlet.outlet_device_ac_input) {
-                    renderedData.quantity = outlet.outlet_device_ac_input.length;
-                }
-                if (outlet.results && outlet.results.length > 0) {
-                    renderedData.baseline = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_measured_savings_kWh || "") }, 0);
-                    renderedData.energySaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_eqpt_energy_baseline_avg_hourly_kW || "") }, 0);
-                    renderedData.costSaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "") }, 0);
-                }
-                if (outlet.first_intermediary_table && outlet.first_intermediary_table.length > 0) {
-                    renderedData.baseline = Number(outlet.first_intermediary_table[0].ac_baseline_kWh);
-                }
-            }
-        }
-        return renderedData;
-    }, [selectedType, outlet]);
-
-    return (
-        <div className="flex flex-col gap-4 h-3/6">
+    const [show, setShow] = React.useState(true);
+    
+    return (<div className="flex flex-col gap-4 h-3/6">
             <div className="flex justify-between items-baseline">
                 <CardHeader Titles={['Equipment']} className='text-sm' />
             </div>
@@ -1106,7 +1066,7 @@ const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
                 <Radio.Button value="ac">Air Con</Radio.Button>
             </Radio.Group>
             <div className="2xl:grid grid gap-y-2">
-                <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={getInDecimal(renderedData.baseline, 2)} Postfix={'kW'} />
+                <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={getInDecimal(selectedType == 'ke' ? renderedData.baselineKE : renderedData.baselineAC, 2)} Postfix={'kW'} />
                 {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
                 <StatusCard Title={'Savings @ Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} /> */}
 
@@ -1206,7 +1166,7 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
                 Savings
             </h2>
             <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' TooltipText={<p>Σ (Equipment Energy Usage Without TablePointer - Equipment Energy Usage With TablePointer) time<br/><br/>Automatically measured when the individualequipment is in use by the outlet andenergy saving happens<br/><br/>Savings Co-share Invoicing is based on MeasuredEnergy Savings and the Last Available Tariff </p>} FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' TooltipText={<p>Σ (Equipment Energy Usage Without TablePointer - Equipment Energy Usage With TablePointer) time<br /><br />Automatically measured when the individualequipment is in use by the outlet andenergy saving happens<br /><br />Savings Co-share Invoicing is based on MeasuredEnergy Savings and the Last Available Tariff </p>} FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' TooltipText={`The amount of savings generated assumingat the regulated tariff rate as provided by the Energy Market Authority`} FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
             </div>
         </div>
