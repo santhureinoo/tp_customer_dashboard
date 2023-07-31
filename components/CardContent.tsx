@@ -350,7 +350,6 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     const sortDat = cloned_first_intermediary_tables.sort(function (left: any, right: any) {
                         return moment(left.day_of_month + "/" + left.outlet_month_year, "DD/MM/YYYY").diff(moment(right.day_of_month + "/" + right.outlet_month_year, "DD/MM/YYYY"));
                     });
-                    console.log(sortDat);
                     setFirstIntermediaryData(sortDat);
                 }
             });
@@ -375,7 +374,6 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     if (result.data && result.data.findManyResults) {
                         const cloned_results: any[] = cloneDeep(result.data.findManyResults);
                         const totalMeasuredSaving = cloned_results.reduce((pv, cv) => {
-                            console.log(cv);
                             pv.measuredSavingsKwh = getInDecimal(Number(cv.outlet_measured_savings_kWh) + Number(pv.measuredSavingsKwh));
                             pv.measuredSavingsExpense = getInDecimal(Number(cv.outlet_measured_savings_expenses) + Number(pv.measuredSavingsExpense));
 
@@ -384,7 +382,6 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                             measuredSavingsExpense: 0,
                             measuredSavingsKwh: 0,
                         });
-                        console.log(totalMeasuredSaving);
                         setMeasuredSavings(totalMeasuredSaving);
                     }
                 }
