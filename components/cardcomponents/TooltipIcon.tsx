@@ -8,7 +8,7 @@ interface Props {
 
 const TooltipIcon = ({ text }: Props) => {
     return (
-        <Tooltip title={<div className="leading-tight">{text}</div>} trigger="hover">
+        <Tooltip title={<div className="leading-tight w-100">{text}</div>} trigger="hover">
             <FontAwesomeIcon color='#43A4FD' className="text-[25px]" icon={faInfoCircle} />
         </Tooltip>
     )

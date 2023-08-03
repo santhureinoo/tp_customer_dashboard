@@ -45,6 +45,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         MinKWH: number,
         MaxKWH: number,
         CurrentKHW: number,
+        CurrentPercent: number,
         OutletSavingKHW: number,
         SavingTariff: number,
         LastAvailTariff: number,
@@ -52,6 +53,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         MinKWH: 0,
         MaxKWH: 0,
         CurrentKHW: 0,
+        CurrentPercent: 0,
         OutletSavingKHW: 0,
         SavingTariff: 0,
         LastAvailTariff: 0,
@@ -505,7 +507,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 return {
                     MinKWH: diff === 0 ? parseFloat(dat.acmv_10percent_benchmark_comparison_kWh || "0") : 0,
                     MaxKWH: diff === 0 ? parseFloat(dat.acmv_25percent_benchmark_comparison_kWh || "0") : 0,
-                    CurrentKHW: diff === 0 ? getInDecimal(Number(dat.acmv_measured_savings_kWh || "0")) : 0,
+                    CurrentKHW: diff === 0 ? getInDecimal(Number(dat.outlet_measured_savings_kWh || "0")) : 0,
+                    CurrentPercent:  diff === 0 ? getInDecimal(Number(dat.outlet_measured_savings_percent || "0"), 2) : 0, 
                     OutletSavingKHW: diff <= 0 ? parseFloat(dat.outlet_measured_savings_kWh || "0") : 0,
                     SavingTariff: diff === 0 ? parseFloat(dat.savings_tariff_expenses || "0") : 0
                 }
@@ -514,6 +517,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                     MinKWH: prev.MinKWH + curr.MinKWH,
                     MaxKWH: prev.MaxKWH + curr.MaxKWH,
                     CurrentKHW: prev.CurrentKHW + curr.CurrentKHW,
+                    CurrentPercent: prev.CurrentPercent + curr.CurrentPercent,
                     OutletSavingKHW: prev.OutletSavingKHW + curr.OutletSavingKHW,
                     SavingTariff: prev.SavingTariff + curr.SavingTariff
                 }
@@ -521,9 +525,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 MinKWH: 0,
                 MaxKWH: 0,
                 CurrentKHW: 0,
+                CurrentPercent: 0,
                 OutletSavingKHW: 0,
                 SavingTariff: 0,
             });
+
+            console.log(currentTotalKWHs)
 
             const currentTotalKWHsWithOM = currOutletMonth.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
@@ -866,7 +873,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                     <ValueFirstCard tooltip={`Last Tariff rate from Energy Market Authority`} title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(totalKWHs.LastAvailTariff || '0'), 4)}`} valueColor={'custom-blue-card-font'} />
                                                 </div>
                                                 <div>
-                                                    <ValueFirstCard tooltip={`The amount of savings generated assumingat the regulated tariff rate as provided by the Energy Market Authority`} title={'Savings @ Tariff Increase'} subTitle={`$${numberWithCommas(parseFloat(globalSetting?.poss_tariff_increase || '0.00'), 4)}`} value={`$${numberWithCommas(totalKWHs.SavingTariff, 2)}`} valueColor={'custom-green-card-font'} />
+                                                    <ValueFirstCard tooltip={`The amount of savings generated assuming at the regulated tariff rate as provided by the Energy Market Authority`} title={'Savings @ Tariff Increase'} subTitle={`$${numberWithCommas(parseFloat(globalSetting?.poss_tariff_increase || '0.00'), 4)}`} value={`$${numberWithCommas(totalKWHs.SavingTariff, 2)}`} valueColor={'custom-green-card-font'} />
                                                 </div>
                                             </div>
                                             {/* <div>

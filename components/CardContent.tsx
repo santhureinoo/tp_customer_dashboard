@@ -195,7 +195,7 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
         if (totalKWHs) {
             return <BenchMarkMeter MinKWH={{ Percentage: '10', ActualKHW: totalKWHs.MinKWH }}
                 MaxKWH={{ Percentage: '25', ActualKHW: totalKWHs.MaxKWH }}
-                CurrentKHW={{ Percentage: '17', ActualKHW: totalKWHs.CurrentKHW }} />
+                CurrentKHW={{ Percentage: totalKWHs.CurrentPercent, ActualKHW: totalKWHs.CurrentKHW }} />
         } else {
             return <></>
         }
@@ -828,7 +828,7 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element =
 
     const getTooltip = React.useMemo(() => {
         if (selectedCard === 'savingPerformance') return <TooltipIcon text='Energy consumption with and without Tablepointer'></TooltipIcon>
-        else return <TooltipIcon text={`Represents the individual equipment's energy usagewithout TablePointer over a typical hour for statistical best-fit averaging,and is continuously and dynamically sampled to ensure its validity over time`}></TooltipIcon>
+        else return <TooltipIcon text={`Represents the individual equipment's energy usage without TablePointer over a typical hour for statistical best-fit averaging,and is continuously and dynamically sampled to ensure its validity over time`}></TooltipIcon>
     }, [selectedCard])
 
     return (
@@ -1053,26 +1053,28 @@ interface EqptProps {
 const Equipment = ({ outlet, latestLiveDate, renderedData }: EqptProps): JSX.Element => {
     const [selectedType, setSelectedType] = React.useState("ke");
     const [show, setShow] = React.useState(true);
-    
+
+    React.useEffect(()=>{
+        if(renderedData.baselineKE > 0) {
+            setSelectedType('ke');
+        } else {
+            setSelectedType('ac');
+        }
+    },[renderedData]);
+
     return (<div className="flex flex-col gap-4 h-3/6">
-            <div className="flex justify-between items-baseline">
-                <CardHeader Titles={['Equipment']} className='text-sm' />
-            </div>
-            <Radio.Group className='w-full text-extraSmall' size="small" buttonStyle="solid" onChange={((event) => { setSelectedType(event.target.value) })} value={selectedType} style={{ marginBottom: 8 }}>
-                <Radio.Button value="ke">Kitchen Exhaust</Radio.Button>
-                <Radio.Button value="ac">Air Con</Radio.Button>
-            </Radio.Group>
-            <div className="2xl:grid grid gap-y-2">
-                <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={getInDecimal(selectedType == 'ke' ? renderedData.baselineKE : renderedData.baselineAC, 2)} Postfix={'kW'} />
-                {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
-                <StatusCard Title={'Savings @ Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} /> */}
-
-                {/* <StatusCard Title={'Quantity'} textClassName='text-l' className='bg-custom-blue-card text-custom-blue-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.quantity)} /> */}
-
-                {/* <StatusCard Title={'Energy Saved'} textClassName='text-l' className='bg-custom-green-card text-custom-green-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.energySaved)} Postfix={'kWh'} />
-                <StatusCard Title={'Cost Saved'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.costSaved)} Prefix={'$'} /> */}
-            </div>
+        <div className="flex justify-between items-baseline">
+            <CardHeader Titles={['Equipment']} className='text-sm' />
         </div>
+        <Radio.Group className='w-full text-extraSmall' size="small" buttonStyle="solid" onChange={((event) => { setSelectedType(event.target.value) })} value={selectedType} style={{ marginBottom: 8 }}>
+            {renderedData.baselineKE > 0 && <Radio.Button className='!text-black' disabled={renderedData.baselineAC == 0} value="ke">Kitchen Exhaust</Radio.Button>}
+            {renderedData.baselineAC > 0 && <Radio.Button className='!text-black' disabled={renderedData.baselineKE == 0} value="ac">Air Con</Radio.Button>}
+        </Radio.Group>
+        <div className="2xl:grid grid gap-y-2">
+            <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`}
+                Value={getInDecimal(selectedType == 'ke' ? renderedData.baselineKE : renderedData.baselineAC, 2)} Postfix={'kW'} />
+        </div>
+    </div>
     )
 }
 
@@ -1139,8 +1141,8 @@ const EquipmentEnergy = ({ WithTableKw, WithTableExpense, WithoutTableKw, Withou
                 Equipment Energy Usage
             </h2>
             <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='W/O TablePointer' TooltipText={`Amount of energy your equipment will consumewithout TablePointer's solution`} FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' Title='With TablePointer' TooltipText={`Amount of energy your equipment consumedwith TablePointer's solution`} FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='W/O TablePointer' TooltipText={`Amount of energy your equipment will consume without TablePointer's solution`} FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' Title='With TablePointer' TooltipText={`Amount of energy your equipment consumed with TablePointer's solution`} FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
             </div>
         </div>
     )
@@ -1164,7 +1166,7 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
             </h2>
             <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
                 <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' TooltipText={<p>Σ (Equipment Energy Usage Without TablePointer - Equipment Energy Usage With TablePointer) time<br /><br />Automatically measured when the individualequipment is in use by the outlet andenergy saving happens<br /><br />Savings Co-share Invoicing is based on MeasuredEnergy Savings and the Last Available Tariff </p>} FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' TooltipText={`The amount of savings generated assumingat the regulated tariff rate as provided by the Energy Market Authority`} FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' TooltipText={`The amount of savings generated assuming at the regulated tariff rate as provided by the Energy Market Authority`} FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
             </div>
         </div>
     )
