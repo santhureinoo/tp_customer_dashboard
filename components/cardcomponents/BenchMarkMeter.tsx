@@ -86,7 +86,7 @@ const BenchMarkMeter = (props: BenchMarkProps): JSX.Element => {
                         <div class="flex flex-col items-center">
                             <span class="text-extraSmall">Last Month</span>
                             <span class="text-xl text-blue-600 font-bold">
-                                ${Number(props.CurrentKHW.Percentage) * 100}%
+                                ${getInDecimal(Number(props.CurrentKHW.Percentage) * 100)}%
                             </span>
                         <span class="text-extraSmall">(${props.CurrentKHW.ActualKHW} kWh)</span>
                     </div>
