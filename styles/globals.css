@@ -27,8 +27,17 @@
     .active-sp {
         @apply bg-custom-lightblue text-custom-darkblue rounded-lg
     }
+
 }
 
 .dashed{
     stroke-dasharray: 5,5; 
  }
+
+.ant-radio-group-small .ant-radio-button-wrapper span {
+    font-size: 10px !important;
+}
+
+.ant-radio-group-small .ant-radio-button-wrapper {
+    line-height: 19px !important;
+}

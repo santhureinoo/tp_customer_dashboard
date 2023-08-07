@@ -78,7 +78,7 @@ export function bytesToSize(bytes: number) {
 }
 
 export function getInDecimal(x: number, fixed = 0) {
-  return x % 1 === 0 ? x : (Math.round(x * Math.pow(10, fixed + 1)) / Math.pow(10, fixed + 1)).toFixed(fixed);
+  return x % 1 === 0 ? x : Number((Math.round(x * Math.pow(10, fixed + 1)) / Math.pow(10, fixed + 1)).toFixed(fixed));
 }
 
 export function numberWithCommas(x?: number, fixed = 0) {

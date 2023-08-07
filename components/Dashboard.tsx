@@ -1,18 +1,21 @@
 import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { dateValueForQuery, getMonths, numberWithCommas, zeroPad } from '../common/helper';
+import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas, zeroPad } from '../common/helper';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
-import { customer, global_input, group, invoice, outlet, outlet_month, results } from "../common/types";
+import { customer, global_input, group, invoice, outlet, outlet_month, reports, results } from "../common/types";
 import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, EquipmentEnergyCard, LiveOutletCard, RankAndOutletCard, RemarksCard, SavingEnergyCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard, ValueFirstCard, YearlyEnergyCard } from "./CardContent";
 import ClientOnly from "./ClientOnly";
 import { v4 as uuidv4 } from 'uuid';
 import CustomSelect from "./cardcomponents/CustomSelect";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
+import dayjs from 'dayjs';
+import { DatePicker } from 'antd';
 
 const Dashboard = ({ groupId }: any): JSX.Element => {
     const [currentCustomerID, setCurrentCustomerID] = React.useState(1);
-    const [currentPage, setCurrentPage] = React.useState<String>('summary');
+    const [currentPage, setCurrentPage] = React.useState<'Summary' | 'Outlet'>('Summary');
     const [lastestLiveDate, setLastestLiveDate] = React.useState('');
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [latestOutlets, setLatestOutlets] = React.useState<outlet[]>([]);
@@ -42,6 +45,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         MinKWH: number,
         MaxKWH: number,
         CurrentKHW: number,
+        CurrentPercent: number,
         OutletSavingKHW: number,
         SavingTariff: number,
         LastAvailTariff: number,
@@ -49,6 +53,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         MinKWH: 0,
         MaxKWH: 0,
         CurrentKHW: 0,
+        CurrentPercent: 0,
         OutletSavingKHW: 0,
         SavingTariff: 0,
         LastAvailTariff: 0,
@@ -68,6 +73,15 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
           poss_tariff_increase
         }
       }`;
+
+    const getOutletsBelongToCustomerQuery = gql`
+    query FindFirstReports($where: ReportsWhereInput) {
+        findFirstReports(where: $where) {
+          outlet_ids
+          group_id
+        }
+      }`;
+
 
 
     const getFindFirstLastestReportDateQuery = gql`
@@ -154,51 +168,30 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }
 
-    const getOutletsBySelectedDateVariable = {
-        "variables": {
-            "where": {
-                "outlet_date": {
-                    "contains": `${selectedMonth}/${selectedYear}`
-                }
-            },
-            "where2": {
-                "outlet_date": {
-                    "contains": `${selectedMonth}/${selectedYear}`
-                }
-            },
-            "where3": {
-                "outlet_month_year": {
-                    "equals": `${selectedMonth}/${selectedYear}`
-                },
-                "day_of_month": {
-                    "equals": '1'
+    const getOutletsBelongToCustomerVariable = React.useMemo(() => {
+        if (lastestLiveDate) {
+            return {
+                "variables": {
+                    "where": {
+                        "group_id": {
+                            "equals": groupId
+                        },
+                        "year": {
+                            "equals": lastestLiveDate.split('/')[1]
+                        },
+                        "month": {
+                            "equals": lastestLiveDate.split('/')[0]
+                        }
+                    }
                 }
             }
+        } else {
+            return undefined;
         }
-    };
 
-    const getOutletsByLatestDateVariable = {
-        "variables": {
-            "where": {
-                "outlet_date": {
-                    "contains": lastestLiveDate
-                }
-            },
-            "where2": {
-                "outlet_date": {
-                    "contains": lastestLiveDate
-                }
-            },
-            "where3": {
-                "outlet_month_year": {
-                    "equals": lastestLiveDate
-                },
-                "day_of_month": {
-                    "equals": '1'
-                }
-            }
-        }
-    };
+    }, [lastestLiveDate, groupId])
+
+
     //summary results query and variable
     const findFirstGroupSummaryVariable = {
         "variables": {
@@ -276,6 +269,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
       }`
 
     const getSummaryResult = useQuery(findFirstGroupSummaryQuery, findFirstGroupSummaryVariable);
+    const getOutletsBelongToCustomerResult = useQuery(getOutletsBelongToCustomerQuery, getOutletsBelongToCustomerVariable);
     const getGlobalInputResult = useQuery(getGlobalInputQuery, getGlobalInputVariable);
 
     //useEffect hook for summary result 
@@ -513,7 +507,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 return {
                     MinKWH: diff === 0 ? parseFloat(dat.acmv_10percent_benchmark_comparison_kWh || "0") : 0,
                     MaxKWH: diff === 0 ? parseFloat(dat.acmv_25percent_benchmark_comparison_kWh || "0") : 0,
-                    CurrentKHW: diff === 0 ? parseInt(dat.acmv_measured_savings_kWh || "0") : 0,
+                    CurrentKHW: diff === 0 ? getInDecimal(Number(dat.outlet_measured_savings_kWh || "0")) : 0,
+                    CurrentPercent:  diff === 0 ? getInDecimal(Number(dat.outlet_measured_savings_percent || "0"), 2) : 0, 
                     OutletSavingKHW: diff <= 0 ? parseFloat(dat.outlet_measured_savings_kWh || "0") : 0,
                     SavingTariff: diff === 0 ? parseFloat(dat.savings_tariff_expenses || "0") : 0
                 }
@@ -522,6 +517,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                     MinKWH: prev.MinKWH + curr.MinKWH,
                     MaxKWH: prev.MaxKWH + curr.MaxKWH,
                     CurrentKHW: prev.CurrentKHW + curr.CurrentKHW,
+                    CurrentPercent: prev.CurrentPercent + curr.CurrentPercent,
                     OutletSavingKHW: prev.OutletSavingKHW + curr.OutletSavingKHW,
                     SavingTariff: prev.SavingTariff + curr.SavingTariff
                 }
@@ -529,9 +525,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 MinKWH: 0,
                 MaxKWH: 0,
                 CurrentKHW: 0,
+                CurrentPercent: 0,
                 OutletSavingKHW: 0,
                 SavingTariff: 0,
             });
+
+            console.log(currentTotalKWHs)
 
             const currentTotalKWHsWithOM = currOutletMonth.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
@@ -578,8 +577,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [getOutletResult.data]);
 
-    const getOutletsByIdResult = useQuery(getOutletsBySelectedDateQuery, getOutletsBySelectedDateVariable);
-    const getLatestOutletsResult = useQuery(getOutletsBySelectedDateQuery, getOutletsByLatestDateVariable);
+    const getOutletsByIdResult = useLazyQuery(getOutletsBySelectedDateQuery);
+    const getLatestOutletsResult = useLazyQuery(getOutletsBySelectedDateQuery);
     const getFindFirstLastestReportDateResult = useQuery(getFindFirstLastestReportDateQuery);
 
     React.useEffect(() => {
@@ -616,37 +615,96 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [lastestLiveDate])
 
-    React.useEffect(() => {
-        if (getOutletsByIdResult.data && getOutletsByIdResult.data.outlet_months) {
-            const currentOutlets: outlet[] = [];
-            const outletmonths: outlet_month[] | undefined = getOutletsByIdResult.data.outlet_months;
-            if (outletmonths) {
-                outletmonths.forEach(month => {
-                    month.outlet && currentOutlets.push(month.outlet);
-                })
-            }
-            // Ping
-            setOutlets(currentOutlets);
-        } else {
-            setOutlets([]);
-        }
-    }, [getOutletsByIdResult.data])
+    // React.useEffect(() => {
+
+    // }, [getOutletsByIdResult.data])
 
     React.useEffect(() => {
-        if (getLatestOutletsResult.data && getLatestOutletsResult.data.outlet_months) {
+        if (getOutletsBelongToCustomerResult.data && getOutletsBelongToCustomerResult.data.findFirstReports) {
             const currentOutlets: outlet[] = [];
-            const outletmonths: outlet_month[] | undefined = getLatestOutletsResult.data.outlet_months;
-            if (outletmonths) {
-                outletmonths.forEach(month => {
-                    month.outlet && currentOutlets.push(month.outlet);
-                })
-            }
-            // Ping
-            setLatestOutlets(currentOutlets);
+            const report: reports = getOutletsBelongToCustomerResult.data.findFirstReports;
+            getOutletsByIdResult[0]({
+                "variables": {
+                    "where": {
+                        "outlet_date": {
+                            "contains": `${selectedMonth}/${selectedYear}`
+                        },
+                        "outlet_outlet_id": {
+                            "in": JSON.parse(report.outlet_ids)
+                        }
+                    },
+                    "where2": {
+                        "outlet_date": {
+                            "contains": `${selectedMonth}/${selectedYear}`
+                        }
+                    },
+                    "where3": {
+                        "outlet_month_year": {
+                            "equals": `${selectedMonth}/${selectedYear}`
+                        },
+                        "day_of_month": {
+                            "equals": '1'
+                        }
+                    }
+                }
+            }).then(res => {
+                if (res.data && res.data.outlet_months) {
+                    const currentOutlets: outlet[] = [];
+                    const outletmonths: outlet_month[] | undefined = res.data.outlet_months;
+                    if (outletmonths) {
+                        outletmonths.forEach(month => {
+                            month.outlet && currentOutlets.push(month.outlet);
+                        })
+                    }
+                    // Ping
+                    setOutlets(currentOutlets);
+                } else {
+                    setOutlets([]);
+                }
+            })
+            getLatestOutletsResult[0]({
+                "variables": {
+                    "where": {
+                        "outlet_date": {
+                            "contains": lastestLiveDate
+                        },
+                        "outlet_outlet_id": {
+                            "in": JSON.parse(report.outlet_ids)
+                        }
+                    },
+                    "where2": {
+                        "outlet_date": {
+                            "contains": lastestLiveDate
+                        }
+                    },
+                    "where3": {
+                        "outlet_month_year": {
+                            "equals": lastestLiveDate
+                        },
+                        "day_of_month": {
+                            "equals": '1'
+                        }
+                    }
+                }
+            }).then(getLatestOutletsResult => {
+                if (getLatestOutletsResult.data && getLatestOutletsResult.data.outlet_months) {
+                    const outletmonths: outlet_month[] | undefined = getLatestOutletsResult.data.outlet_months;
+                    if (outletmonths) {
+                        outletmonths.forEach(month => {
+                            month.outlet && currentOutlets.push(month.outlet);
+                        })
+                    }
+                    // Ping
+                    setLatestOutlets(currentOutlets);
+                }
+                else {
+                    setLatestOutlets([]);
+                }
+            })
         } else {
             setLatestOutlets([]);
         }
-    }, [getLatestOutletsResult.data])
+    }, [getOutletsBelongToCustomerResult.data])
 
     React.useEffect(() => {
         const customerstring = localStorage.getItem('customer');
@@ -681,6 +739,53 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
     }, [currentOutlet]);
 
+    const getEqptCard = React.useMemo(() => {
+        const renderedData = {
+            quantityAC: 0,
+            baselineAC: 0,
+            energySavedAC: 0,
+            costSavedAC: 0,
+            quantityKE: 0,
+            baselineKE: 0,
+            energySavedKE: 0,
+            costSavedKE: 0,
+        }
+        if (currentOutlet) {
+
+            if (currentOutlet.outlet_device_ex_fa_input) {
+                renderedData.quantityKE = currentOutlet.outlet_device_ex_fa_input.length;
+            }
+            if (currentOutlet.results && currentOutlet.results.length > 0) {
+                renderedData.baselineKE = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_measured_savings_kWh || "0") }, 0);
+                renderedData.energySavedKE = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_eqpt_energy_baseline_avg_hourly_kW || "0") }, 0);
+                renderedData.costSavedKE = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "0") }, 0);
+            }
+            if (currentOutlet.first_intermediary_table && currentOutlet.first_intermediary_table.length > 0) {
+                renderedData.baselineKE = Number(currentOutlet.first_intermediary_table[0].ke_baseline_kW);
+            }
+
+            if (currentOutlet.outlet_device_ac_input) {
+                renderedData.quantityAC = currentOutlet.outlet_device_ac_input.length;
+            }
+            if (currentOutlet.results && currentOutlet.results.length > 0) {
+                renderedData.baselineAC = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_measured_savings_kWh || "") }, 0);
+                renderedData.energySavedAC = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_eqpt_energy_baseline_avg_hourly_kW || "") }, 0);
+                renderedData.costSavedAC = currentOutlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "") }, 0);
+            }
+            if (currentOutlet.first_intermediary_table && currentOutlet.first_intermediary_table.length > 0) {
+                renderedData.baselineAC = Number(currentOutlet.first_intermediary_table[0].ac_baseline_kWh);
+            }
+        }
+
+        if (renderedData.baselineAC > 0 || renderedData.baselineKE > 0) {
+            return <div>
+                <EquipmentCard renderedData={renderedData} outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
+            </div>
+        } else {
+            return <></>
+        }
+    }, [currentOutlet])
+
     const getHeaderBreadCrumb = React.useMemo(() => {
         return (<h3 className="text-gray-700 text-sm font-bold">
             <div className="flex items-center">
@@ -706,20 +811,36 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [getGroupByIdResult.data])
 
+
+    React.useEffect(() => {
+
+        group && axios.post('api/mixpanel_track',
+            {
+                'distinct_id': groupId,
+                'name': group,
+                'event_name': currentPage + ' page',
+                'attributes': {
+                    'distinct_id': groupId,
+                    'name': group,
+                    ...(currentPage === 'Outlet' && { 'outlet ID': currentOutlet?.outlet_id, 'outlet name': currentOutlet?.name })
+                }
+            });
+    }, [currentPage, group, currentOutlet])
+
     return (
         <React.Fragment>
             {
                 /**
                  * Checking the dashboard page is outlet or summary
                  */
-                currentPage == 'outlet' ?
+                currentPage == 'Outlet' ?
                     /**
                      * outlet page
                      */
                     <div>
                         <div className="flex justify-between w-1/4 gap-2 mb-[50px]">
-                            <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${currentPage === 'summary' ? 'bg-custom-darkblue text-white' : 'text-custom-darkblue border-solid border-2'}`} onClick={() => setCurrentPage('summary')}>Summary</span>
-                            <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${currentPage == 'summary' ? 'text-custom-darkblue border-solid border-2' : 'bg-custom-darkblue text-white'}`} onClick={() => setCurrentPage('outlet')}>Outlet</span>
+                            <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${'text-custom-darkblue border-solid border-2'}`} onClick={() => setCurrentPage('Summary')}>Summary</span>
+                            <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${'bg-custom-darkblue text-white'}`} onClick={() => setCurrentPage('Outlet')}>Outlet</span>
                         </div>
                         <div className="flex justify-between h-full mb-[50px]">
                             {getHeaderBreadCrumb}
@@ -747,14 +868,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                 <div>
                                                     <BenchMarkComparisonCard totalKWHs={totalKWHs} />
                                                 </div>
+                                                {getEqptCard}
                                                 <div>
-                                                    <EquipmentCard outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
+                                                    <ValueFirstCard tooltip={`Last Tariff rate from Energy Market Authority`} title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(totalKWHs.LastAvailTariff || '0'), 4)}`} valueColor={'custom-blue-card-font'} />
                                                 </div>
                                                 <div>
-                                                    <ValueFirstCard title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(totalKWHs.LastAvailTariff || '0'), 4)}`} valueColor={'custom-blue-card-font'} />
-                                                </div>
-                                                <div>
-                                                    <ValueFirstCard title={'Savings @ Tariff Increase'} subTitle={`$${numberWithCommas(parseFloat(globalSetting?.poss_tariff_increase || '0.00'), 4)}`} value={`$${numberWithCommas(totalKWHs.SavingTariff, 2)}`} valueColor={'custom-green-card-font'} />
+                                                    <ValueFirstCard tooltip={`The amount of savings generated assuming at the regulated tariff rate as provided by the Energy Market Authority`} title={'Savings @ Tariff Increase'} subTitle={`$${numberWithCommas(parseFloat(globalSetting?.poss_tariff_increase || '0.00'), 4)}`} value={`$${numberWithCommas(totalKWHs.SavingTariff, 2)}`} valueColor={'custom-green-card-font'} />
                                                 </div>
                                             </div>
                                             {/* <div>
@@ -774,8 +893,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                      */
                     <div>
                         <div className="flex justify-between mb-4 w-1/4 gap-2">
-                            <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${currentPage == 'summary' ? 'bg-custom-darkblue text-white' : 'text-custom-darkblue border-solid border-2'}`} onClick={() => setCurrentPage('summary')}>Summary</span>
-                            <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${currentPage == 'summary' ? 'text-custom-darkblue border-solid border-2' : 'bg-custom-darkblue text-white'}`} onClick={() => setCurrentPage('outlet')}>Outlet</span>
+                            <span className={`py-3 px-auto rounded-lg text-sm text-center w-1/2 cursor-pointer ${currentPage == 'Summary' ? 'bg-custom-darkblue text-white' : 'text-custom-darkblue border-solid border-2'}`} onClick={() => setCurrentPage('Summary')}>Summary</span>
+                            <span className={`py-3 px-auto rounded-lg text-sm text-custom-darkblue border-solid text-center border-2 w-1/2 cursor-pointer ${currentPage == 'Summary' ? 'text-custom-darkblue border-solid border-2' : 'bg-custom-darkblue text-white'}`} onClick={() => setCurrentPage('Outlet')}>Outlet</span>
                         </div>
                         {/**
                      * Group Div
@@ -787,31 +906,31 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <span className='text-custom-gray text-sm font-bold'>{group}</span>
                             </div>
                             <div className="flex justify-between h-full gap-4">
-                                <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[115px] p-2.5 ">
-                                    {getMonths(lastestLiveDate, selectedYear).map(mon => {
-                                        return <option key={mon.value} value={mon.value}>{mon.display}</option>
-                                    })}
-                                    {/* <option value="All">Month</option> */}
-                                    {/* <option value="01">January</option>
-                                    <option value="02">February</option>
-                                    <option value="03">March</option>
-                                    <option value="04">April</option>
-                                    <option value="05">May</option>
-                                    <option value="06">June</option>
-                                    <option value="07">July</option>
-                                    <option value="08">August</option>
-                                    <option value="09">September</option>
-                                    <option value="10">October</option>
-                                    <option value="11">November</option>
-                                    <option value="12">December</option> */}
-                                </select>
-                                <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                    {/* <option value="All">Year</option> */}
-                                    {/* <option value="2020">2020</option>
-                                    <option value="2021">2021</option> */}
-                                    <option value="2022">2022</option>
-                                    <option value="2023">2023</option>
-                                </select>
+
+                                <DatePicker
+                                    placeholder="Select date"
+                                    value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
+                                    onChange={(value) => {
+                                        if (value) {
+                                            setSelectedMonth(zeroPad(value.month() + 1, 2));
+                                            setSelectedYear(value.year().toString());
+                                        }
+                                    }}
+                                    clearIcon={false}
+                                    disabledDate={(date) => {
+                                        const latestLiveDateInDayjs = dayjs(lastestLiveDate, 'MM/YYYY');
+                                        if (date.year() < 2022 || date.year() > 2023) {
+                                            return true;
+                                        } else if (date.isAfter(latestLiveDateInDayjs)) {
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    }}
+                                    format={'MM/YYYY'}
+                                    picker={'month'}
+                                ></DatePicker>
+
                             </div>
                         </div>
                         {/**
@@ -846,10 +965,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                              */
                         }
                         <div className="flex gap-5 justify-between">
-                            <YearlyEnergyCard Svg="/asserts/3.png" Value={`$` + numberWithCommas(summaryResults.measureExpense)} Postfix="Energy" Year="saved" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="250" Width="250" />
-                            <YearlyEnergyCard Svg="/asserts/2.png" Value={numberWithCommas(summaryResults.co2Saving)} Postfix="kg CO" SmallPostfix="2" Year="saved" BgColor="bg-gray-200" TextColor="text-custom-gray" Height="250" Width="250" />
-                            <YearlyEnergyCard Svg="/asserts/1.png" Value={numberWithCommas(Math.round(summaryResults.co2Saving / 60.5))} Postfix="Trees" Year="to be planted" BgColor="bg-green-200" TextColor="text-custom-green-card-font" Height="250" Width="250" />
-                            <YearlyEnergyCard Svg="/asserts/4.png" Value={numberWithCommas(summaryResults.measureExpense * 2)} Postfix="Meals" Year="to be sold" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/Energy.svg" Value={`$` + numberWithCommas(summaryResults.measureExpense)} Postfix="Energy" Year="saved" BgColor="bg-blue-200" TextColor="text-custom-blue-card-font" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/CO2.svg" Value={numberWithCommas(summaryResults.co2Saving)} Postfix="kg CO" SmallPostfix="2" Year="saved" BgColor="bg-gray-200" TextColor="text-custom-gray" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/Trees.svg" Value={numberWithCommas(Math.round(summaryResults.co2Saving / 60.5))} Postfix="Trees" Year="to be planted" BgColor="bg-green-200" TextColor="text-custom-green-card-font" Height="250" Width="250" />
+                            <YearlyEnergyCard Svg="/asserts/Meals.svg" Value={numberWithCommas(summaryResults.measureExpense * 2)} Postfix="Meals" Year="to be sold" BgColor="bg-orange-200" TextColor="text-custom-orange-card-font" Height="250" Width="250" />
                         </div>
                     </div>
             }

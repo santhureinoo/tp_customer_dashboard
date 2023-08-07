@@ -5,11 +5,11 @@ import SavingMeterDigits from "./cardcomponents/SavingMeterDigits";
 import CardHeader from "./CardHeader";
 import Jumbotron from "./cardcomponents/Jumbotron";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSortUp } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle, faSortUp } from '@fortawesome/free-solid-svg-icons';
 import Image from "next/image";
-import ProgressiveMeter from "./cardcomponents/ProgressiveMeter";
 import BenchMarkMeter from "./cardcomponents/BenchMarkMeter";
 import Notification from "./cardcomponents/Notification";
+import { DatePicker, Radio } from 'antd';
 import {
     Chart as ChartJS,
     ArcElement,
@@ -45,7 +45,10 @@ import { DropdownProps, first_intermediary_table, outlet, results, secondary_int
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
 import { cloneDeep } from '@apollo/client/utilities';
-import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas } from '../common/helper';
+import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas, zeroPad } from '../common/helper';
+import dayjs from 'dayjs';
+import { number } from 'superstruct';
+import TooltipIcon from './cardcomponents/TooltipIcon';
 
 // ChartJS.register(...registerablesJS);
 
@@ -125,14 +128,15 @@ const SustainPerformance = ({ total, year }: any): JSX.Element => {
 
     return (
         <div className="flex flex-col gap-4 h-full">
-            <div className="flex justify-between items-baseline">
+            <div className="flex gap-x-2">
                 <CardHeader Titles={['Sustainability Performance']} SubTitle={`Year to Date (${year})`} />
+                <TooltipIcon text={`Total Savings Performance this year`}></TooltipIcon>
             </div>
             <div className="lg:grid lg:grid-cols-4 grid grid-cols-2 gap-2">
-                <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/savings_blue.png" width='50' height='50' />} />
-                <StatusCard Title={'CO2 Saved'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/carbondioxide.png" width='50' height='50' />} />
-                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 60.5))} Postfix={'trees'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/tree.svg" width='50' height="50" />} />
-                <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(Math.round(total.energy * 2))} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/meals.png" width='50' height="50" />} />
+                <StatusCard PostfixDirection={'vertical'} Title={'Energy Savings'} className='bg-custom-blue-card text-custom-blue-card-font' Value={numberWithCommas(total.energy)} Postfix={'SGD'} RightSideValue={<Image alt="barcode not found" src="/asserts/Money_small.svg" width='50' height='50' />} />
+                <StatusCard Title={'CO2 Saved'} className='bg-custom-gray-card text-custom-gray-card-font' Value={numberWithCommas(total.co2)} Postfix={'kg'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/CO2_small.svg" width='50' height='50' />} />
+                <StatusCard Title={'Planted Tree'} className='bg-custom-green-card text-custom-green-card-font' Value={numberWithCommas(Math.round(total.co2 / 60.5))} Postfix={'trees'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/Trees_small.svg" width='50' height="50" />} />
+                <StatusCard Title={'Meals to be sold'} className='bg-custom-orange-card text-custom-orange-card-font' Value={numberWithCommas(Math.round(total.energy * 2))} Postfix={'meals'} PostfixDirection={'vertical'} RightSideValue={<Image alt="barcode not found" src="/asserts/Meal_small.svg" width='50' height="50" />} />
                 {/* <StatusCard Title={'Outlet Category Iconisation'} className='bg-custom-orange-card text-custom-orange-card-font' Value={outlet_category_iconisation()} /> */}
 
             </div>
@@ -191,7 +195,7 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
         if (totalKWHs) {
             return <BenchMarkMeter MinKWH={{ Percentage: '10', ActualKHW: totalKWHs.MinKWH }}
                 MaxKWH={{ Percentage: '25', ActualKHW: totalKWHs.MaxKWH }}
-                CurrentKHW={{ Percentage: '17', ActualKHW: totalKWHs.CurrentKHW }} />
+                CurrentKHW={{ Percentage: totalKWHs.CurrentPercent, ActualKHW: totalKWHs.CurrentKHW }} />
         } else {
             return <></>
         }
@@ -200,7 +204,11 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
 
     return (
         <div className="flex flex-col gap-4">
-            <CardHeader Titles={['Benchmark Comparison']} SubTitle={"vs. Industry Peer"} />
+            <div className='flex flex-row px-2'>
+                <CardHeader Titles={['Benchmark Comparison']} SubTitle={"vs. Industry Peer"} />
+                <TooltipIcon text={`Comparison of the highest/lowest and previous month's consumption`}></TooltipIcon>
+            </div>
+
             <div className="h-full">
                 {getBMM}
             </div>
@@ -226,11 +234,17 @@ interface Props {
 
 export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     const [firstIntermediaryData, setFirstIntermediaryData] = React.useState<first_intermediary_table[]>([]);
-    const [selectedSavingPerformanceIndex, setSelectedSavingPerformanceIndex] = React.useState(1);
-    const currentMoment = moment(latestLiveDate, 'MM/YYYY');
     const [selectedTab, setSelectedTab] = React.useState<'kwh' | 'saving'>('kwh');
+    const currentMoment = moment(latestLiveDate, 'MM/YYYY');
     const [selectedMonth, setSelectedMonth] = React.useState(currentMoment.format('MM'));
     const [selectedYear, setSelectedYear] = React.useState(currentMoment.format('YYYY'));
+    const [measuredSavings, setMeasuredSavings] = React.useState<{
+        measuredSavingsExpense: number,
+        measuredSavingsKwh: number,
+    }>({
+        measuredSavingsExpense: 0,
+        measuredSavingsKwh: 0,
+    });
     const getFirstIntermediaryQuery = gql`
     query First_intermediary_tables($where: First_intermediary_tableWhereInput) {
         first_intermediary_tables(where: $where) {
@@ -257,7 +271,16 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
       }
     `;
 
+    const getFindManyResultsQuery = gql`
+        query FindManyResults($where: ResultsWhereInput) {
+            findManyResults(where: $where) {
+            outlet_measured_savings_kWh
+            outlet_measured_savings_expenses
+        }
+    }`;
+
     const getFirstIntermediaryResult = useLazyQuery(getFirstIntermediaryQuery);
+    const getFindManyresultsResult = useLazyQuery(getFindManyResultsQuery);
 
     const getLastSevenDays = (currentMoment: moment.Moment): moment.Moment[] => {
         const momentDaysArray: moment.Moment[] = [];
@@ -294,76 +317,15 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     }
                 }
             };
-            // switch (selectedSavingPerformanceIndex) {
-            //     case 0: variable = {
-            //         "variables": {
-            //             "where": {
-            //                 "AND": [
-            //                     {
-            //                         "outlet_month_year": {
-            //                             "in": [currentMoment.clone().subtract(1, 'months').format("MM/YYYY"), currentMoment.clone().subtract(2, 'months').format("MM/YYYY"), currentMoment.format("MM/YYYY")]
-            //                         },
-            //                         "outlet_id": {
-            //                             "equals": parseInt(currentOutletID)
-            //                         }
-            //                     }
-            //                 ],
-
-            //                 // "outlet_id": {
-            //                 //     "equals": parseInt(currentOutletID)
-            //                 // }
-
-            //             }
-            //         }
-            //     }; break;
-            //     case 1: variable = {
-            //         "variables": {
-            //             "where": {
-            //                 "AND": [
-            //                     {
-            //                         "outlet_month_year": {
-            //                             "equals": currentMoment.format("MM/YYYY")
-            //                         },
-            //                         "outlet_id": {
-            //                             "equals": parseInt(currentOutletID)
-            //                         }
-            //                     }
-            //                 ],
-
-            //                 // "outlet_id": {
-            //                 //     "equals": parseInt(currentOutletID)
-            //                 // }
-
-            //             }
-            //         }
-            //     }; break;
-            //     default: variable = {
-            //         "variables": {
-            //             "where": {
-            //                 "AND": [
-            //                     {
-            //                         "OR": getLastSevenDays(currentMoment).map(mom => {
-            //                             return {
-            //                                 "outlet_month_year": {
-            //                                     "equals": mom.format("MM/YYYY")
-            //                                 },
-            //                                 "day_of_month": {
-            //                                     "equals": mom.format("D")
-            //                                 }
-            //                             }
-            //                         }),
-            //                         "outlet_id": {
-            //                             "equals": parseInt(currentOutletID)
-            //                         }
-            //                     }
-            //                 ]
-            //             }
-            //         }
-            //     }; break;
-            // }
         }
         return variable;
-    }, [currentOutletID, latestLiveDate, selectedSavingPerformanceIndex]);
+    }, [currentOutletID, latestLiveDate]);
+
+    React.useEffect(() => {
+        const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+        setSelectedMonth(currentMoment.format('MM'));
+        setSelectedYear(currentMoment.format('YYYY'));
+    }, [latestLiveDate]);
 
     React.useEffect(() => {
         if (currentOutletID) {
@@ -391,11 +353,48 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     setFirstIntermediaryData(sortDat);
                 }
             });
+
+            getFindManyresultsResult[0]({
+                "variables": {
+                    "where": {
+                        "AND": [
+                            {
+                                "outlet_date": {
+                                    "contains": dateValueForQuery(selectedMonth, selectedYear)
+                                },
+                                "outlet_id": {
+                                    "equals": parseInt(currentOutletID)
+                                }
+                            }
+                        ],
+                    }
+                }
+            }).then(
+                result => {
+                    if (result.data && result.data.findManyResults) {
+                        const cloned_results: any[] = cloneDeep(result.data.findManyResults);
+                        const totalMeasuredSaving = cloned_results.reduce((pv, cv) => {
+                            pv.measuredSavingsKwh = getInDecimal(Number(cv.outlet_measured_savings_kWh) + Number(pv.measuredSavingsKwh));
+                            pv.measuredSavingsExpense = getInDecimal(Number(cv.outlet_measured_savings_expenses) + Number(pv.measuredSavingsExpense));
+
+                            return pv;
+                        }, {
+                            measuredSavingsExpense: 0,
+                            measuredSavingsKwh: 0,
+                        });
+                        setMeasuredSavings(totalMeasuredSaving);
+                    }
+                }
+            )
         } else {
             setFirstIntermediaryData([]);
+            setMeasuredSavings({
+                measuredSavingsExpense: 0,
+                measuredSavingsKwh: 0,
+            })
         }
 
-    }, [currentOutletID, selectedSavingPerformanceIndex, selectedMonth, selectedYear]);
+    }, [currentOutletID, selectedMonth, selectedYear]);
 
     const getChartData = React.useMemo(() => {
         if (selectedTab === 'kwh') {
@@ -417,7 +416,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     label: 'Measured Savings',
                     backgroundColor: 'rgb(191 219 254)',
                     data: firstIntermediaryData.map(data => {
-                        return getInDecimal(parseFloat(data.all_eqpt_without_TP_kWh || "0") - parseFloat(data.all_eqpt_with_TP_kWh || "0"));
+                        return (getInDecimal(parseFloat(data.all_eqpt_without_TP_kWh || "0")) - getInDecimal(parseFloat(data.all_eqpt_with_TP_kWh || "0")));
                     }),
                     barThickness: 15,
                     order: 3,
@@ -450,43 +449,6 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                     barThickness: 15,
                     order: 2,
                 },
-                // {
-                //     type: 'line' as const,
-                //     label: 'KE Saving Expenses',
-                //     lineTension: 0,
-                //     borderColor: 'rgb(255, 99, 132)',
-                //     borderWidth: 2,
-                //     // fill: true,
-                //     // backgroundColor: (context: ScriptableContext<"line">) => {
-                //     //     const ctx = context.chart.ctx;
-                //     //     var gradient = ctx.createLinearGradient(0, 0, 0, 200);
-                //     //     gradient.addColorStop(0, 'rgba(255, 218, 225, 1)');
-                //     //     gradient.addColorStop(1, 'rgba(255, 255, 255,0)');
-                //     //     return gradient;
-                //     // },
-                //     backgroundColor: 'transparent',
-                //     data: firstIntermediaryData.map(data => Math.round(parseInt(data.ke_savings_expenses || "0"))),
-                // },
-                // {
-                //     type: 'line' as const,
-                //     label: 'AC Saving Expenses',
-                //     lineTension: 0,
-                //     borderColor: 'rgb(96 165 250)',
-                //     borderWidth: 2,
-                //     // fill: true,
-                //     backgroundColor: 'transparent',
-                //     data: firstIntermediaryData.map(data => Math.round(parseInt(data.ac_savings_expenses || "0"))),
-                // },
-                // {
-                //     type: 'line' as const,
-                //     label: 'Total Saving Expenses',
-                //     lineTension: 0,
-                //     borderColor: 'rgb(191 219 254)',
-                //     borderWidth: 2,
-                //     // fill: true,
-                //     backgroundColor: 'transparent',
-                //     data: firstIntermediaryData.map(data => Math.round(parseInt(data.total_savings_expenses || "0"))),
-                // }
             ]
         }
     }, [selectedTab, firstIntermediaryData]);
@@ -549,24 +511,26 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
         }
     }
 
-    //Select the month function
-
-    const handleMonthSelect = (event: any) => {
-        setSelectedMonth(event.target.value)
-    }
-
-    //Select the year function
-    const handleYearSelect = (event: any) => {
-        setSelectedYear(event.target.value)
-    }
-
     return (
         <div className="flex flex-col gap-4 px-4">
             <div className="flex justify-between items-baseline">
-                <div className='flex flex-row gap-x-2 text-xs font-extrabold text-custom-gray my-4'>
-                    {/* <button onClick={e => { setSelectedSavingPerformanceIndex(0) }} className={`${selectedSavingPerformanceIndex === 0 ? 'active-sp ' : ''}p-2`}>Last 3 Months</button>
-                    <button onClick={e => { setSelectedSavingPerformanceIndex(1) }} className={`${selectedSavingPerformanceIndex === 1 ? 'active-sp ' : ''}p-2`}>Last Month</button>
-                    <button onClick={e => { setSelectedSavingPerformanceIndex(2) }} className={`${selectedSavingPerformanceIndex === 2 ? 'active-sp ' : ''}p-2`}>Last Week</button> */}
+                <div className='flex flex-row gap-x-2 my-4'>
+                    <div className='flex flex-col'>
+                        <CardHeader Titles={['Measured Savings']} />
+                        <div className='flex flex-row items-baseline'>
+                            <div className='mr-4'>
+                                <span className="font-bold text-3xl text-custom-blue-card-font">{measuredSavings?.measuredSavingsKwh}</span>
+                                <sub className="text-extra-small text-custom-blue-card-font font-thin mr-1">kWh</sub>
+                            </div>
+
+                            <span className="font-bold text-3xl text-custom-blue-card-font">${measuredSavings?.measuredSavingsExpense}</span>
+                        </div>
+                    </div>
+
+                    {/* <h2>{measuredSavings?.measuredSavingsExpense}</h2>
+                    <h2>{measuredSavings?.measuredSavingsKwh}</h2> */}
+                </div>
+                <div className='flex flex-row gap-x-2 text-xs'>
                     <div className="grid grid-cols-2">
                         <button onClick={(e) => { setSelectedTab('kwh'); }} className={selectedTab === 'kwh' ? "bg-custom-lightblue text-custom-darkblue rounded-r-none rounded-l-lg px-4 py-4" : "bg-gray-100 rounded-r-none rounded-lg px-4 py-4"}>
                             kWh
@@ -575,41 +539,29 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
                             $
                         </button>
                     </div>
-                </div>
-                <div className='flex flex-row gap-x-2 text-xs'>
-                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-[115px] p-2.5 ">
-                        {/* <option value="All">Month</option> */}
-                        {/* <option value="01">January</option>
-                        <option value="02">February</option>
-                        <option value="03">March</option>
-                        <option value="04">April</option>
-                        <option value="05">May</option>
-                        <option value="06">June</option>
-                        <option value="07">July</option>
-                        <option value="08">August</option>
-                        <option value="09">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option> */}
-                        {getMonths(latestLiveDate || '', selectedYear).map(mon => {
-                            return <option key={mon.value} value={mon.value}>{mon.display}</option>
-                        })}
-                    </select>
-                    <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        {/* <option value="All">Year</option> */}
-                        {/* <option value="2020">2020</option>
-                        <option value="2021">2021</option> */}
-                        <option value="2022">2022</option>
-                        <option value="2023">2023</option>
-                    </select>
-                    {/* <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
-                        <option>Start Date</option>
-                        <option>Start Date</option>
-                    </select>
-                    <select className={`outline-none px-2 py-1 border-2 rounded-lg h-11`}>
-                        <option>End Date</option>
-                        <option>End Date</option>
-                    </select> */}
+                    {/* <DatePicker
+                        placeholder="Select date"
+                        value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
+                        onChange={(value) => {
+                            if (value) {
+                                setSelectedMonth(zeroPad(value.month() + 1, 2));
+                                setSelectedYear(value.year().toString());
+                            }
+                        }}
+                        clearIcon={false}
+                        disabledDate={(date) => {
+                            const latestLiveDateInDayjs = dayjs(latestLiveDate, 'MM/YYYY');
+                            if (date.year() < 2022 || date.year() > 2023) {
+                                return true;
+                            } else if (date.isAfter(latestLiveDateInDayjs)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }}
+                        format={'MM/YYYY'}
+                        picker={'month'}
+                    ></DatePicker> */}
                 </div>
 
             </div>
@@ -622,8 +574,9 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     // const labels = ['10', '10.5', '11', '11.5', '12', '12.5', '13', '13.5', '14','14.5','15','15.5','16','16.5','17','17.5','18','18.5','19','19.5','20','20.5','21','21.5','22'];
     const [secondaryIntermediary, setSecondIntermediary] = React.useState<secondary_intermediary_table[]>([]);
     const [selectedEqptEnergyIndex, setSelectedEqptEnergyIndex] = React.useState(1);
-    const [selectedMonth, setSelectedMonth] = React.useState(moment().format('MM'));
-    const [selectedYear, setSelectedYear] = React.useState("2023");
+    const latestLiveDateMoment = moment(latestLiveDate, 'MM/YYYY');
+    const [selectedMonth, setSelectedMonth] = React.useState(latestLiveDateMoment.format('MM'));
+    const [selectedYear, setSelectedYear] = React.useState(latestLiveDateMoment.format('YYYY'));
     const currentMoment = moment(selectedMonth, 'DD/MM/YYYY');
     const getSecondIntermediaryQuery = gql`
     query Secondary_intermediary_tables($where: Secondary_intermediary_tableWhereInput) {
@@ -716,6 +669,12 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
         }
     }, [currentOutletID, selectedMonth, selectedYear, selectedEqptEnergyIndex])
 
+    React.useEffect(() => {
+        const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+        setSelectedMonth(currentMoment.format('MM'));
+        setSelectedYear(currentMoment.format('YYYY'));
+    }, [latestLiveDate]);
+
     const labels = React.useMemo(() => {
         return secondaryIntermediary.map(data => {
             if (data.time) {
@@ -799,17 +758,6 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
         }
     }
 
-    //Select the month function
-
-    const handleMonthSelect = (event: any) => {
-        setSelectedMonth(event.target.value)
-    }
-
-    //Select the year function
-    const handleYearSelect = (event: any) => {
-        setSelectedYear(event.target.value)
-    }
-
     const getValidDate = React.useMemo(() => {
         if (selectedMonth === 'All' && selectedYear === 'All') {
             return 'All';
@@ -831,20 +779,31 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
                     <button onClick={e => { setSelectedEqptEnergyIndex(1) }} className={selectedEqptEnergyIndex === 1 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last 3 Months</button>
                     <button onClick={e => { setSelectedEqptEnergyIndex(2) }} className={selectedEqptEnergyIndex === 2 ? "bg-custom-lightblue text-custom-darkblue rounded-lg p-2" : "p-2"}>Last Month</button>
     </div> */}
-                <div className='flex flex-row gap-x-2 text-xs'>
-                    <select id="months" value={selectedMonth} onChange={handleMonthSelect} className="bg-neutral-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                        {getMonths(latestLiveDate || '', selectedYear).map(mon => {
-                            return <option key={mon.value} value={mon.value}>{mon.display}</option>
-                        })}
-                    </select>
-                    <select id="years" value={selectedYear} onChange={handleYearSelect} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        {/* <option value="All">Year</option> */}
-                        {/* <option value="2020">2020</option>
-                        <option value="2021">2021</option> */}
-                        <option value="2022">2022</option>
-                        <option value="2023">2023</option>
-                    </select>
-                </div>
+                {/* <div className='flex flex-row gap-x-2 text-xs'>
+                    <DatePicker
+                        placeholder="Select date"
+                        value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
+                        onChange={(value) => {
+                            if (value) {
+                                setSelectedMonth(zeroPad(value.month() + 1, 2));
+                                setSelectedYear(value.year().toString());
+                            }
+                        }}
+                        clearIcon={false}
+                        disabledDate={(date) => {
+                            const latestLiveDateInDayjs = dayjs(latestLiveDate, 'MM/YYYY');
+                            if (date.year() < 2022 || date.year() > 2023) {
+                                return true;
+                            } else if (date.isAfter(latestLiveDateInDayjs)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }}
+                        format={'MM/YYYY'}
+                        picker={'month'}
+                    ></DatePicker>
+                </div> */}
 
             </div>
             <div className='flex flex-col'>
@@ -857,30 +816,24 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
 }
 
 const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
-    const [selectedCard, setSelectedCard] = React.useState<DropdownProps>({
-        display: <CardHeader className={'text-base'} Titles={['Savings Performance']} />,
-        value: 'savingPerformance',
-    });
-
-    const titleDropdowns: DropdownProps[] = [
-        {
-            display: <CardHeader Titles={['Savings Performance']} className={'text-base'} />,
-            value: 'savingPerformance',
-        },
-        {
-            display: <CardHeader Titles={['Eqpt. Energy Baseline']} className={'text-base'} SubTitleAlign="end" SubTitle={<span className='text-custom-subtitle'>Avg. Hourly</span>} />,
-            value: 'energyBaseline',
-        }
-    ]
+    const [selectedCard, setSelectedCard] = React.useState<string>("savingPerformance");
+    const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+    const [selectedMonth, setSelectedMonth] = React.useState(currentMoment.format('MM'));
+    const [selectedYear, setSelectedYear] = React.useState(currentMoment.format('YYYY'));
 
     const selectedContent = React.useMemo(() => {
-        if (selectedCard.value === "savingPerformance") return <SavingPerformance latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />;
-        else return <EqptEnergyBaseline latestLiveDate={latestLiveDate} currentOutletID={currentOutletID} />
-    }, [selectedCard, latestLiveDate, currentOutletID])
+        if (selectedCard === "savingPerformance") return <SavingPerformance latestLiveDate={moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY')} currentOutletID={currentOutletID} />;
+        else return <EqptEnergyBaseline latestLiveDate={moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY')} currentOutletID={currentOutletID} />
+    }, [selectedCard, latestLiveDate, currentOutletID, selectedMonth, selectedYear])
+
+    const getTooltip = React.useMemo(() => {
+        if (selectedCard === 'savingPerformance') return <TooltipIcon text='Energy consumption with and without Tablepointer'></TooltipIcon>
+        else return <TooltipIcon text={`Represents the individual equipment's energy usage without TablePointer over a typical hour for statistical best-fit averaging,and is continuously and dynamically sampled to ensure its validity over time`}></TooltipIcon>
+    }, [selectedCard])
 
     return (
         <div className="flex flex-col gap-4">
-            <CustomizedDropDown
+            {/* <CustomizedDropDown
                 data={titleDropdowns}
                 selected={selectedCard}
                 inputType={'dropdown'}
@@ -888,7 +841,43 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element =
                 name={"titleSelection"}
                 setSelected={setSelectedCard}
                 hideBorder={true}
-            />
+            /> */}
+
+            <div className='flex flex-row gap-x-2 items-center justify-between'>
+                <div className='flex items-center gap-x-2'>
+                    <Radio.Group size="large" buttonStyle="solid" onChange={((event) => { setSelectedCard(event.target.value) })} value={selectedCard}>
+                        <Radio.Button value="savingPerformance">Savings Performance</Radio.Button>
+                        <Radio.Button value="energyBaseline">Eqpt. Energy Baseline</Radio.Button>
+                    </Radio.Group>
+                    {getTooltip}
+                </div>
+                <div>
+                    <DatePicker
+                        placeholder="Select date"
+                        value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
+                        onChange={(value) => {
+                            if (value) {
+                                setSelectedMonth(zeroPad(value.month() + 1, 2));
+                                setSelectedYear(value.year().toString());
+                            }
+                        }}
+                        clearIcon={false}
+                        disabledDate={(date) => {
+                            const latestLiveDateInDayjs = dayjs(latestLiveDate, 'MM/YYYY');
+                            if (date.year() < 2022 || date.year() > 2023) {
+                                return true;
+                            } else if (date.isAfter(latestLiveDateInDayjs)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }}
+                        format={'MM/YYYY'}
+                        picker={'month'}
+                    ></DatePicker>
+                </div>
+
+            </div>
 
             {selectedContent}
 
@@ -1058,80 +1047,45 @@ const StatusHorizontalCard = ({ Title, SubTitle, Value, textClassName, Prefix, P
 interface EqptProps {
     outlet?: outlet;
     latestLiveDate: string;
+    renderedData: any
 }
 
-const Equipment = ({ outlet, latestLiveDate }: EqptProps): JSX.Element => {
+const Equipment = ({ outlet, latestLiveDate, renderedData }: EqptProps): JSX.Element => {
     const [selectedType, setSelectedType] = React.useState("ke");
-    const renderedData = React.useMemo(() => {
+    const [show, setShow] = React.useState(true);
 
-        const renderedData = {
-            quantity: 0,
-            baseline: 0,
-            energySaved: 0,
-            costSaved: 0,
-        }
-        if (selectedType === 'ke') {
-            if (outlet) {
-
-                if (outlet.outlet_device_ex_fa_input) {
-                    renderedData.quantity = outlet.outlet_device_ex_fa_input.length;
-                }
-                if (outlet.results && outlet.results.length > 0) {
-                    renderedData.baseline = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_measured_savings_kWh || "0") }, 0);
-                    renderedData.energySaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ke_eqpt_energy_baseline_avg_hourly_kW || "0") }, 0);
-                    renderedData.costSaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "0") }, 0);
-                }
-                if (outlet.first_intermediary_table && outlet.first_intermediary_table.length > 0) {
-                    renderedData.baseline = Number(outlet.first_intermediary_table[0].ke_baseline_kW);
-                }
-            }
-
+    React.useEffect(()=>{
+        if(renderedData.baselineKE > 0) {
+            setSelectedType('ke');
         } else {
-            if (outlet) {
-                if (outlet.outlet_device_ac_input) {
-                    renderedData.quantity = outlet.outlet_device_ac_input.length;
-                }
-                if (outlet.results && outlet.results.length > 0) {
-                    renderedData.baseline = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_measured_savings_kWh || "") }, 0);
-                    renderedData.energySaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.ac_eqpt_energy_baseline_avg_hourly_kW || "") }, 0);
-                    renderedData.costSaved = outlet.results.reduce((acc, item) => { return acc += parseInt(item.outlet_measured_savings_expenses || "") }, 0);
-                }
-                if (outlet.first_intermediary_table && outlet.first_intermediary_table.length > 0) {
-                    renderedData.baseline = Number(outlet.first_intermediary_table[0].ac_baseline_kWh);
-                }
-            }
+            setSelectedType('ac');
         }
-        return renderedData;
-    }, [selectedType, outlet]);
+    },[renderedData]);
 
-    return (
-        <div className="flex flex-col gap-4 h-3/6">
-            <div className="flex justify-between items-baseline">
-                <CardHeader Titles={['Equipment']} className='text-sm' />
-                <select value={selectedType} onChange={((event) => { setSelectedType(event.currentTarget.value) })} className={`outline-none px-2 py-1 border-2 rounded-lg text-xs w-1/2`}>
-                    <option value="ke">Kitchen Exhaust</option>
-                    {/* <option value="ac">Air Con</option> */}
-                </select>
-            </div>
-            <div className="2xl:grid grid gap-y-2">
-                <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`} Value={getInDecimal(renderedData.baseline,2)} Postfix={'kW'} />
-                {/* <StatusCard Title={'Last Available Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.quantity)} />
-                <StatusCard Title={'Savings @ Tariff'} textClassName='text-l' className='h-3/4' SubTitle={`As of ${latestLiveDate}`} Value={numberWithCommas(renderedData.baseline)} Postfix={'kW'} /> */}
-
-                {/* <StatusCard Title={'Quantity'} textClassName='text-l' className='bg-custom-blue-card text-custom-blue-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.quantity)} /> */}
-
-                {/* <StatusCard Title={'Energy Saved'} textClassName='text-l' className='bg-custom-green-card text-custom-green-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.energySaved)} Postfix={'kWh'} />
-                <StatusCard Title={'Cost Saved'} textClassName='text-l' className='bg-custom-orange-card text-custom-orange-card-font h-3/4 my-1' Value={numberWithCommas(renderedData.costSaved)} Prefix={'$'} /> */}
-            </div>
+    return (<div className="flex flex-col gap-4 h-3/6">
+        <div className="flex justify-between items-baseline">
+            <CardHeader Titles={['Equipment']} className='text-sm' />
         </div>
+        <Radio.Group className='w-full text-extraSmall' size="small" buttonStyle="solid" onChange={((event) => { setSelectedType(event.target.value) })} value={selectedType} style={{ marginBottom: 8 }}>
+            {renderedData.baselineKE > 0 && <Radio.Button className={`${selectedType === 'ke' && renderedData.baselineAC == 0 ? '!text-black' : ''}`} disabled={renderedData.baselineAC == 0} value="ke">Kitchen Exhaust</Radio.Button>}
+            {renderedData.baselineAC > 0 && <Radio.Button className={`${selectedType === 'ac' && renderedData.baselineKE == 0 ? '!text-black' : ''}`} disabled={renderedData.baselineKE == 0} value="ac">Air Con</Radio.Button>}
+        </Radio.Group>
+        <div className="2xl:grid grid gap-y-2">
+            <StatusHorizontalCard Title={'Baseline'} textClassName='text-sm' className='bg-custom-orange-card text-custom-orange-card-font' SubTitle={`As of ${latestLiveDate}`}
+                Value={getInDecimal(selectedType == 'ke' ? renderedData.baselineKE : renderedData.baselineAC, 2)} Postfix={'kW'} />
+        </div>
+    </div>
     )
 }
 
-const ValueFirst = ({ title, subTitle, value, valueColor }: any): JSX.Element => {
+const ValueFirst = ({ title, tooltip, subTitle, value, valueColor }: any): JSX.Element => {
     return (
         <div className="flex flex-col gap-y-2">
             <div>
-                <CardHeader Titles={[title]} />
+                <div className='flex flex-row justify-between'>
+                    <CardHeader Titles={[title]} />
+                    {tooltip && <TooltipIcon text={tooltip}></TooltipIcon>}
+                </div>
                 <span className="text-sm text-custom-gray font-thin self-start">{subTitle}</span>
                 {/* <span className='text-custom-gray'>As of <span className="text-custom-darkblue">{subTitle}</span></span> */}
             </div>
@@ -1157,9 +1111,8 @@ const LiveOutlet = ({ Value }: any): JSX.Element => {
     )
 }
 interface UsageCardProps {
-    Title?: String,
-    PreSubTitle?: String,
-    PostSubTitle?: any,
+    Title?: string,
+    TooltipText?: string | JSX.Element,
     FirstPrefix?: any,
     FirstValue?: any,
     FirstPostfix?: any,
@@ -1183,9 +1136,14 @@ interface EquipmentEnergyProps {
  */
 const EquipmentEnergy = ({ WithTableKw, WithTableExpense, WithoutTableKw, WithoutTableExpense }: EquipmentEnergyProps): JSX.Element => {
     return (
-        <div className='flex flex-row gap-2 justify-between w-full h-full' >
-            <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' PreSubTitle='W/O' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
-            <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' PreSubTitle='With' PostSubTitle="TablePointer" Title='Equipment Energy Usage' FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
+        <div>
+            <h2 className="font-bold text-sm">
+                Equipment Energy Usage
+            </h2>
+            <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='W/O TablePointer' TooltipText={`Amount of energy your equipment will consume without TablePointer's solution`} FirstValue={WithoutTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithoutTableExpense} Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-green-card-font' Title='With TablePointer' TooltipText={`Amount of energy your equipment consumed with TablePointer's solution`} FirstValue={WithTableKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={WithTableExpense} Icon={false} />
+            </div>
         </div>
     )
 }
@@ -1201,10 +1159,14 @@ interface SavingEnergyProps {
  */
 const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: SavingEnergyProps): JSX.Element => {
     return (
+
         <div>
-            <div className='flex flex-row gap-2 justify-between w-full h-full' >
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
-                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
+            <h2 className="font-bold text-sm">
+                Savings
+            </h2>
+            <div className='flex flex-row gap-2 justify-between w-full h-full mt-2' >
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Measured Savings' TooltipText={<p>Σ (Equipment Energy Usage Without TablePointer - Equipment Energy Usage With TablePointer) time<br /><br />Automatically measured when the individual equipment is in use by the outlet andenergy saving happens<br /><br />Savings Co-share Invoicing is based on Measured Energy Savings and the Last Available Tariff </p>} FirstValue={MeasureKw} FirstPostfix="kWh" SecondPrefix="$" SecondValue={MeasureExpense} Position="vertical" Icon={false} />
+                <UsageCard BgColor={`bg-custom-blue-card`} TextColor='text-custom-blue-card-font' Title='Savings @ Tariff Increase' TooltipText={`The amount of savings generated assuming at the regulated tariff rate as provided by the Energy Market Authority`} FirstValue={"$" + TariffKw} SecondPrefix="$" SecondValue={TariffExpense} Position="vertical" Icon={false} />
             </div>
         </div>
     )
@@ -1213,10 +1175,10 @@ const SavingEnergy = ({ MeasureKw, MeasureExpense, TariffExpense, TariffKw }: Sa
 /**
  * Usage Card
  */
-const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, TextColor, Icon = false, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
+const UsageCard = ({ Title, TooltipText, FirstPrefix, FirstValue, FirstPostfix, SecondPrefix, SecondValue, SecondPostfix, BgColor, TextColor, Icon = false, Position = 'horizontal' }: UsageCardProps): JSX.Element => {
     return (
-        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray ${Position !== 'vertical' ? 'justify-between gap-8' : ''} h-auto 2xl:h-full w-2/3 ${BgColor}`}>
-            <div className={'flex flex-col'}>
+        <div className={`flex flex-col p-2 rounded-lg border-2 border-custom-lightgray h-auto 2xl:h-full w-2/3 ${BgColor}`}>
+            {/* <div className={'flex flex-col'}>
                 {
                     (Icon == true) ?
                         <div className="flex">
@@ -1230,37 +1192,22 @@ const UsageCard = ({ Title, PreSubTitle, PostSubTitle, FirstPrefix, FirstValue, 
                     <span className={`font-bold text-sm mr-2`}>{PreSubTitle}</span>
                     <span className={`text-sm font-thin`}>{PostSubTitle}</span>
                 </div>
+            </div> */}
+            <div className="flex justify-between">
+                <h2 className="font-bold text-sm text">{Title} </h2> {TooltipText && <TooltipIcon text={TooltipText}></TooltipIcon>}
             </div>
-            {
-                (Position == 'vertical') ?
-                    <div className='flex flex-col gap-5 relative'>
-                        <div className="text-left">
-                            {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
-                            <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
-                            {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
-                        </div>
-                        <svg className="absolute left-0 right-0 mx-auto" width="44" height="80" viewBox="0 0 44 112" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <line y1="-0.25" x2="118.955" y2="-0.25" transform="matrix(0.359554 -0.933124 0.860639 0.509216 0.714844 112)" stroke="#999999" strokeWidth="0.5" />
-                        </svg>
-                        <div className="text-right">
-                            {SecondPrefix && <span className={`font-bold text-xl ${TextColor}`}>{SecondPrefix}</span>}
-                            <span className={`font-bold text-xl ${TextColor}`}>{SecondValue}</span>
-                            {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
-                        </div>
-                    </div> :
-                    <div className='flex flex-row justify-between mt-4'>
-                        <div>
-                            {FirstPrefix && <span className={`font-bold text-xl ${TextColor}`}>{FirstPrefix}</span>}
-                            <span className={`font-bold text-xl ${TextColor}`}>{FirstValue}</span>
-                            {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
-                        </div>
-                        <div>
-                            {SecondPrefix && <span className={`font-bold text-xl ${TextColor}`}>{SecondPrefix}</span>}
-                            <span className={`font-bold text-xl ${TextColor}`}>{SecondValue}</span>
-                            {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
-                        </div>
-                    </div>
-            }
+            <div className='flex flex-col justify-between mt-2'>
+                <div>
+                    {FirstPrefix && <span className={`font-bold text-3xl ${TextColor}`}>{FirstPrefix}</span>}
+                    <span className={`font-bold text-3xl ${TextColor}`}>{FirstValue}</span>
+                    {FirstPostfix && <span className={`text-sm ${TextColor} mx-1`}>{FirstPostfix}</span>}
+                </div>
+                <div>
+                    {SecondPrefix && <span className={`font-bold text-3xl ${TextColor}`}>{SecondPrefix}</span>}
+                    <span className={`font-bold text-3xl ${TextColor}`}>{SecondValue}</span>
+                    {SecondPostfix && <span className={`text-sm ${TextColor} mx-1`}>{SecondPostfix}</span>}
+                </div>
+            </div>
 
         </div>
     )
