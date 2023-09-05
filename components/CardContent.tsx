@@ -41,7 +41,7 @@ import {
 import { Chart } from 'react-chartjs-2';
 import { ChartJSOrUndefined } from 'react-chartjs-2/dist/types';
 import CustomizedDropDown from './CustomizedDropDown';
-import { DropdownProps, first_intermediary_table, outlet, results, secondary_intermediary_table } from '../common/types';
+import { date_range_customer_dashboards_table, DropdownProps, first_intermediary_table, outlet, results, secondary_intermediary_table } from '../common/types';
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
 import { cloneDeep } from '@apollo/client/utilities';
@@ -229,13 +229,13 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
 
 interface Props {
     currentOutletID: string;
-    latestLiveDate?: string;
+    latestLiveDate?: date_range_customer_dashboards_table;
 }
 
 export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     const [firstIntermediaryData, setFirstIntermediaryData] = React.useState<first_intermediary_table[]>([]);
     const [selectedTab, setSelectedTab] = React.useState<'kwh' | 'saving'>('kwh');
-    const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+    const currentMoment = moment(latestLiveDate?.end_date, 'MM/YYYY');
     const [selectedMonth, setSelectedMonth] = React.useState(currentMoment.format('MM'));
     const [selectedYear, setSelectedYear] = React.useState(currentMoment.format('YYYY'));
     const [measuredSavings, setMeasuredSavings] = React.useState<{
@@ -293,7 +293,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
 
     const getFirstIntermediaryVariable = React.useMemo(() => {
         let variable = {};
-        const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+        const currentMoment = moment(latestLiveDate?.end_date, 'MM/YYYY');
         if (currentOutletID) {
 
             variable = {
@@ -322,7 +322,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): J
     }, [currentOutletID, latestLiveDate]);
 
     React.useEffect(() => {
-        const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+        const currentMoment = moment(latestLiveDate?.end_date, 'MM/YYYY');
         setSelectedMonth(currentMoment.format('MM'));
         setSelectedYear(currentMoment.format('YYYY'));
     }, [latestLiveDate]);
@@ -574,7 +574,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     // const labels = ['10', '10.5', '11', '11.5', '12', '12.5', '13', '13.5', '14','14.5','15','15.5','16','16.5','17','17.5','18','18.5','19','19.5','20','20.5','21','21.5','22'];
     const [secondaryIntermediary, setSecondIntermediary] = React.useState<secondary_intermediary_table[]>([]);
     const [selectedEqptEnergyIndex, setSelectedEqptEnergyIndex] = React.useState(1);
-    const latestLiveDateMoment = moment(latestLiveDate, 'MM/YYYY');
+    const latestLiveDateMoment = moment(latestLiveDate?.end_date, 'MM/YYYY');
     const [selectedMonth, setSelectedMonth] = React.useState(latestLiveDateMoment.format('MM'));
     const [selectedYear, setSelectedYear] = React.useState(latestLiveDateMoment.format('YYYY'));
     const currentMoment = moment(selectedMonth, 'DD/MM/YYYY');
@@ -670,7 +670,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     }, [currentOutletID, selectedMonth, selectedYear, selectedEqptEnergyIndex])
 
     React.useEffect(() => {
-        const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+        const currentMoment = moment(latestLiveDate?.end_date, 'MM/YYYY');
         setSelectedMonth(currentMoment.format('MM'));
         setSelectedYear(currentMoment.format('YYYY'));
     }, [latestLiveDate]);
@@ -817,13 +817,19 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
 
 const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
     const [selectedCard, setSelectedCard] = React.useState<string>("savingPerformance");
-    const currentMoment = moment(latestLiveDate, 'MM/YYYY');
+    const currentMoment = moment(latestLiveDate?.end_date, 'MM/YYYY');
     const [selectedMonth, setSelectedMonth] = React.useState(currentMoment.format('MM'));
     const [selectedYear, setSelectedYear] = React.useState(currentMoment.format('YYYY'));
 
     const selectedContent = React.useMemo(() => {
-        if (selectedCard === "savingPerformance") return <SavingPerformance latestLiveDate={moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY')} currentOutletID={currentOutletID} />;
-        else return <EqptEnergyBaseline latestLiveDate={moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY')} currentOutletID={currentOutletID} />
+        if (selectedCard === "savingPerformance") return <SavingPerformance latestLiveDate={{
+            end_date: moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY'),
+            start_date: moment().format('MM/YYYY')
+        }} currentOutletID={currentOutletID} />;
+        else return <EqptEnergyBaseline latestLiveDate={{
+            end_date: moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY'),
+            start_date: moment().format('MM/YYYY')
+        }} currentOutletID={currentOutletID} />
     }, [selectedCard, latestLiveDate, currentOutletID, selectedMonth, selectedYear])
 
     const getTooltip = React.useMemo(() => {
@@ -863,10 +869,9 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element =
                         }}
                         clearIcon={false}
                         disabledDate={(date) => {
-                            const latestLiveDateInDayjs = dayjs(latestLiveDate, 'MM/YYYY');
-                            if (date.year() < 2022 || date.year() > 2023) {
-                                return true;
-                            } else if (date.isAfter(latestLiveDateInDayjs)) {
+                            const latestLiveDateInDayjs = dayjs(latestLiveDate?.end_date, 'MM/YYYY');
+                            const latestStartDateInDayjs = dayjs(latestLiveDate?.start_date, 'MM/YYYY');
+                            if (date.isAfter(latestLiveDateInDayjs) || date.isBefore(latestStartDateInDayjs)) {
                                 return true;
                             } else {
                                 return false;
@@ -1054,13 +1059,13 @@ const Equipment = ({ outlet, latestLiveDate, renderedData }: EqptProps): JSX.Ele
     const [selectedType, setSelectedType] = React.useState("ke");
     const [show, setShow] = React.useState(true);
 
-    React.useEffect(()=>{
-        if(renderedData.baselineKE > 0) {
+    React.useEffect(() => {
+        if (renderedData.baselineKE > 0) {
             setSelectedType('ke');
         } else {
             setSelectedType('ac');
         }
-    },[renderedData]);
+    }, [renderedData]);
 
     return (<div className="flex flex-col gap-4 h-3/6">
         <div className="flex justify-between items-baseline">

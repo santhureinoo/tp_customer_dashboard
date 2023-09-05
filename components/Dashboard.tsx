@@ -3,7 +3,7 @@ import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas, zeroPad }
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 import moment from 'moment';
-import { customer, global_input, group, invoice, outlet, outlet_month, reports, results } from "../common/types";
+import { customer, date_range_customer_dashboards_table, global_input, group, invoice, outlet, outlet_month, reports, results } from "../common/types";
 import { BenchMarkComparisonCard, ChartCard, EqptEnergyBaseline, EquipmentCard, EquipmentEnergyCard, LiveOutletCard, RankAndOutletCard, RemarksCard, SavingEnergyCard, SavingMeterCard, SavingPerformance, SustainPerformanceCard, ValueFirstCard, YearlyEnergyCard } from "./CardContent";
 import ClientOnly from "./ClientOnly";
 import { v4 as uuidv4 } from 'uuid';
@@ -16,7 +16,10 @@ import { DatePicker } from 'antd';
 const Dashboard = ({ groupId }: any): JSX.Element => {
     const [currentCustomerID, setCurrentCustomerID] = React.useState(1);
     const [currentPage, setCurrentPage] = React.useState<'Summary' | 'Outlet'>('Summary');
-    const [lastestLiveDate, setLastestLiveDate] = React.useState('');
+    const [lastestLiveDate, setLastestLiveDate] = React.useState<date_range_customer_dashboards_table>({
+        start_date: `01/${moment().format('MM/YYYY')}`,
+        end_date: `01/${moment().add('1', 'months').format('MM/YYYY')}`
+    });
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [latestOutlets, setLatestOutlets] = React.useState<outlet[]>([]);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
@@ -85,10 +88,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
 
     const getFindFirstLastestReportDateQuery = gql`
-    query FindFirstLastest_report_date {
-        findFirstLastest_report_date {
-          date_id
-          lastest_report_month_year
+    query FindFirstDate_range_customer_dashboard {
+        findFirstDate_range_customer_dashboard {
+          id
+          start_date
+          end_date
+          updated_at
         }
       }
     `;
@@ -177,10 +182,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             "equals": groupId
                         },
                         "year": {
-                            "equals": lastestLiveDate.split('/')[1]
+                            "equals": lastestLiveDate.end_date.split('/')[1]
                         },
                         "month": {
-                            "equals": lastestLiveDate.split('/')[0]
+                            "equals": lastestLiveDate.end_date.split('/')[0]
                         }
                     }
                 }
@@ -498,17 +503,17 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             // Per month calculation
             const currentTotalKWHs = currData.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
-                const currentDate = moment(lastestLiveDate, 'MM/YYYY');
+                const currentDate = moment(lastestLiveDate.end_date, 'MM/YYYY');
                 return resultDate.diff(currentDate) <= 0;
             }).map(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
-                const currentDate = moment(lastestLiveDate, 'MM/YYYY');
+                const currentDate = moment(lastestLiveDate.end_date, 'MM/YYYY');
                 const diff = resultDate.diff(currentDate);
                 return {
                     MinKWH: diff === 0 ? parseFloat(dat.acmv_10percent_benchmark_comparison_kWh || "0") : 0,
                     MaxKWH: diff === 0 ? parseFloat(dat.acmv_25percent_benchmark_comparison_kWh || "0") : 0,
                     CurrentKHW: diff === 0 ? getInDecimal(Number(dat.outlet_measured_savings_kWh || "0")) : 0,
-                    CurrentPercent:  diff === 0 ? getInDecimal(Number(dat.outlet_measured_savings_percent || "0"), 2) : 0, 
+                    CurrentPercent: diff === 0 ? getInDecimal(Number(dat.outlet_measured_savings_percent || "0"), 2) : 0,
                     OutletSavingKHW: diff <= 0 ? parseFloat(dat.outlet_measured_savings_kWh || "0") : 0,
                     SavingTariff: diff === 0 ? parseFloat(dat.savings_tariff_expenses || "0") : 0
                 }
@@ -534,7 +539,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
             const currentTotalKWHsWithOM = currOutletMonth.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
-                const currentDate = moment(lastestLiveDate, 'MM/YYYY');
+                const currentDate = moment(lastestLiveDate.end_date, 'MM/YYYY');
                 return resultDate.diff(currentDate) == 0;
             }).map(dat => {
                 return {
@@ -556,7 +561,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             // Per year calculation
             const currentTotalYearly = currData.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
-                const currentDate = moment(lastestLiveDate, 'MM/YYYY');
+                const currentDate = moment(lastestLiveDate.end_date, 'MM/YYYY');
                 return resultDate.diff(currentDate, "years") === 0;
             }).map(dat => {
                 return {
@@ -583,17 +588,14 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
     React.useEffect(() => {
         if (getFindFirstLastestReportDateResult.data
-            && getFindFirstLastestReportDateResult.data.findFirstLastest_report_date
-            && getFindFirstLastestReportDateResult.data.findFirstLastest_report_date.lastest_report_month_year) {
-            setLastestLiveDate(getFindFirstLastestReportDateResult.data.findFirstLastest_report_date.lastest_report_month_year);
-        } else {
-            setLastestLiveDate('');
+            && getFindFirstLastestReportDateResult.data.findFirstDate_range_customer_dashboard) {
+            setLastestLiveDate(getFindFirstLastestReportDateResult.data.findFirstDate_range_customer_dashboard);
         }
     }, [getFindFirstLastestReportDateResult.data]);
 
     React.useEffect(() => {
         if (lastestLiveDate) {
-            const latestLiveDateInMoment = moment(lastestLiveDate, 'MM/YYYY');
+            const latestLiveDateInMoment = moment(lastestLiveDate.end_date, 'MM/YYYY');
             setSelectedMonth(latestLiveDateInMoment.format('MM'));
             setSelectedYear(latestLiveDateInMoment.format('YYYY'));
             getInvoice[0]({
@@ -859,10 +861,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     <ClientOnly>
                                         <div className="grid grid-cols-6 gap-2">
                                             <div className="col-span-2">
-                                                <SavingMeterCard date={moment(lastestLiveDate, 'MM/YYYY').year()} kiloWatHour={totalKWHs.OutletSavingKHW.toFixed(1)} outletId={currentOutlet?.outlet_id} />
+                                                <SavingMeterCard date={moment(lastestLiveDate.end_date, 'MM/YYYY').year()} kiloWatHour={totalKWHs.OutletSavingKHW.toFixed(1)} outletId={currentOutlet?.outlet_id} />
                                             </div>
                                             <div className="col-span-4">
-                                                <SustainPerformanceCard total={totalPerYear} year={moment(lastestLiveDate, 'MM/YYYY').year()} />
+                                                <SustainPerformanceCard total={totalPerYear} year={moment(lastestLiveDate.end_date, 'MM/YYYY').year()} />
                                             </div>
                                             <div className="flex flex-col gap-y-2">
                                                 <div>
@@ -918,10 +920,9 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     }}
                                     clearIcon={false}
                                     disabledDate={(date) => {
-                                        const latestLiveDateInDayjs = dayjs(lastestLiveDate, 'MM/YYYY');
-                                        if (date.year() < 2022 || date.year() > 2023) {
-                                            return true;
-                                        } else if (date.isAfter(latestLiveDateInDayjs)) {
+                                        const latestLiveDateInDayjs = dayjs(lastestLiveDate.end_date, 'MM/YYYY');
+                                        const latestStartDateInDayjs = dayjs(lastestLiveDate.start_date, 'MM/YYYY');
+                                        if (date.isAfter(latestLiveDateInDayjs) || date.isBefore(latestStartDateInDayjs)) {
                                             return true;
                                         } else {
                                             return false;

@@ -793,3 +793,18 @@ export interface PageCursors {
     last: PageCursor;
     previous: PageCursor;
 }
+
+export namespace date_range_customer_dashboards_tableFields {
+    export type id = number;
+    export type starte_date = string;
+    export type end_date = string;
+    export type updated_at = string;
+}
+
+export interface date_range_customer_dashboards_table {
+    [key: string]: any;
+    id?: date_range_customer_dashboards_tableFields.id;
+    start_date: date_range_customer_dashboards_tableFields.starte_date;
+    end_date: date_range_customer_dashboards_tableFields.end_date;
+    updated_at?: date_range_customer_dashboards_tableFields.updated_at;
+}
