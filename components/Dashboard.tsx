@@ -668,7 +668,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 "variables": {
                     "where": {
                         "outlet_date": {
-                            "contains": lastestLiveDate
+                            "contains": lastestLiveDate.end_date
                         },
                         "outlet_outlet_id": {
                             "in": JSON.parse(report.outlet_ids)
@@ -676,12 +676,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                     },
                     "where2": {
                         "outlet_date": {
-                            "contains": lastestLiveDate
+                            "contains": lastestLiveDate.end_date
                         }
                     },
                     "where3": {
                         "outlet_month_year": {
-                            "equals": lastestLiveDate
+                            "equals": lastestLiveDate.end_date
                         },
                         "day_of_month": {
                             "equals": '1'
