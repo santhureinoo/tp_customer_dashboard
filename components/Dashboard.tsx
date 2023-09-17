@@ -311,8 +311,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 tempUsageExpenseWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseFloat(result.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
                                 tempUsageKwWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_kW as String ? parseFloat(result.outlet_eqpt_energy_usage_without_TP_month_kW) : 0)
                                 tempUsageExpenseWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_expenses as String ? parseFloat(result.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0)
-                                tempMeasureKw += (result.outlet_measured_savings_kWh as String ? parseFloat(result.outlet_measured_savings_kWh) : 0)
-                                tempMeasureExpense += (result.outlet_measured_savings_expenses as String ? parseFloat(result.outlet_measured_savings_expenses) : 0)
+                                tempMeasureKw += tempUsageKwWOTP - tempUsageKwWithTP;
+                                tempMeasureExpense += tempUsageExpenseWOTP - tempUsageExpenseWithTP;
                                 tempTariffExpense += (result.savings_tariff_expenses as String ? parseFloat(result.savings_tariff_expenses) : 0)
                                 tempEnergySaving += (result.tp_sales_expenses as String ? parseFloat(result.tp_sales_expenses) : 0)
                                 tempCo2Saving += (result.co2_savings_kg as String ? parseFloat(result.co2_savings_kg) : 0)
@@ -957,7 +957,11 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP)} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
-                                <SavingEnergyCard MeasureKw={numberWithCommas(summaryResults.measureKw)} MeasureExpense={numberWithCommas(summaryResults.measureExpense)} TariffExpense={numberWithCommas(summaryResults.tariffExpense)} TariffKw={numberWithCommas(Number(globalSetting ? globalSetting.poss_tariff_increase : 0), 4)} />
+                                <SavingEnergyCard
+                                    MeasureKw={numberWithCommas(summaryResults.measureKw)}
+                                    MeasureExpense={numberWithCommas(summaryResults.measureExpense)}
+                                    TariffExpense={numberWithCommas(summaryResults.tariffExpense)}
+                                    TariffKw={numberWithCommas(Number(globalSetting ? globalSetting.poss_tariff_increase : 0), 4)} />
                             </div>
                         </div>
                         {
