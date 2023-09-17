@@ -286,8 +286,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             let tempUsageExpenseWithTP = 0
             let tempUsageKwWOTP = 0
             let tempUsageExpenseWOTP = 0
-            let tempMeasureKw = 0
-            let tempMeasureExpense = 0
+            // let tempMeasureKw = 0
+            // let tempMeasureExpense = 0
             let tempTariffExpense = 0
             let tempEnergySaving = 0
             let tempCo2Saving = 0
@@ -311,8 +311,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                 tempUsageExpenseWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseFloat(result.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
                                 tempUsageKwWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_kW as String ? parseFloat(result.outlet_eqpt_energy_usage_without_TP_month_kW) : 0)
                                 tempUsageExpenseWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_expenses as String ? parseFloat(result.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0)
-                                tempMeasureKw += tempUsageKwWOTP - tempUsageKwWithTP;
-                                tempMeasureExpense += tempUsageExpenseWOTP - tempUsageExpenseWithTP;
+                                // tempMeasureKw += tempUsageKwWOTP - tempUsageKwWithTP;
+                                // tempMeasureExpense += tempUsageExpenseWOTP - tempUsageExpenseWithTP;
                                 tempTariffExpense += (result.savings_tariff_expenses as String ? parseFloat(result.savings_tariff_expenses) : 0)
                                 tempEnergySaving += (result.tp_sales_expenses as String ? parseFloat(result.tp_sales_expenses) : 0)
                                 tempCo2Saving += (result.co2_savings_kg as String ? parseFloat(result.co2_savings_kg) : 0)
@@ -337,8 +337,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 usageExpenseWithTP: tempUsageExpenseWithTP,
                 usageKwWOTP: tempUsageKwWOTP,
                 usageExpenseWOTP: tempUsageExpenseWOTP,
-                measureKw: tempMeasureKw,
-                measureExpense: tempMeasureExpense,
+                measureKw: tempUsageKwWOTP - tempUsageKwWithTP,
+                measureExpense: tempUsageExpenseWOTP - tempUsageExpenseWithTP,
                 tariffExpense: tempTariffExpense,
                 energySaving: tempEnergySaving,
                 co2Saving: tempCo2Saving,
