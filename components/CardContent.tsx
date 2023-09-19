@@ -46,7 +46,7 @@ import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import moment from 'moment';
 import { cloneDeep } from '@apollo/client/utilities';
 import { dateValueForQuery, getInDecimal, getMonths, numberWithCommas, zeroPad } from '../common/helper';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { number } from 'superstruct';
 import TooltipIcon from './cardcomponents/TooltipIcon';
 
@@ -230,9 +230,10 @@ const BenchMarkComparison = ({ totalKWHs }: any): JSX.Element => {
 interface Props {
     currentOutletID: string;
     latestLiveDate?: date_range_customer_dashboards_table;
+    dataMonthsForGroups: Dayjs[];
 }
 
-export const SavingPerformance = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
+export const SavingPerformance = ({ currentOutletID, latestLiveDate, dataMonthsForGroups }: Props): JSX.Element => {
     const [firstIntermediaryData, setFirstIntermediaryData] = React.useState<first_intermediary_table[]>([]);
     const [selectedTab, setSelectedTab] = React.useState<'kwh' | 'saving'>('kwh');
     const currentMoment = moment(latestLiveDate?.end_date, 'MM/YYYY');
@@ -815,22 +816,22 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
     )
 }
 
-const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element => {
+const CardSwitcher = ({ currentOutletID, latestLiveDate, dataMonthsForGroups }: Props): JSX.Element => {
     const [selectedCard, setSelectedCard] = React.useState<string>("savingPerformance");
     const currentMoment = moment(latestLiveDate?.end_date, 'MM/YYYY');
     const [selectedMonth, setSelectedMonth] = React.useState(currentMoment.format('MM'));
     const [selectedYear, setSelectedYear] = React.useState(currentMoment.format('YYYY'));
 
     const selectedContent = React.useMemo(() => {
-        if (selectedCard === "savingPerformance") return <SavingPerformance latestLiveDate={{
+        if (selectedCard === "savingPerformance") return <SavingPerformance  dataMonthsForGroups={dataMonthsForGroups} latestLiveDate={{
             end_date: moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY'),
             start_date: moment().format('MM/YYYY')
         }} currentOutletID={currentOutletID} />;
-        else return <EqptEnergyBaseline latestLiveDate={{
+        else return <EqptEnergyBaseline dataMonthsForGroups={dataMonthsForGroups} latestLiveDate={{
             end_date: moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY'),
             start_date: moment().format('MM/YYYY')
         }} currentOutletID={currentOutletID} />
-    }, [selectedCard, latestLiveDate, currentOutletID, selectedMonth, selectedYear])
+    }, [selectedCard, latestLiveDate, dataMonthsForGroups, currentOutletID, selectedMonth, selectedYear])
 
     const getTooltip = React.useMemo(() => {
         if (selectedCard === 'savingPerformance') return <TooltipIcon text='Energy consumption with and without Tablepointer'></TooltipIcon>
@@ -874,6 +875,9 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate }: Props): JSX.Element =
                             if (date.isAfter(latestLiveDateInDayjs) || date.isBefore(latestStartDateInDayjs)) {
                                 return true;
                             } else {
+                                if (!dataMonthsForGroups.find(dat => dat.isSame(date, 'month'))) {
+                                    return true;
+                                }
                                 return false;
                             }
                         }}

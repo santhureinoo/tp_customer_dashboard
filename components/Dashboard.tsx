@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import CustomSelect from "./cardcomponents/CustomSelect";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { DatePicker } from 'antd';
 
 const Dashboard = ({ groupId }: any): JSX.Element => {
@@ -20,6 +20,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         start_date: `01/${moment().format('MM/YYYY')}`,
         end_date: `01/${moment().add('1', 'months').format('MM/YYYY')}`
     });
+    const [dataMonthsForGroups, setDataMonthsForGroups] = React.useState<Dayjs[]>([]);
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [latestOutlets, setLatestOutlets] = React.useState<outlet[]>([]);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
@@ -358,6 +359,14 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [getGlobalInputResult]);
 
+    const groupByOutletmonthQuery = gql`
+    query GroupByOutlet_month($by: [Outlet_monthScalarFieldEnum!]!, $where: Outlet_monthWhereInput) {
+        groupByOutlet_month(by: $by, where: $where) {
+          outlet_date
+        }
+      }
+    `;
+
     const getInvoiceQuery = gql`
     query FindFirstInvoice($where: InvoiceWhereInput) {
         findFirstInvoice(where: $where) {
@@ -473,6 +482,30 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
          
      }`
 
+    const groupByOutletNameVariable = {
+        "variables": {
+            "by": "outlet_date",
+            "where": {
+                "last_avail_tariff": {
+                    "not": {
+                        "equals": null
+                    }
+                },
+                "outlet": {
+                    "is": {
+                        "customer": {
+                            "is": {
+                                "group_id": {
+                                    "equals": groupId
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     const getGroupVariable = {
         "variables":
         {
@@ -493,6 +526,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
     const getOutletResult = useQuery(getOutletQuery, getOutletVariable);
     const getInvoice = useLazyQuery(getInvoiceQuery);
+
+    const getGroupByOutletmonth = useQuery(groupByOutletmonthQuery, groupByOutletNameVariable);
 
     React.useEffect(() => {
         if (getOutletResult.data && getOutletResult.data.findFirstOutlet) {
@@ -592,6 +627,13 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             setLastestLiveDate(getFindFirstLastestReportDateResult.data.findFirstDate_range_customer_dashboard);
         }
     }, [getFindFirstLastestReportDateResult.data]);
+
+    React.useEffect(() => {
+        if (getGroupByOutletmonth.data &&
+            getGroupByOutletmonth.data.groupByOutlet_month) {
+            setDataMonthsForGroups(getGroupByOutletmonth.data.groupByOutlet_month.map((mon: any) => dayjs(mon.outlet_date, 'DD/MM/YYYY')));
+        }
+    }, [getGroupByOutletmonth.data])
 
     React.useEffect(() => {
         if (lastestLiveDate) {
@@ -781,7 +823,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
         if (renderedData.baselineAC > 0 || renderedData.baselineKE > 0) {
             return <div>
-                <EquipmentCard renderedData={renderedData} outlet={currentOutlet} latestLiveDate={lastestLiveDate} />
+                <EquipmentCard renderedData={renderedData} outlet={currentOutlet} latestLiveDate={lastestLiveDate.end_date} />
             </div>
         } else {
             return <></>
@@ -872,7 +914,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                                 </div>
                                                 {getEqptCard}
                                                 <div>
-                                                    <ValueFirstCard tooltip={`Last Tariff rate from Energy Market Authority`} title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate}`} value={`$${numberWithCommas(Number(totalKWHs.LastAvailTariff || '0'), 4)}`} valueColor={'custom-blue-card-font'} />
+                                                    <ValueFirstCard tooltip={`Last Tariff rate from Energy Market Authority`} title={'Last Available Tariff'} subTitle={`As of ${lastestLiveDate.end_date}`} value={`$${numberWithCommas(Number(totalKWHs.LastAvailTariff || '0'), 4)}`} valueColor={'custom-blue-card-font'} />
                                                 </div>
                                                 <div>
                                                     <ValueFirstCard tooltip={`The amount of savings generated assuming at the regulated tariff rate as provided by the Energy Market Authority`} title={'Savings @ Tariff Increase'} subTitle={`$${numberWithCommas(parseFloat(globalSetting?.poss_tariff_increase || '0.00'), 4)}`} value={`$${numberWithCommas(totalKWHs.SavingTariff, 2)}`} valueColor={'custom-green-card-font'} />
@@ -882,7 +924,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                             <ExpectedSavingsCard totalKWHs={totalKWHs} />
                                         </div> */}
                                             <div className="col-span-5">
-                                                <ChartCard latestLiveDate={lastestLiveDate} currentOutletID={currentOutletID} />
+                                                <ChartCard latestLiveDate={lastestLiveDate} dataMonthsForGroups={dataMonthsForGroups} currentOutletID={currentOutletID} />
                                             </div>
                                         </div>
                                     </ClientOnly>
@@ -920,11 +962,16 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     }}
                                     clearIcon={false}
                                     disabledDate={(date) => {
+                                        console.log(date);
                                         const latestLiveDateInDayjs = dayjs(lastestLiveDate.end_date, 'MM/YYYY');
                                         const latestStartDateInDayjs = dayjs(lastestLiveDate.start_date, 'MM/YYYY');
                                         if (date.isAfter(latestLiveDateInDayjs) || date.isBefore(latestStartDateInDayjs)) {
+                                            console.log(dataMonthsForGroups.find(dat => dat.isSame(date, 'month')));
                                             return true;
                                         } else {
+                                            if (!dataMonthsForGroups.find(dat => dat.isSame(date, 'month'))) {
+                                                return true;
+                                            }
                                             return false;
                                         }
                                     }}
