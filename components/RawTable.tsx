@@ -135,12 +135,12 @@ const RawTable = ({ groupId, title }: any): JSX.Element => {
     }, [getFindOutletsByGroupIDResult.data]);
 
     const onViewClick = React.useCallback(() => {
-        setIsDataLoading(true);
         setDataAndHeaders({
             data: [],
             header: [],
         });
         if (selectedOutlet) {
+            setIsDataLoading(true);
             axios.post(`${process.env.NEXT_PUBLIC_SITE_URL}:4001/raw_data`, {
                 "filename": `${title}_${selectedOutlet.customer?.name}_${selectedOutlet.name}_${dayjs().month(Number(selectedMonth) - 1).format("MMM")}_${selectedYear}.xlsx`
             }).then(res => {
@@ -282,13 +282,13 @@ const RawTable = ({ groupId, title }: any): JSX.Element => {
         {dataAndHeaders.header.length > 0 && <table className="border-separate border border-slate-500">
             <thead>
                 <tr>
-                    {dataAndHeaders.header.map(col => { return <th className="border border-slate-600">{col}</th> })}
+                    {dataAndHeaders.header.map((col, ind) => { return <th key={`heder-${ind}`} className="border border-slate-600">{col}</th> })}
                 </tr>
             </thead>
             <tbody>
-                {dataAndHeaders.data.map(dat => {
-                    return <tr>{dat.map((da: any, index: number) => {
-                        return <td className="border border-slate-700">
+                {dataAndHeaders.data.map((dat, parentInd) => {
+                    return <tr key={`row-${parentInd}`}>{dat.map((da: any, index: number) => {
+                        return <td key={`row-item-${index}`} className="border border-slate-700">
                             {index !== 0 ? da : moment(da).format('D/M/YYYY')}
                         </td>
                     })}
