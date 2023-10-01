@@ -80,29 +80,29 @@ export default withIronSessionApiRoute(
 
 
         if (result.data && result.data.findFirstGroup_password && result.data.findFirstGroup_password.group_id) {
-            req.session.group = {
-                id: result.data.findFirstGroup_password.group_id,
-            };
-
             const groupInfoResult: any = await client.query({
                 query: getGroupQuery, variables: {
                     "GroupWhereUniqueInput": { "group_id": result.data.findFirstGroup_password.group_id }
                 }
             });
+            req.session.group = {
+                id: result.data.findFirstGroup_password.group_id,
+                name: groupInfoResult.data.group.group_name,
+            };
 
             await req.session.save();
 
             const mixpanelConfig = mixpanel.init(process.env.MIXPANEL_TOKEN || '3583f33e37fcb53346be88d215695dc4');
             const uaParser = new UAParser(req.headers['user-agent']);
             mixpanelConfig.people.set(result.data.findFirstGroup_password.group_id, {
-                name: groupInfoResult.data.group.name,
+                name: groupInfoResult.data.group.group_name,
                 $last_seen: moment().format("MMM DD YYYY"),
             }, () => {
                 mixpanelConfig.track(
                     'Signed In',
                     {
                         'distinct_id': result.data.findFirstGroup_password.group_id,
-                        'name': groupInfoResult.data.group.name,
+                        'name': groupInfoResult.data.group.group_name,
                         'Signin At': moment().format("MMM DD YYYY"),
                         '$os': uaParser.getOS().name + ' ' + uaParser.getOS().version,
                         "$browser": uaParser.getBrowser().name + ' ' + uaParser.getBrowser().version,

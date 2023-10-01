@@ -2,14 +2,14 @@ import { withIronSessionSsr } from "iron-session/next";
 import type { NextPage } from 'next'
 import React, { useCallback } from 'react';
 import { getIronSessionCookieSetting } from "../common/helper";
-import Dashboard from '../components/Dashboard';
 import Layout from '../components/Layout';
+import RawTable from "../components/RawTable";
 
-const Dashboards: NextPage = ({ id, title }: any) => {
+const RawScreen: NextPage = ({ id, title }: any) => {
 
   return (
     <Layout title={title} groupId={id}>
-      <Dashboard groupId={id} />
+      <RawTable groupId={id} title={title}></RawTable>
     </Layout>
   )
 }
@@ -28,7 +28,7 @@ export const getServerSideProps = withIronSessionSsr(
 
     return {
       props: {
-        title: ['Outlet', 'Tanglin Mall'],
+        title: req.session.group.name,
         id: req.session.group.id,
       },
     };
@@ -36,4 +36,10 @@ export const getServerSideProps = withIronSessionSsr(
   getIronSessionCookieSetting()
 );
 
-export default Dashboards
+// Dashboards.getInitialProps = async () => {
+//   const title = ['Outlet', 'Tanglin Mall'];
+//   return { title };
+// };
+
+
+export default RawScreen

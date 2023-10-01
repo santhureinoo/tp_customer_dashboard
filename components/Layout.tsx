@@ -41,7 +41,7 @@ const Layout = ({ title, groupId, children }: Props) => {
             </Head>
             <main className="flex h-screen bg-custom-lightgray">
                 <Sidebar groupName={group} setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
-                <div className="flex-1 flex flex-col overflow-scroll ">
+                <div className="flex-1 flex flex-col">
                     <div className="flex-1 overflow-x-hidden overflow-y-auto bg-custom-lightgray">
                         <div className="container mx-auto px-6 py-8">
                             <button onClick={e => {

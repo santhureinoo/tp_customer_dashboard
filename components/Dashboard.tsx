@@ -966,7 +966,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                         const latestLiveDateInDayjs = dayjs(lastestLiveDate.end_date, 'MM/YYYY');
                                         const latestStartDateInDayjs = dayjs(lastestLiveDate.start_date, 'MM/YYYY');
                                         if (date.isAfter(latestLiveDateInDayjs) || date.isBefore(latestStartDateInDayjs)) {
-                                            console.log(dataMonthsForGroups.find(dat => dat.isSame(date, 'month')));
                                             return true;
                                         } else {
                                             if (!dataMonthsForGroups.find(dat => dat.isSame(date, 'month'))) {

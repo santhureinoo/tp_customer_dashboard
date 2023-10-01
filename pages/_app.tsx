@@ -6,11 +6,14 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 import Script from 'next/script';
 import client from "../common/apollo-client";
 import { ApolloProvider } from '@apollo/client';
+import { SnackbarProvider } from 'notistack';
 
 config.autoAddCss = false
 function MyApp({ Component, pageProps, router }: AppProps) {
   return <ApolloProvider client={client}>
-    <Component {...pageProps} />
+    <SnackbarProvider>
+      <Component {...pageProps} />
+    </SnackbarProvider>
   </ApolloProvider >
 }
 

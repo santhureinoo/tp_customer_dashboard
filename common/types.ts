@@ -340,6 +340,7 @@ export interface outlet {
     results?: results[];
     reports?: reports[];
     outlet_month?: outlet_month[];
+    customer?: customer;
     first_intermediary_table?: first_intermediary_table[];
     outlet_device_live_date?: outlet_device_live_date[];
 }
