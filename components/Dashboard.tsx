@@ -519,11 +519,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         setSelectedMonth(event.target.value)
     }
 
-    //Select the year function
-    const handleYearSelect = (event: any) => {
-        setSelectedYear(event.target.value)
-    }
-
     const getOutletResult = useQuery(getOutletQuery, getOutletVariable);
     const getInvoice = useLazyQuery(getInvoiceQuery);
 
@@ -748,7 +743,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         } else {
             setLatestOutlets([]);
         }
-    }, [getOutletsBelongToCustomerResult.data])
+    }, [getOutletsBelongToCustomerResult.data, selectedMonth, selectedYear])
 
     React.useEffect(() => {
         const customerstring = localStorage.getItem('customer');
