@@ -67,15 +67,20 @@ const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
                 </div>
 
                 <nav className="mt-10 px-2 py-2">
+                    <Link href="https://www.tablepointer.com/terms-conditions">
+                        <a className="link w-full">
+                            <span className="mx-3 font-bold text-custom-2xs">Terms of Service</span>
+                        </a>
+                    </Link>
+                    <Link href="http://13.212.69.26:8001" passHref={true}>
+                        <a className="link w-full" target="_blank">
+                            <span className="mx-3 font-bold text-custom-2xs">PMD Dashboard</span>
+                        </a>
+                    </Link>
                     <Link href="/api/logout">
                         <a className="link w-full place-content-center">
                             <FontAwesomeIcon style={{ cursor: 'pointer' }} icon={faSignOut} />
                             <span className="mx-3 text-[14px]">LogOut</span>
-                        </a>
-                    </Link>
-                    <Link href="https://www.tablepointer.com/terms-conditions">
-                        <a className="link w-full">
-                            <span className="mx-3 font-bold text-custom-2xs">Terms of Service</span>
                         </a>
                     </Link>
                 </nav>
