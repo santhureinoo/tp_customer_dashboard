@@ -21,6 +21,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         end_date: `01/${moment().add('1', 'months').format('MM/YYYY')}`
     });
     const [dataMonthsForGroups, setDataMonthsForGroups] = React.useState<Dayjs[]>([]);
+    const [dataMonthsForGroupsByOutlet, setDataMonthsForGroupsByOutlet] = React.useState<Dayjs[]>([]);
     const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [latestOutlets, setLatestOutlets] = React.useState<outlet[]>([]);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
@@ -359,9 +360,9 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [getGlobalInputResult]);
 
-    const groupByOutletmonthQuery = gql`
-    query GroupByOutlet_month($by: [Outlet_monthScalarFieldEnum!]!, $where: Outlet_monthWhereInput) {
-        groupByOutlet_month(by: $by, where: $where) {
+    const groupByResultsQuery = gql`
+    query GroupByResults($by: [ResultsScalarFieldEnum!]!, $where: ResultsWhereInput) {
+        groupByResults(by: $by, where: $where) {
           outlet_date
         }
       }
@@ -482,15 +483,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
          
      }`
 
-    const groupByOutletNameVariable = {
+    const groupByResultsVariable = {
         "variables": {
             "by": "outlet_date",
             "where": {
-                "last_avail_tariff": {
-                    "not": {
-                        "equals": null
-                    }
-                },
                 "outlet": {
                     "is": {
                         "customer": {
@@ -501,10 +497,75 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             }
                         }
                     }
-                }
+                },
+                "NOT": [
+                    {
+                        "AND": [
+                            {
+                                "outlet_eqpt_energy_usage_with_TP_month_expenses": {
+                                    "equals": "0"
+                                },
+                                "outlet_eqpt_energy_usage_with_TP_month_kW": {
+                                    "equals": "0"
+                                },
+                                "outlet_eqpt_energy_usage_without_TP_month_expenses": {
+                                    "equals": "0"
+                                },
+                                "outlet_eqpt_energy_usage_without_TP_month_kW": {
+                                    "equals": "0"
+                                }
+                            }
+                        ],
+                    }
+
+                ],
+
             }
         }
     }
+
+    const groupByResultsByOutletVariable = React.useMemo(() => {
+        if (currentOutlet) {
+            return {
+                "variables": {
+                    "by": "outlet_date",
+                    "where": {
+                        "outlet": {
+                            "is": {
+                                "outlet_id": {
+                                    "equals": currentOutlet.outlet_id
+                                }
+                            }
+                        },
+                        "NOT": [
+                            {
+                                "AND": [
+                                    {
+                                        "outlet_eqpt_energy_usage_with_TP_month_expenses": {
+                                            "equals": "0"
+                                        },
+                                        "outlet_eqpt_energy_usage_with_TP_month_kW": {
+                                            "equals": "0"
+                                        },
+                                        "outlet_eqpt_energy_usage_without_TP_month_expenses": {
+                                            "equals": "0"
+                                        },
+                                        "outlet_eqpt_energy_usage_without_TP_month_kW": {
+                                            "equals": "0"
+                                        }
+                                    }
+                                ],
+                            }
+
+                        ],
+
+                    }
+                }
+            }
+        }
+        return {}
+
+    }, [currentOutlet]);
 
     const getGroupVariable = {
         "variables":
@@ -522,7 +583,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     const getOutletResult = useQuery(getOutletQuery, getOutletVariable);
     const getInvoice = useLazyQuery(getInvoiceQuery);
 
-    const getGroupByOutletmonth = useQuery(groupByOutletmonthQuery, groupByOutletNameVariable);
+    const getGroupByResultsmonth = useQuery(groupByResultsQuery, groupByResultsVariable);
+    const getGroupByResultsByOutletmonth = useQuery(groupByResultsQuery, groupByResultsByOutletVariable);
 
     React.useEffect(() => {
         if (getOutletResult.data && getOutletResult.data.findFirstOutlet) {
@@ -624,11 +686,18 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     }, [getFindFirstLastestReportDateResult.data]);
 
     React.useEffect(() => {
-        if (getGroupByOutletmonth.data &&
-            getGroupByOutletmonth.data.groupByOutlet_month) {
-            setDataMonthsForGroups(getGroupByOutletmonth.data.groupByOutlet_month.map((mon: any) => dayjs(mon.outlet_date, 'DD/MM/YYYY')));
+        if (getGroupByResultsmonth.data &&
+            getGroupByResultsmonth.data.groupByResults) {
+            setDataMonthsForGroups(getGroupByResultsmonth.data.groupByResults.map((mon: any) => dayjs(mon.outlet_date, 'DD/MM/YYYY')));
         }
-    }, [getGroupByOutletmonth.data])
+    }, [getGroupByResultsmonth.data])
+
+    React.useEffect(() => {
+        if (getGroupByResultsByOutletmonth.data &&
+            getGroupByResultsByOutletmonth.data.groupByResults) {
+            setDataMonthsForGroupsByOutlet(getGroupByResultsByOutletmonth.data.groupByResults.map((mon: any) => dayjs(mon.outlet_date, 'DD/MM/YYYY')));
+        }
+    }, [getGroupByResultsByOutletmonth.data])
 
     React.useEffect(() => {
         if (lastestLiveDate) {
@@ -919,7 +988,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                             <ExpectedSavingsCard totalKWHs={totalKWHs} />
                                         </div> */}
                                             <div className="col-span-5">
-                                                <ChartCard latestLiveDate={lastestLiveDate} dataMonthsForGroups={dataMonthsForGroups} currentOutletID={currentOutletID} />
+                                                <ChartCard latestLiveDate={lastestLiveDate} dataMonthsForGroups={dataMonthsForGroupsByOutlet} currentOutletID={currentOutletID} />
                                             </div>
                                         </div>
                                     </ClientOnly>
@@ -957,7 +1026,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     }}
                                     clearIcon={false}
                                     disabledDate={(date) => {
-                                        console.log(date);
                                         const latestLiveDateInDayjs = dayjs(lastestLiveDate.end_date, 'MM/YYYY');
                                         const latestStartDateInDayjs = dayjs(lastestLiveDate.start_date, 'MM/YYYY');
                                         if (date.isAfter(latestLiveDateInDayjs) || date.isBefore(latestStartDateInDayjs)) {
