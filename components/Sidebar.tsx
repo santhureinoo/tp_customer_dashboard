@@ -61,7 +61,7 @@ const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
                                     </svg>
 
                                 </div>
-                                <span className="mx-3 font-bold text-custom-2xs">PMD Dashboard</span>
+                                <span className="mx-3 font-bold text-custom-2xs">Live Energy Measurement</span>
                             </a>
                         </Link>
                         <Link href="/raw">
