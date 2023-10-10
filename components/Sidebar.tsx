@@ -53,6 +53,17 @@ const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
                                 <span className="mx-3 text-[14px]">Dashboard</span>
                             </a>
                         </Link>
+                        <Link href="http://13.212.69.26:8001" passHref={true}>
+                            <a className="link w-full" target="_blank">
+                                <div className={`bg-custom-dark-gray p-2 rounded-full`}>
+                                    <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14.7273 -0.000335693H0.545454C0.24375 -0.000335693 0 0.243414 0 0.545119V11.4542C0 11.7559 0.24375 11.9997 0.545454 11.9997H14.7273C15.029 11.9997 15.2727 11.7559 15.2727 11.4542V0.545119C15.2727 0.243414 15.029 -0.000335693 14.7273 -0.000335693ZM13.154 3.3133L8.09148 8.37921C8.06585 8.40459 8.03124 8.41882 7.99517 8.41882C7.9591 8.41882 7.92449 8.40459 7.89886 8.37921L5.94716 6.42751L3.00682 9.36955C2.98119 9.39493 2.94658 9.40916 2.91051 9.40916C2.87444 9.40916 2.83983 9.39493 2.8142 9.36955L2.18693 8.74228C2.16155 8.71665 2.14732 8.68204 2.14732 8.64597C2.14732 8.6099 2.16155 8.57529 2.18693 8.54966L5.85 4.88489C5.90284 4.83205 5.98977 4.83205 6.04261 4.88489L7.99432 6.83489L12.3324 2.49512C12.3852 2.44228 12.4722 2.44228 12.525 2.49512L13.1523 3.12239C13.2068 3.17353 13.2068 3.26046 13.154 3.3133Z" fill="white" />
+                                    </svg>
+
+                                </div>
+                                <span className="mx-3 font-bold text-custom-2xs">PMD Dashboard</span>
+                            </a>
+                        </Link>
                         <Link href="/raw">
                             <a className={router.pathname == "/raw" ? "link-active" : "link"}>
                                 <div className={`${router.pathname == "/raw" ? "bg-custom-darkblue" : "bg-custom-dark-gray"} p-2 rounded-full`}>
@@ -67,11 +78,6 @@ const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
                 </div>
 
                 <nav className="mt-10 px-2 py-2">
-                    <Link href="http://13.212.69.26:8001" passHref={true}>
-                        <a className="link w-full" target="_blank">
-                            <span className="mx-3 font-bold text-custom-2xs">PMD Dashboard</span>
-                        </a>
-                    </Link>
                     <Link href="https://www.tablepointer.com/terms-conditions">
                         <a className="link w-full">
                             <span className="mx-3 font-bold text-custom-2xs">Terms of Service</span>
