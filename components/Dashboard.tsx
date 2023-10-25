@@ -22,8 +22,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     });
     const [dataMonthsForGroups, setDataMonthsForGroups] = React.useState<Dayjs[]>([]);
     const [dataMonthsForGroupsByOutlet, setDataMonthsForGroupsByOutlet] = React.useState<Dayjs[]>([]);
-    const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [latestOutlets, setLatestOutlets] = React.useState<outlet[]>([]);
+    const [outlets, setOutlets] = React.useState<outlet[]>([]);
     const [currentOutlet, setCurrentOutlet] = React.useState<outlet>();
     const [currentOutletID, setCurrentOutletID] = React.useState("");
     const [currentInvoice, setCurrentInvoice] = React.useState<invoice>();
@@ -87,7 +87,70 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
       }`;
 
-
+    const getOutletsQuery = gql`
+    query Outlets($where: OutletWhereInput, $where2: ResultsWhereInput, $where3: First_intermediary_tableWhereInput) {
+        outlets(where: $where) {
+          outlet_id
+          name
+          customer_id
+          outlet_device_live_date {
+            outlet_id
+            outlet_date
+          }
+          outlet_device_ac_input {
+            device_num
+          }
+          outlet_device_ex_fa_input {
+            device_num
+          }
+          first_intermediary_table(where: $where3) {
+            ke_baseline_kW
+            ac_baseline_kWh
+          }
+          results(where: $where2) {
+            outlet_id
+            outlet_date
+            ke_measured_savings_kWh
+            ac_measured_savings_kWh
+            acmv_measured_savings_kWh
+            outlet_measured_savings_kWh
+            outlet_measured_savings_expenses
+            outlet_measured_savings_percent
+            co2_savings_kg
+            savings_tariff_expenses
+            tp_sales_expenses
+            ke_eqpt_energy_baseline_avg_hourly_kW
+            ac_eqpt_energy_baseline_avg_hourly_kW
+            acmv_eqpt_energy_baseline_avg_hourly_kW
+            ke_eqpt_energy_baseline_avg_hourly_as_date
+            ac_eqpt_energy_baseline_avg_hourly_as_date
+            acmv_eqpt_energy_baseline_avg_hourly_as_date
+            ke_eqpt_energy_usage_without_TP_month_kW
+            ac_eqpt_energy_usage_without_TP_month_kW
+            outlet_eqpt_energy_usage_without_TP_month_kW
+            outlet_eqpt_energy_usage_without_TP_month_expenses
+            ke_eqpt_energy_usage_with_TP_month_kW
+            ac_eqpt_energy_usage_with_TP_month_kW
+            outlet_eqpt_energy_usage_with_TP_month_kW
+            outlet_eqpt_energy_usage_with_TP_month_expenses
+            acmv_25percent_benchmark_comparison_kWh
+            acmv_25percent_benchmark_comparison_expenses
+            acmv_10percent_benchmark_comparison_kWh
+            acmv_10percent_benchmark_comparison_expenses
+            ke_and_ac_25percent_benchmark_comparison_kWh
+            ke_and_ac_25percent_benchmark_comparison_expenses
+            monday
+            tuesday
+            wednesday
+            thursday
+            friday
+            saturday
+            sunday
+            holiday
+          }
+        }
+      }
+    `;
 
     const getFindFirstLastestReportDateQuery = gql`
     query FindFirstDate_range_customer_dashboard {
@@ -175,63 +238,69 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }
 
-    const getOutletsBelongToCustomerVariable = React.useMemo(() => {
-        if (lastestLiveDate) {
-            return {
-                "variables": {
-                    "where": {
-                        "group_id": {
-                            "equals": groupId
-                        },
-                        "year": {
-                            "equals": lastestLiveDate.end_date.split('/')[1]
-                        },
-                        "month": {
-                            "equals": lastestLiveDate.end_date.split('/')[0]
+    const getOutletsVariable = {
+        "variables": {
+            "where": {
+                "customer": {
+                    "is": {
+                        "group": {
+                            "is": {
+                                "group_id": {
+                                    "equals": groupId
+                                }
+                            }
                         }
                     }
                 }
+            },
+            "where2": {
+                "outlet_date": {
+                    "contains": lastestLiveDate.end_date
+                }
+            },
+            "where3": {
+                "outlet_month_year": {
+                    "equals": lastestLiveDate.end_date
+                },
+                "day_of_month": {
+                    "equals": '1'
+                }
             }
-        } else {
-            return undefined;
-        }
-
-    }, [lastestLiveDate, groupId])
-
-
-    //summary results query and variable
-    const findFirstGroupSummaryVariable = {
-        "variables": {
-            "where": {
-                "group_id": {
-                    "equals": groupId
-                }
-            },
-            ...(selectedMonth !== 'All' || selectedYear !== 'All') && {
-                "resultsWhere2": {
-                    "outlet_date": {
-                        "contains": dateValueForQuery(selectedMonth, selectedYear)
-                    }
-                }
-            },
-
-            ...(selectedMonth !== 'All' || selectedYear !== 'All') && {
-                "outletMonthWhere2": {
-                    "outlet_date": {
-                        "contains": dateValueForQuery(selectedMonth, selectedYear)
-                    }
-                }
-            },
         }
     }
 
+    const getOutletsBelongToCustomerVariable = React.useMemo(() => {
+        return {
+            "variables": {
+                "where": {
+                    "group_id": {
+                        "equals": groupId
+                    },
+                    ...(selectedYear !== 'All') && {
+                        "year": {
+                            "equals": selectedYear
+                        },
+                    },
+                    ...(selectedMonth !== 'All') && {
+                        "month": {
+                            "equals": selectedMonth
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }, [selectedYear, selectedMonth, groupId])
+
+
     const findFirstGroupSummaryQuery = gql`
-    query Query($where: GroupWhereInput, $resultsWhere2: ResultsWhereInput, $outletMonthWhere2: Outlet_monthWhereInput) {
+    query Query($where: GroupWhereInput, $resultsWhere2: ResultsWhereInput, $outletMonthWhere2: Outlet_monthWhereInput, $outletWhere2: OutletWhereInput) {
         findFirstGroup(where: $where) {
           group_id
           group_name
           customers {
-            outlet {
+            outlet(where: $outletWhere2) {
               outlet_id
               name
               results(where: $resultsWhere2) {
@@ -275,90 +344,22 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
       }`
 
-    const getSummaryResult = useQuery(findFirstGroupSummaryQuery, findFirstGroupSummaryVariable);
+    const getSummaryResult = useLazyQuery(findFirstGroupSummaryQuery);
     const getOutletsBelongToCustomerResult = useQuery(getOutletsBelongToCustomerQuery, getOutletsBelongToCustomerVariable);
     const getGlobalInputResult = useQuery(getGlobalInputQuery, getGlobalInputVariable);
-
-    //useEffect hook for summary result 
-    React.useEffect(() => {
-        if (getSummaryResult.data) {
-
-            //temp value for results
-            let tempUsageKwWithTP = 0
-            let tempUsageExpenseWithTP = 0
-            let tempUsageKwWOTP = 0
-            let tempUsageExpenseWOTP = 0
-            // let tempMeasureKw = 0
-            // let tempMeasureExpense = 0
-            let tempTariffExpense = 0
-            let tempEnergySaving = 0
-            let tempCo2Saving = 0
-            let tempSavingTariff = 0
-            let tempOutlets: outlet[] = [];
-
-            getSummaryResult.data.findFirstGroup.customers.forEach((customer: any) => {
-
-                const outletList = customer.outlet;
-                //Sum up all the values from results of outlets
-                tempOutlets = [
-                    ...tempOutlets,
-                    ...outletList
-                ]
-                outletList.forEach((outlet: any) => {
-                    if (outlet.results.length > 0) {
-                        //
-                        outlet.results.forEach((result: any) => {
-                            if (result) {
-                                tempUsageKwWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_kW as String ? parseFloat(result.outlet_eqpt_energy_usage_with_TP_month_kW) : 0)
-                                tempUsageExpenseWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseFloat(result.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
-                                tempUsageKwWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_kW as String ? parseFloat(result.outlet_eqpt_energy_usage_without_TP_month_kW) : 0)
-                                tempUsageExpenseWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_expenses as String ? parseFloat(result.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0)
-                                // tempMeasureKw += tempUsageKwWOTP - tempUsageKwWithTP;
-                                // tempMeasureExpense += tempUsageExpenseWOTP - tempUsageExpenseWithTP;
-                                tempTariffExpense += (result.savings_tariff_expenses as String ? parseFloat(result.savings_tariff_expenses) : 0)
-                                tempEnergySaving += (result.tp_sales_expenses as String ? parseFloat(result.tp_sales_expenses) : 0)
-                                tempCo2Saving += (result.co2_savings_kg as String ? parseFloat(result.co2_savings_kg) : 0)
-                            }
-
-
-                        })
-
-                    }
-
-                    if (outlet.outlet_month.length > 0) {
-                        outlet.outlet_month.forEach((month: any) => {
-                            tempSavingTariff += Number(month.last_avail_tariff);
-                        })
-
-                    }
-                })
-            });
-
-            let tempResult = {
-                usageKwWithTP: tempUsageKwWithTP,
-                usageExpenseWithTP: tempUsageExpenseWithTP,
-                usageKwWOTP: tempUsageKwWOTP,
-                usageExpenseWOTP: tempUsageExpenseWOTP,
-                measureKw: tempUsageKwWOTP - tempUsageKwWithTP,
-                measureExpense: tempUsageExpenseWOTP - tempUsageExpenseWithTP,
-                tariffExpense: tempTariffExpense,
-                energySaving: tempEnergySaving,
-                co2Saving: tempCo2Saving,
-                tariffKWH: tempSavingTariff
-            }
-
-            setSummaryResults(result => ({
-                ...summaryResults,
-                ...tempResult
-            }))
-        }
-    }, [selectedMonth, selectedYear, getSummaryResult]);
+    const getOutletsResult = useQuery(getOutletsQuery, getOutletsVariable);
 
     React.useEffect(() => {
         if (getGlobalInputResult.data) {
             setGlobalSetting(getGlobalInputResult.data.global_input);
         }
     }, [getGlobalInputResult]);
+
+    React.useEffect(() => {
+        if (getOutletsResult.data) {
+            setOutlets(getOutletsResult.data.outlets);
+        }
+    }, [getOutletsResult]);
 
     const groupByResultsQuery = gql`
     query GroupByResults($by: [ResultsScalarFieldEnum!]!, $where: ResultsWhereInput) {
@@ -576,10 +577,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
     //Select the month function
 
-    const handleMonthSelect = (event: any) => {
-        setSelectedMonth(event.target.value)
-    }
-
     const getOutletResult = useQuery(getOutletQuery, getOutletVariable);
     const getInvoice = useLazyQuery(getInvoiceQuery);
 
@@ -627,8 +624,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 SavingTariff: 0,
             });
 
-            console.log(currentTotalKWHs)
-
             const currentTotalKWHsWithOM = currOutletMonth.filter(dat => {
                 const resultDate = moment(dat.outlet_date, 'DD/MM/YYYY');
                 const currentDate = moment(lastestLiveDate.end_date, 'MM/YYYY');
@@ -673,8 +668,6 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             setTotalPerYear(currentTotalYearly);
         }
     }, [getOutletResult.data]);
-
-    const getOutletsByIdResult = useLazyQuery(getOutletsBySelectedDateQuery);
     const getLatestOutletsResult = useLazyQuery(getOutletsBySelectedDateQuery);
     const getFindFirstLastestReportDateResult = useQuery(getFindFirstLastestReportDateQuery);
 
@@ -723,53 +716,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
     }, [lastestLiveDate])
 
-    // React.useEffect(() => {
-
-    // }, [getOutletsByIdResult.data])
-
     React.useEffect(() => {
         if (getOutletsBelongToCustomerResult.data && getOutletsBelongToCustomerResult.data.findFirstReports) {
             const currentOutlets: outlet[] = [];
             const report: reports = getOutletsBelongToCustomerResult.data.findFirstReports;
-            getOutletsByIdResult[0]({
-                "variables": {
-                    "where": {
-                        "outlet_date": {
-                            "contains": `${selectedMonth}/${selectedYear}`
-                        },
-                        "outlet_outlet_id": {
-                            "in": JSON.parse(report.outlet_ids)
-                        }
-                    },
-                    "where2": {
-                        "outlet_date": {
-                            "contains": `${selectedMonth}/${selectedYear}`
-                        }
-                    },
-                    "where3": {
-                        "outlet_month_year": {
-                            "equals": `${selectedMonth}/${selectedYear}`
-                        },
-                        "day_of_month": {
-                            "equals": '1'
-                        }
-                    }
-                }
-            }).then(res => {
-                if (res.data && res.data.outlet_months) {
-                    const currentOutlets: outlet[] = [];
-                    const outletmonths: outlet_month[] | undefined = res.data.outlet_months;
-                    if (outletmonths) {
-                        outletmonths.forEach(month => {
-                            month.outlet && currentOutlets.push(month.outlet);
-                        })
-                    }
-                    // Ping
-                    setOutlets(currentOutlets);
-                } else {
-                    setOutlets([]);
-                }
-            })
             getLatestOutletsResult[0]({
                 "variables": {
                     "where": {
@@ -807,6 +757,109 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 }
                 else {
                     setLatestOutlets([]);
+                }
+            })
+
+            getSummaryResult[0]({
+                "variables": {
+                    "where": {
+                        "group_id": {
+                            "equals": groupId
+                        }
+                    },
+                    ...(selectedMonth !== 'All' || selectedYear !== 'All') && {
+                        "resultsWhere2": {
+                            "outlet_date": {
+                                "contains": dateValueForQuery(selectedMonth, selectedYear)
+                            }
+                        }
+                    },
+
+                    ...(selectedMonth !== 'All' || selectedYear !== 'All') && {
+                        "outletMonthWhere2": {
+                            "outlet_date": {
+                                "contains": dateValueForQuery(selectedMonth, selectedYear)
+                            }
+                        }
+                    },
+
+                    "outletWhere2": {
+                        "outlet_id": {
+                            "in": JSON.parse(report.outlet_ids)
+                        }
+                    }
+                }
+            }).then(res => {
+                if (res.data) {
+
+                    //temp value for results
+                    let tempUsageKwWithTP = 0
+                    let tempUsageExpenseWithTP = 0
+                    let tempUsageKwWOTP = 0
+                    let tempUsageExpenseWOTP = 0
+                    // let tempMeasureKw = 0
+                    // let tempMeasureExpense = 0
+                    let tempTariffExpense = 0
+                    let tempEnergySaving = 0
+                    let tempCo2Saving = 0
+                    let tempSavingTariff = 0
+                    let tempOutlets: outlet[] = [];
+
+                    res.data.findFirstGroup.customers.forEach((customer: any) => {
+
+                        const outletList = customer.outlet;
+                        //Sum up all the values from results of outlets
+                        tempOutlets = [
+                            ...tempOutlets,
+                            ...outletList
+                        ]
+                        outletList.forEach((outlet: any) => {
+                            if (outlet.results.length > 0) {
+                                //
+                                outlet.results.forEach((result: any) => {
+                                    if (result) {
+                                        tempUsageKwWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_kW as String ? parseFloat(result.outlet_eqpt_energy_usage_with_TP_month_kW) : 0)
+                                        tempUsageExpenseWithTP += (result.outlet_eqpt_energy_usage_with_TP_month_expenses as String ? parseFloat(result.outlet_eqpt_energy_usage_with_TP_month_expenses) : 0)
+                                        tempUsageKwWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_kW as String ? parseFloat(result.outlet_eqpt_energy_usage_without_TP_month_kW) : 0)
+                                        tempUsageExpenseWOTP += (result.outlet_eqpt_energy_usage_without_TP_month_expenses as String ? parseFloat(result.outlet_eqpt_energy_usage_without_TP_month_expenses) : 0)
+                                        // tempMeasureKw += tempUsageKwWOTP - tempUsageKwWithTP;
+                                        // tempMeasureExpense += tempUsageExpenseWOTP - tempUsageExpenseWithTP;
+                                        tempTariffExpense += (result.savings_tariff_expenses as String ? parseFloat(result.savings_tariff_expenses) : 0)
+                                        tempEnergySaving += (result.tp_sales_expenses as String ? parseFloat(result.tp_sales_expenses) : 0)
+                                        tempCo2Saving += (result.co2_savings_kg as String ? parseFloat(result.co2_savings_kg) : 0)
+                                    }
+
+
+                                })
+
+                            }
+
+                            if (outlet.outlet_month.length > 0) {
+                                outlet.outlet_month.forEach((month: any) => {
+                                    tempSavingTariff += Number(month.last_avail_tariff);
+                                })
+
+                            }
+                        })
+                    });
+
+                    let tempResult = {
+                        usageKwWithTP: tempUsageKwWithTP,
+                        usageExpenseWithTP: tempUsageExpenseWithTP,
+                        usageKwWOTP: tempUsageKwWOTP,
+                        usageExpenseWOTP: tempUsageExpenseWOTP,
+                        measureKw: tempUsageKwWOTP - tempUsageKwWithTP,
+                        measureExpense: tempUsageExpenseWOTP - tempUsageExpenseWithTP,
+                        tariffExpense: tempTariffExpense,
+                        energySaving: tempEnergySaving,
+                        co2Saving: tempCo2Saving,
+                        tariffKWH: tempSavingTariff
+                    }
+
+                    setSummaryResults(result => ({
+                        ...summaryResults,
+                        ...tempResult
+                    }))
                 }
             })
         } else {
@@ -954,10 +1007,10 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             {getHeaderBreadCrumb}
                             <CustomSelect setSelectedValue={(val) => {
                                 setCurrentOutletID(val);
-                                const curOut = latestOutlets.find(out => out.outlet_id === Number(val));
+                                const curOut = outlets.find(out => out.outlet_id === Number(val));
                                 setCurrentOutlet(curOut);
                                 setTitle(["Outlet", curOut?.name || '']);
-                            }} selectedValue={currentOutletID} dropdownValue={latestOutlets.map(out => { return { value: out.outlet_id.toString(), display: out.name } })} />
+                            }} selectedValue={currentOutletID} dropdownValue={outlets.map(out => { return { value: out.outlet_id.toString(), display: out.name } })} />
                         </div>
 
                         <div className="flex flex-col mt-8">
@@ -1060,7 +1113,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                          * Live outlet card
                          */}
                             <div className="w-1/5">
-                                <LiveOutletCard Value={outlets.length} />
+                                <LiveOutletCard Value={latestOutlets.length} />
                             </div>
                             <div className="flex justify-between gap-2 h-full w-2/3">
                                 <EquipmentEnergyCard WithTableExpense={numberWithCommas(summaryResults.usageExpenseWithTP)} WithTableKw={numberWithCommas(summaryResults.usageKwWithTP)} WithoutTableExpense={numberWithCommas(summaryResults.usageExpenseWOTP)} WithoutTableKw={numberWithCommas(summaryResults.usageKwWOTP)} />
