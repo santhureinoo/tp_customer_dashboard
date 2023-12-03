@@ -846,7 +846,7 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate, dataMonthsForGroups }: 
                     if (a.isAfter(b)) return 1;
                     else if (a.isBefore(b)) return -1;
                     else return 0;
-                }).pop();
+                })[dataMonthsForGroups.length - 1]
                 if (lastDate) {
                     setSelectedMonth(lastDate.format('MM'));
                     setSelectedYear(lastDate.format('YYYY'));
@@ -889,7 +889,7 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate, dataMonthsForGroups }: 
                         disabledDate={(date) => {
                             const latestLiveDateInDayjs = dayjs(latestLiveDate?.end_date, 'MM/YYYY');
                             const latestStartDateInDayjs = dayjs(latestLiveDate?.start_date, 'MM/YYYY');
-                            if (date.isAfter(latestLiveDateInDayjs) || date.isBefore(latestStartDateInDayjs)) {
+                            if (date.isAfter(latestLiveDateInDayjs, 'month') || date.isBefore(latestStartDateInDayjs, 'month')) {
                                 return true;
                             } else {
                                 if (!dataMonthsForGroups.find(dat => dat.isSame(date, 'month'))) {

@@ -700,7 +700,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                     if (a.isAfter(b)) return 1;
                     else if (a.isBefore(b)) return -1;
                     else return 0;
-                }).pop();
+                })[dataMonthsForGroups.length - 1];
                 if (lastDate) {
                     setSelectedMonth(lastDate.format('MM'));
                     setSelectedYear(lastDate.format('YYYY'));
@@ -727,7 +727,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 }
             });
         }
-    }, [lastestLiveDate, dataMonthsForGroups])
+    }, [lastestLiveDate, dataMonthsForGroups]);
 
     React.useEffect(() => {
         if (getOutletsBelongToCustomerResult.data && getOutletsBelongToCustomerResult.data.findFirstReports) {
@@ -1094,7 +1094,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                                     disabledDate={(date) => {
                                         const latestLiveDateInDayjs = dayjs(lastestLiveDate.end_date, 'MM/YYYY');
                                         const latestStartDateInDayjs = dayjs(lastestLiveDate.start_date, 'MM/YYYY');
-                                        if (date.isAfter(latestLiveDateInDayjs) || date.isBefore(latestStartDateInDayjs)) {
+                                        if (date.isAfter(latestLiveDateInDayjs, 'month') || date.isBefore(latestStartDateInDayjs, 'month')) {
                                             return true;
                                         } else {
                                             if (!dataMonthsForGroups.find(dat => dat.isSame(date, 'month'))) {
