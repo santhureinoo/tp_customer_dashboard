@@ -823,7 +823,7 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate, dataMonthsForGroups }: 
     const [selectedYear, setSelectedYear] = React.useState(currentMoment.format('YYYY'));
 
     const selectedContent = React.useMemo(() => {
-        if (selectedCard === "savingPerformance") return <SavingPerformance  dataMonthsForGroups={dataMonthsForGroups} latestLiveDate={{
+        if (selectedCard === "savingPerformance") return <SavingPerformance dataMonthsForGroups={dataMonthsForGroups} latestLiveDate={{
             end_date: moment(selectedMonth + '/' + selectedYear, 'MM/YYYY').format('MM/YYYY'),
             start_date: moment().format('MM/YYYY')
         }} currentOutletID={currentOutletID} />;
@@ -837,6 +837,23 @@ const CardSwitcher = ({ currentOutletID, latestLiveDate, dataMonthsForGroups }: 
         if (selectedCard === 'savingPerformance') return <TooltipIcon text='Energy consumption with and without Tablepointer'></TooltipIcon>
         else return <TooltipIcon text={`Represents the individual equipment's energy usage without TablePointer over a typical hour for statistical best-fit averaging,and is continuously and dynamically sampled to ensure its validity over time`}></TooltipIcon>
     }, [selectedCard])
+
+    React.useEffect(() => {
+        if (latestLiveDate) {
+            const latestLiveDateInDayjs = dayjs(latestLiveDate.end_date, 'MM/YYYY');
+            if (!dataMonthsForGroups.find(dat => dat.isSame(latestLiveDateInDayjs, 'month'))) {
+                const lastDate = dataMonthsForGroups.sort((a, b) => {
+                    if (a.isAfter(b)) return 1;
+                    else if (a.isBefore(b)) return -1;
+                    else return 0;
+                }).pop();
+                if (lastDate) {
+                    setSelectedMonth(lastDate.format('MM'));
+                    setSelectedYear(lastDate.format('YYYY'));
+                }
+            }
+        }
+    }, [latestLiveDate, dataMonthsForGroups]);
 
     return (
         <div className="flex flex-col gap-4">

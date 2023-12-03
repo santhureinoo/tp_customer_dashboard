@@ -7,11 +7,14 @@ import { faChartPie, faSignOut } from '@fortawesome/free-solid-svg-icons';
 
 interface Props {
     sidebarOpen: boolean;
-    groupName: string;
+    group: {
+        group_name: string,
+        live_energy_measurement: string
+    };
     setSidebarOpen(sidebarOpen: boolean): void;
 }
 
-const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
+const Sidebar = ({ sidebarOpen, group, setSidebarOpen }: Props) => {
     const router = useRouter();
     return (
         <>
@@ -38,7 +41,7 @@ const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
                             </defs>
                         </svg>
                         <div className="flex">
-                            <h2 className="text-[14px] mx-2 font-bold">Welcome,<br />{groupName}</h2>
+                            <h2 className="text-[14px] mx-2 font-bold">Welcome,<br />{group.group_name}</h2>
                         </div>
                     </div>
                     <nav className="mt-10 space-y-3 px-2">
@@ -53,7 +56,7 @@ const Sidebar = ({ sidebarOpen, groupName, setSidebarOpen }: Props) => {
                                 <span className="mx-3 text-[14px]">Dashboard</span>
                             </a>
                         </Link>
-                        <Link href="http://13.214.131.54:8001" passHref={true}>
+                        <Link href={group.live_energy_measurement === null ? "http://13.214.131.54:8001" : group.live_energy_measurement} passHref={true}>
                             <a className="link w-full" target="_blank">
                                 <div className={`bg-custom-dark-gray px-1.5 py-2 rounded-full`}>
                                     <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">

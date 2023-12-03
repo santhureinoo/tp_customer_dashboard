@@ -11,12 +11,19 @@ interface Props {
 
 const Layout = ({ title, groupId, children }: Props) => {
     const [sidebarOpen, setSidebarOpen] = React.useState(true);
-    const [group, setGroup] = React.useState("");
+    const [group, setGroup] = React.useState<{
+        group_name: string
+        live_energy_measurement: string
+    }>({
+        group_name: '',
+        live_energy_measurement: '',
+    });
     //Group Query by Id
     const getGroupQuery = gql`query Fetchgroup($GroupWhereUniqueInput: GroupWhereUniqueInput!) {
         group (where: $GroupWhereUniqueInput){
             group_id,
-            group_name
+            group_name,
+            live_energy_measurement
         }
          
      }`
@@ -30,7 +37,10 @@ const Layout = ({ title, groupId, children }: Props) => {
     const getGroupByIdResult = useQuery(getGroupQuery, getGroupVariable)
     React.useEffect(() => {
         if (getGroupByIdResult.data) {
-            setGroup(getGroupByIdResult.data.group.group_name)
+            setGroup({
+                group_name: getGroupByIdResult.data.group.group_name,
+                live_energy_measurement: getGroupByIdResult.data.group.live_energy_measurement
+            })
         }
     }, [getGroupByIdResult.data]);
     return (
@@ -40,7 +50,7 @@ const Layout = ({ title, groupId, children }: Props) => {
                 <link rel="icon" href="asserts/TP Favicon-Circle.svg" />
             </Head>
             <main className="flex h-screen bg-custom-lightgray">
-                <Sidebar groupName={group} setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
+                <Sidebar group={group} setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
                 <div className="flex-1 flex flex-col">
                     <div className="flex-1 overflow-x-hidden overflow-y-auto bg-custom-lightgray">
                         <div className="container mx-auto px-6 py-8">

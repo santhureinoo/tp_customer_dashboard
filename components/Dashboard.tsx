@@ -694,17 +694,30 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
 
     React.useEffect(() => {
         if (lastestLiveDate) {
-            const latestLiveDateInMoment = moment(lastestLiveDate.end_date, 'MM/YYYY');
-            setSelectedMonth(latestLiveDateInMoment.format('MM'));
-            setSelectedYear(latestLiveDateInMoment.format('YYYY'));
+            const latestLiveDateInDayjs = dayjs(lastestLiveDate.end_date, 'MM/YYYY');
+            if (!dataMonthsForGroups.find(dat => dat.isSame(latestLiveDateInDayjs, 'month'))) {
+                const lastDate = dataMonthsForGroups.sort((a, b) => {
+                    if (a.isAfter(b)) return 1;
+                    else if (a.isBefore(b)) return -1;
+                    else return 0;
+                }).pop();
+                if (lastDate) {
+                    setSelectedMonth(lastDate.format('MM'));
+                    setSelectedYear(lastDate.format('YYYY'));
+                }
+            } else {
+                setSelectedMonth(latestLiveDateInDayjs.format('MM'));
+                setSelectedYear(latestLiveDateInDayjs.format('YYYY'));
+            }
+
             getInvoice[0]({
                 "variables": {
                     "where": {
                         "month": {
-                            "equals": zeroPad(latestLiveDateInMoment.month() + 1, 2).toString()
+                            "equals": zeroPad(latestLiveDateInDayjs.month() + 1, 2).toString()
                         },
                         "year": {
-                            "equals": latestLiveDateInMoment.year().toString()
+                            "equals": latestLiveDateInDayjs.year().toString()
                         }
                     }
                 }
@@ -714,7 +727,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 }
             });
         }
-    }, [lastestLiveDate])
+    }, [lastestLiveDate, dataMonthsForGroups])
 
     React.useEffect(() => {
         if (getOutletsBelongToCustomerResult.data && getOutletsBelongToCustomerResult.data.findFirstReports) {
