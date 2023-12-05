@@ -524,7 +524,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate, dataMonthsF
                                 <sub className="text-extra-small text-custom-blue-card-font font-thin mr-1">kWh</sub>
                             </div>
 
-                            <span className="font-bold text-3xl text-custom-blue-card-font">${measuredSavings?.measuredSavingsExpense}</span>
+                            <span className="font-bold text-3xl text-custom-blue-card-font">${Number(measuredSavings?.measuredSavingsExpense).toFixed(2)}</span>
                         </div>
                     </div>
 
