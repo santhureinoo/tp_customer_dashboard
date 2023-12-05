@@ -9,7 +9,8 @@ interface Props {
     sidebarOpen: boolean;
     group: {
         group_name: string,
-        live_energy_measurement: string
+        live_energy_measurement: string,
+        hide: boolean
     };
     setSidebarOpen(sidebarOpen: boolean): void;
 }
@@ -56,7 +57,7 @@ const Sidebar = ({ sidebarOpen, group, setSidebarOpen }: Props) => {
                                 <span className="mx-3 text-[14px]">Dashboard</span>
                             </a>
                         </Link>
-                        <Link href={group.live_energy_measurement === null ? "http://13.214.131.54:8001" : group.live_energy_measurement} passHref={true}>
+                        {!group.hide && <Link href={group.live_energy_measurement === null ? "http://13.214.131.54:8001" : group.live_energy_measurement} passHref={true}>
                             <a className="link w-full" target="_blank">
                                 <div className={`bg-custom-dark-gray px-1.5 py-2 rounded-full`}>
                                     <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -66,7 +67,7 @@ const Sidebar = ({ sidebarOpen, group, setSidebarOpen }: Props) => {
                                 </div>
                                 <span className="mx-3 text-custom-2xs">Live Energy Measurement</span>
                             </a>
-                        </Link>
+                        </Link>}
                         <Link href="/raw">
                             <a className={router.pathname == "/raw" ? "link-active" : "link"}>
                                 <div className={`${router.pathname == "/raw" ? "bg-custom-darkblue" : "bg-custom-dark-gray"} p-2 rounded-full`}>

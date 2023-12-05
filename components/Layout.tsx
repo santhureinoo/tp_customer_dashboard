@@ -14,16 +14,19 @@ const Layout = ({ title, groupId, children }: Props) => {
     const [group, setGroup] = React.useState<{
         group_name: string
         live_energy_measurement: string
+        hide: boolean
     }>({
         group_name: '',
         live_energy_measurement: '',
+        hide: false
     });
     //Group Query by Id
     const getGroupQuery = gql`query Fetchgroup($GroupWhereUniqueInput: GroupWhereUniqueInput!) {
         group (where: $GroupWhereUniqueInput){
             group_id,
             group_name,
-            live_energy_measurement
+            live_energy_measurement,
+            hide
         }
          
      }`
@@ -39,7 +42,8 @@ const Layout = ({ title, groupId, children }: Props) => {
         if (getGroupByIdResult.data) {
             setGroup({
                 group_name: getGroupByIdResult.data.group.group_name,
-                live_energy_measurement: getGroupByIdResult.data.group.live_energy_measurement
+                live_energy_measurement: getGroupByIdResult.data.group.live_energy_measurement,
+                hide: getGroupByIdResult.data.group.hide
             })
         }
     }, [getGroupByIdResult.data]);
