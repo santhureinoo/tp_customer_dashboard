@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Image from "next/image";
 import { faChartPie, faSignOut } from '@fortawesome/free-solid-svg-icons';
+import { global_input } from "../common/types";
 
 interface Props {
     sidebarOpen: boolean;
@@ -12,10 +13,11 @@ interface Props {
         live_energy_measurement: string,
         hide: boolean
     };
+    url: string;
     setSidebarOpen(sidebarOpen: boolean): void;
 }
 
-const Sidebar = ({ sidebarOpen, group, setSidebarOpen }: Props) => {
+const Sidebar = ({ sidebarOpen, group, setSidebarOpen, url }: Props) => {
     const router = useRouter();
     return (
         <>
@@ -53,17 +55,15 @@ const Sidebar = ({ sidebarOpen, group, setSidebarOpen }: Props) => {
                                         <path fillRule="evenodd" clipRule="evenodd" d="M6.19264 0.57827C6.28647 0.494047 6.41059 0.4499 6.53764 0.455563C9.22331 0.53596 11.4678 2.4856 11.8746 5.09137C11.8772 5.10693 11.8772 5.1228 11.8746 5.13836C11.8834 5.26165 11.8417 5.38329 11.7588 5.47636C11.676 5.56943 11.5587 5.62627 11.433 5.63431L6.92075 5.93188C6.77153 5.94511 6.62354 5.896 6.51314 5.79663C6.40274 5.69726 6.34015 5.55682 6.34076 5.40982L6.03746 0.977614V0.904527C6.04298 0.779873 6.09881 0.662492 6.19264 0.57827ZM5.88298 7.09088L9.79394 6.8403L9.82054 6.85074C9.98849 6.85349 10.1484 6.92159 10.2652 7.04006C10.382 7.15852 10.4459 7.31765 10.4431 7.48242C10.289 9.72817 8.64251 11.6046 6.40187 12.088C4.16124 12.5714 1.86431 11.5458 0.764148 9.57063C0.440653 9.00175 0.236229 8.37522 0.162871 7.72779C0.13442 7.53594 0.121962 7.34214 0.125624 7.14831C0.133039 4.7603 1.83323 2.6991 4.21218 2.19405C4.50016 2.14014 4.7889 2.28393 4.91455 2.54382C4.94583 2.59098 4.97086 2.64185 4.98905 2.69522C5.03364 3.3836 5.0799 4.06546 5.12596 4.74445C5.16234 5.28069 5.19859 5.81513 5.23381 6.34957C5.232 6.47547 5.25178 6.60077 5.29235 6.72023C5.38783 6.95527 5.62546 7.10439 5.88298 7.09088Z" fill="white" />
                                     </svg>
                                 </div>
-
                                 <span className="mx-3 text-[14px]">Dashboard</span>
                             </a>
                         </Link>
-                        {!group.hide && <Link href={group.live_energy_measurement === null ? "http://13.214.131.54:8001" : group.live_energy_measurement} passHref={true}>
+                        {!group.hide && <Link href={group.live_energy_measurement === null ? url : group.live_energy_measurement} passHref={true}>
                             <a className="link w-full" target="_blank">
                                 <div className={`bg-custom-dark-gray px-1.5 py-2 rounded-full`}>
                                     <svg width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M14.7273 -0.000335693H0.545454C0.24375 -0.000335693 0 0.243414 0 0.545119V11.4542C0 11.7559 0.24375 11.9997 0.545454 11.9997H14.7273C15.029 11.9997 15.2727 11.7559 15.2727 11.4542V0.545119C15.2727 0.243414 15.029 -0.000335693 14.7273 -0.000335693ZM13.154 3.3133L8.09148 8.37921C8.06585 8.40459 8.03124 8.41882 7.99517 8.41882C7.9591 8.41882 7.92449 8.40459 7.89886 8.37921L5.94716 6.42751L3.00682 9.36955C2.98119 9.39493 2.94658 9.40916 2.91051 9.40916C2.87444 9.40916 2.83983 9.39493 2.8142 9.36955L2.18693 8.74228C2.16155 8.71665 2.14732 8.68204 2.14732 8.64597C2.14732 8.6099 2.16155 8.57529 2.18693 8.54966L5.85 4.88489C5.90284 4.83205 5.98977 4.83205 6.04261 4.88489L7.99432 6.83489L12.3324 2.49512C12.3852 2.44228 12.4722 2.44228 12.525 2.49512L13.1523 3.12239C13.2068 3.17353 13.2068 3.26046 13.154 3.3133Z" fill="white" />
                                     </svg>
-
                                 </div>
                                 <span className="mx-3 text-custom-2xs">Live Energy Measurement</span>
                             </a>

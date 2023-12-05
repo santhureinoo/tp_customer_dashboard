@@ -2,6 +2,7 @@ import Sidebar from "./Sidebar"
 import React from 'react';
 import Head from "next/head";
 import { gql, useQuery } from "@apollo/client";
+import { global_input } from "../common/types";
 
 interface Props {
     title: string[];
@@ -11,6 +12,7 @@ interface Props {
 
 const Layout = ({ title, groupId, children }: Props) => {
     const [sidebarOpen, setSidebarOpen] = React.useState(true);
+    const [globalSetting, setGlobalSetting] = React.useState("");
     const [group, setGroup] = React.useState<{
         group_name: string
         live_energy_measurement: string
@@ -37,7 +39,24 @@ const Layout = ({ title, groupId, children }: Props) => {
             "GroupWhereUniqueInput": { "group_id": groupId }
         }
     }
-    const getGroupByIdResult = useQuery(getGroupQuery, getGroupVariable)
+
+    const getGlobalInputQuery = gql`
+    query Global_input($where: Global_inputWhereUniqueInput!) {
+        global_input(where: $where) {
+          live_energy_measurement
+        }
+      }`;
+
+    const getGlobalInputVariable = {
+        "variables": {
+            "where": {
+                "global_input_id": 1
+            }
+        }
+    }
+    const getGroupByIdResult = useQuery(getGroupQuery, getGroupVariable);
+    const getGlobalInputResult = useQuery(getGlobalInputQuery, getGlobalInputVariable);
+
     React.useEffect(() => {
         if (getGroupByIdResult.data) {
             setGroup({
@@ -47,6 +66,12 @@ const Layout = ({ title, groupId, children }: Props) => {
             })
         }
     }, [getGroupByIdResult.data]);
+
+    React.useEffect(() => {
+        if (getGlobalInputResult.data) {
+            setGlobalSetting(getGlobalInputResult.data.global_input.live_energy_measurement);
+        }
+    }, [getGlobalInputResult]);
     return (
         <React.Fragment>
             <Head>
@@ -54,7 +79,7 @@ const Layout = ({ title, groupId, children }: Props) => {
                 <link rel="icon" href="asserts/TP Favicon-Circle.svg" />
             </Head>
             <main className="flex h-screen bg-custom-lightgray">
-                <Sidebar group={group} setSidebarOpen={setSidebarOpen} sidebarOpen={sidebarOpen} />
+                <Sidebar group={group} setSidebarOpen={setSidebarOpen} url={globalSetting} sidebarOpen={sidebarOpen} />
                 <div className="flex-1 flex flex-col">
                     <div className="flex-1 overflow-x-hidden overflow-y-auto bg-custom-lightgray">
                         <div className="container mx-auto px-6 py-8">

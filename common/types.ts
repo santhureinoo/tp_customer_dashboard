@@ -215,6 +215,7 @@ export namespace global_inputFields {
     export type ke_factor_7f = string | null;
     export type ac_factor_p = string | null;
     export type ac_factor_m = string | null;
+    export type live_energy_measurement = string | null;
 
 }
 
@@ -243,6 +244,7 @@ export interface global_input {
     ke_factor_7f: global_inputFields.ke_factor_7f;
     ac_factor_p: global_inputFields.ac_factor_p;
     ac_factor_m: global_inputFields.ac_factor_m;
+    live_energy_measurement: global_inputFields.live_energy_measurement;
 
 }
 
