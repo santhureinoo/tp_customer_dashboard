@@ -376,7 +376,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate, dataMonthsF
                         const cloned_results: any[] = cloneDeep(result.data.findManyResults);
                         const totalMeasuredSaving = cloned_results.reduce((pv, cv) => {
                             pv.measuredSavingsKwh = getInDecimal(Number(cv.outlet_measured_savings_kWh) + Number(pv.measuredSavingsKwh));
-                            pv.measuredSavingsExpense = getInDecimal(Number(cv.outlet_measured_savings_expenses) + Number(pv.measuredSavingsExpense));
+                            pv.measuredSavingsExpense = Number(cv.outlet_measured_savings_expenses) + Number(pv.measuredSavingsExpense);
 
                             return pv;
                         }, {
@@ -524,7 +524,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate, dataMonthsF
                                 <sub className="text-extra-small text-custom-blue-card-font font-thin mr-1">kWh</sub>
                             </div>
 
-                            <span className="font-bold text-3xl text-custom-blue-card-font">${Number(measuredSavings?.measuredSavingsExpense).toFixed(2)}</span>
+                            <span className="font-bold text-3xl text-custom-blue-card-font">${getInDecimal(measuredSavings?.measuredSavingsExpense, 2)}</span>
                         </div>
                     </div>
 
