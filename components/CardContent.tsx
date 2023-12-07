@@ -438,7 +438,7 @@ export const SavingPerformance = ({ currentOutletID, latestLiveDate, dataMonthsF
                     type: 'bar' as const,
                     label: 'KE Saving Expenses',
                     backgroundColor: 'rgb(96 165 250)',
-                    data: firstIntermediaryData.map(data => getInDecimal(parseFloat(data.ke_savings_expenses || "0"), 2)),
+                    data: firstIntermediaryData.map(data => getInDecimal(parseFloat(data.total_savings_expenses || "0"), 2)),
                     barThickness: 15,
                     order: 1,
                 },
@@ -809,7 +809,7 @@ export const EqptEnergyBaseline = ({ currentOutletID, latestLiveDate }: Props): 
             </div>
             <div className='flex flex-col'>
                 <Chart type='scatter' data={data()} options={option} />
-                <span className='text-custom-gray self-end'>Valid as of {getValidDate}</span>
+                {/* <span className='text-custom-gray self-end'>Valid as of {getValidDate}</span> */}
                 <span className='text-custom-gray text-custom-subtitle w-2/3  px-4'>Eqpt. Energy Baseline represents the equipment energy usage over a typical hour without TablePointer, and is continuously and dynamically sampled for statistical best-averaging to ensure validity of time</span>
             </div>
         </div>
