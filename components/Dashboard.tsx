@@ -678,9 +678,20 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     React.useEffect(() => {
         if (getFindFirstLastestReportDateResult.data
             && getFindFirstLastestReportDateResult.data.findFirstDate_range_customer_dashboard) {
-            setLastestLiveDate(getFindFirstLastestReportDateResult.data.findFirstDate_range_customer_dashboard);
+            const latestLiveDateObj = getFindFirstLastestReportDateResult.data.findFirstDate_range_customer_dashboard;
+            const dayjsEndDate = dayjs(latestLiveDateObj.end_date, 'MM/YYYY');
+            if (dataMonthsForGroups.length > 0 && dataMonthsForGroups.findIndex(dat => dat.isSame(dayjsEndDate, 'month')) === -1) {
+
+                setLastestLiveDate({
+                    start_date: dataMonthsForGroups.pop()?.format('MM/YYYY') || '',
+                    end_date: dataMonthsForGroups.at(0)?.format('MM/YYYY') || ''
+                });
+            } else {
+                setLastestLiveDate(latestLiveDateObj);
+            }
+
         }
-    }, [getFindFirstLastestReportDateResult.data]);
+    }, [getFindFirstLastestReportDateResult.data, dataMonthsForGroups]);
 
     React.useEffect(() => {
         if (getGroupByResultsmonth.data &&
