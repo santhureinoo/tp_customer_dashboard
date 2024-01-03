@@ -450,31 +450,34 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         }
       }
     `;
-    const getOutletVariable = {
-        "variables": {
-            "where": {
-                "outlet_date": {
-                    "contains": moment().year().toString()
+    const getOutletVariable = React.useMemo(() => {
+        const year = moment(lastestLiveDate.end_date, 'DD/MM/YYYY').year().toString();
+        return {
+            "variables": {
+                "where": {
+                    "outlet_date": {
+                        "contains": year
+                    },
+                    "outlet_outlet_id": {
+                        "equals": Number(currentOutletID)
+                    }
                 },
-                "outlet_outlet_id": {
-                    "equals": Number(currentOutletID)
-                }
-            },
-            "resultsWhere2": {
-                "outlet_date": {
-                    "contains": moment().year().toString()
+                "resultsWhere2": {
+                    "outlet_date": {
+                        "contains": year
+                    },
+                    "outlet_id": {
+                        "equals": Number(currentOutletID)
+                    }
                 },
-                "outlet_id": {
-                    "equals": Number(currentOutletID)
-                }
-            },
-            "findFirstOutletWhere2": {
-                "outlet_id": {
-                    "equals": Number(currentOutletID)
+                "findFirstOutletWhere2": {
+                    "outlet_id": {
+                        "equals": Number(currentOutletID)
+                    }
                 }
             }
         }
-    };
+    }, [lastestLiveDate]);
     //Group Query by Id
     const getGroupQuery = gql`query Fetchgroup($GroupWhereUniqueInput: GroupWhereUniqueInput!) {
         group (where: $GroupWhereUniqueInput){
@@ -737,7 +740,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 "variables": {
                     "where": {
                         "outlet_date": {
-                            "contains": lastestLiveDate.end_date
+                            "contains": `${selectedMonth}/${selectedYear}`
                         },
                         "outlet_outlet_id": {
                             "in": JSON.parse(report.outlet_ids)
@@ -745,12 +748,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                     },
                     "where2": {
                         "outlet_date": {
-                            "contains": lastestLiveDate.end_date
+                            "contains": `${selectedMonth}/${selectedYear}`
                         }
                     },
                     "where3": {
                         "outlet_month_year": {
-                            "equals": lastestLiveDate.end_date
+                            "equals": `${selectedMonth}/${selectedYear}`
                         },
                         "day_of_month": {
                             "equals": '1'

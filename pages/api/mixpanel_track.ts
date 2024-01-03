@@ -20,7 +20,7 @@ router
         const start = Date.now();
         await next(); // call next in chain
         const end = Date.now();
-        console.log(`Request took ${end - start}ms`);
+        // console.log(`Request took ${end - start}ms`);
     })
     .post((req, res) => {
         if (validate(req.body, validation)) {
@@ -30,7 +30,7 @@ router
             mixpanelObj.people.set(body.distinct_id, {
                 name: body.name,
                 $last_seen: moment().format("MMM DD YYYY"),
-            },() => {
+            }, () => {
                 mixpanelObj.track(body.event_name, {
                     ...body.attributes,
                     '$os': uaParser.getOS().name + ' ' + uaParser.getOS().version,
@@ -39,7 +39,7 @@ router
                     'ip': getClientIp(req),
                 });
             });
-          
+
             return res.status(200).json({
                 status: true,
                 message: 'Event has been successfully tracked',
