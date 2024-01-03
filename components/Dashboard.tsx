@@ -451,7 +451,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
       }
     `;
     const getOutletVariable = React.useMemo(() => {
-        const year = moment(lastestLiveDate.end_date, 'DD/MM/YYYY').year().toString();
+        const year = moment(lastestLiveDate.end_date, 'MM/YYYY').year().toString();
         return {
             "variables": {
                 "where": {
@@ -477,7 +477,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                 }
             }
         }
-    }, [lastestLiveDate]);
+    }, [lastestLiveDate, currentOutletID]);
     //Group Query by Id
     const getGroupQuery = gql`query Fetchgroup($GroupWhereUniqueInput: GroupWhereUniqueInput!) {
         group (where: $GroupWhereUniqueInput){
@@ -587,6 +587,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     const getGroupByResultsByOutletmonth = useQuery(groupByResultsQuery, groupByResultsByOutletVariable);
 
     React.useEffect(() => {
+        console.log(getOutletResult);
         if (getOutletResult.data && getOutletResult.data.findFirstOutlet) {
 
             const currData = getOutletResult.data.findFirstOutlet.results as results[];
