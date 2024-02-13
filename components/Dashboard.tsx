@@ -681,8 +681,8 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             const dayjsEndDate = dayjs(latestLiveDateObj.end_date, 'MM/YYYY');
             if (dataMonthsForGroups.length > 0 && dataMonthsForGroups.findIndex(dat => dat.isSame(dayjsEndDate, 'month')) === -1) {
                 setLastestLiveDate({
-                    start_date: dataMonthsForGroups.at(0)?.format('MM/YYYY') || '',
-                    end_date: dataMonthsForGroups[dataMonthsForGroups.length - 1]?.format('MM/YYYY') || ''
+                    start_date: dataMonthsForGroups[dataMonthsForGroups.length - 1]?.format('MM/YYYY') || '',
+                    end_date: dataMonthsForGroups.at(0)?.format('MM/YYYY') || ''
                 });
             } else {
                 setLastestLiveDate(latestLiveDateObj);
@@ -694,14 +694,18 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
     React.useEffect(() => {
         if (getGroupByResultsmonth.data &&
             getGroupByResultsmonth.data.groupByResults) {
-            setDataMonthsForGroups(getGroupByResultsmonth.data.groupByResults.map((mon: any) => dayjs(mon.outlet_date, 'DD/MM/YYYY')));
+            setDataMonthsForGroups(getGroupByResultsmonth.data.groupByResults.map((mon: any) => dayjs(mon.outlet_date, 'DD/MM/YYYY')).sort((a: Dayjs, b: Dayjs) => {
+                return b.diff(a);
+            }));
         }
     }, [getGroupByResultsmonth.data])
 
     React.useEffect(() => {
         if (getGroupByResultsByOutletmonth.data &&
             getGroupByResultsByOutletmonth.data.groupByResults) {
-            setDataMonthsForGroupsByOutlet(getGroupByResultsByOutletmonth.data.groupByResults.map((mon: any) => dayjs(mon.outlet_date, 'DD/MM/YYYY')));
+            setDataMonthsForGroupsByOutlet(getGroupByResultsByOutletmonth.data.groupByResults.map((mon: any) => dayjs(mon.outlet_date, 'DD/MM/YYYY')).sort((a: Dayjs, b: Dayjs) => {
+                return b.diff(a);
+            }));
         }
     }, [getGroupByResultsByOutletmonth.data])
 
@@ -991,6 +995,34 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
         </h3>)
     }, [title]);
 
+    const datePicker = React.useMemo(() => {
+        return <DatePicker
+            placeholder="Select date"
+            value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
+            onChange={(value) => {
+                if (value) {
+                    setSelectedMonth(zeroPad(value.month() + 1, 2));
+                    setSelectedYear(value.year().toString());
+                }
+            }}
+            clearIcon={false}
+            disabledDate={(date) => {
+                const latestLiveDateInDayjs = dayjs(lastestLiveDate.end_date, 'MM/YYYY');
+                const latestStartDateInDayjs = dayjs(lastestLiveDate.start_date, 'MM/YYYY');
+                if (date.isAfter(latestLiveDateInDayjs, 'month') || date.isBefore(latestStartDateInDayjs, 'month')) {
+                    return true;
+                } else {
+                    if (!dataMonthsForGroups.find(dat => dat.isSame(date, 'month'))) {
+                        return true;
+                    }
+                    return false;
+                }
+            }}
+            format={'MM/YYYY'}
+            picker={'month'}
+        ></DatePicker>
+    }, [lastestLiveDate, dataMonthsForGroups, selectedMonth, selectedYear]);
+
     const getGroupByIdResult = useQuery(getGroupQuery, getGroupVariable)
     React.useEffect(() => {
         if (getGroupByIdResult.data) {
@@ -1094,31 +1126,7 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
                             </div>
                             <div className="flex justify-between h-full gap-4">
 
-                                <DatePicker
-                                    placeholder="Select date"
-                                    value={dayjs(selectedMonth + '/' + selectedYear, 'MM/YYYY')}
-                                    onChange={(value) => {
-                                        if (value) {
-                                            setSelectedMonth(zeroPad(value.month() + 1, 2));
-                                            setSelectedYear(value.year().toString());
-                                        }
-                                    }}
-                                    clearIcon={false}
-                                    disabledDate={(date) => {
-                                        const latestLiveDateInDayjs = dayjs(lastestLiveDate.end_date, 'MM/YYYY');
-                                        const latestStartDateInDayjs = dayjs(lastestLiveDate.start_date, 'MM/YYYY');
-                                        if (date.isAfter(latestLiveDateInDayjs, 'month') || date.isBefore(latestStartDateInDayjs, 'month')) {
-                                            return true;
-                                        } else {
-                                            if (!dataMonthsForGroups.find(dat => dat.isSame(date, 'month'))) {
-                                                return true;
-                                            }
-                                            return false;
-                                        }
-                                    }}
-                                    format={'MM/YYYY'}
-                                    picker={'month'}
-                                ></DatePicker>
+                                {datePicker}
 
                             </div>
                         </div>
