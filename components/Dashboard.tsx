@@ -680,9 +680,12 @@ const Dashboard = ({ groupId }: any): JSX.Element => {
             const latestLiveDateObj = getFindFirstLastestReportDateResult.data.findFirstDate_range_customer_dashboard;
             const dayjsEndDate = dayjs(latestLiveDateObj.end_date, 'MM/YYYY');
             if (dataMonthsForGroups.length > 0 && dataMonthsForGroups.findIndex(dat => dat.isSame(dayjsEndDate, 'month')) === -1) {
+                const sortedDataMonthsForGroups = dataMonthsForGroups.sort((a: Dayjs, b: Dayjs) => {
+                    return b.diff(a);
+                });
                 setLastestLiveDate({
-                    start_date: dataMonthsForGroups[dataMonthsForGroups.length - 1]?.format('MM/YYYY') || '',
-                    end_date: dataMonthsForGroups.at(0)?.format('MM/YYYY') || ''
+                    start_date: sortedDataMonthsForGroups[sortedDataMonthsForGroups.length - 1]?.format('MM/YYYY') || '',
+                    end_date: sortedDataMonthsForGroups.at(0)?.format('MM/YYYY') || ''
                 });
             } else {
                 setLastestLiveDate(latestLiveDateObj);
